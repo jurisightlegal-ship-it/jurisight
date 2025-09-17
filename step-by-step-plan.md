@@ -10,7 +10,7 @@
 This document provides a detailed, week-by-week implementation roadmap for launching Jurisight from concept to production. The plan balances ambitious goals with realistic technical milestones, ensuring a robust legal knowledge platform that serves the Indian legal community effectively.
 
 **Revised Timeline:** 10 weeks (adjusted from original 8 weeks for quality assurance)  
-**Architecture:** Vercel-only deployment with Sanity CMS for simplified infrastructure
+**Architecture:** Vercel-only deployment with Next.js API routes + Postgres for simplified infrastructure
 
 ### **🏗️ Vercel-Only Architecture Benefits**
 
@@ -21,17 +21,20 @@ This document provides a detailed, week-by-week implementation roadmap for launc
 - **Cost Efficiency**: Generous free tier with predictable scaling costs
 - **Developer Experience**: Seamless Git integration and preview deployments
 - **Performance**: Edge functions and automatic optimization for Indian and global users
+- **Type Safety**: End-to-end TypeScript with Drizzle ORM
+- **No Separate Backend**: Everything deploys as a single Next.js application
 
 **Tech Stack:**
 - **Frontend**: Next.js 14 with App Router (deployed on Vercel)
-- **CMS**: Sanity Studio (headless CMS with real-time collaboration)
-- **Database**: Vercel Postgres + Vercel KV for sessions and caching
-- **Authentication**: NextAuth.js with Sanity adapter
+- **Backend**: Next.js API Routes with Vercel Edge Functions
+- **Database**: Vercel Postgres with Drizzle ORM (type-safe)
+- **Caching**: Vercel KV for sessions and temporary data
+- **Authentication**: NextAuth.js with database adapter
 - **Email**: Resend for transactional emails with React Email templates
 - **Analytics**: Google Analytics 4 with custom legal content tracking
 - **Version Control**: GitHub with CLI automation (jurisightlegal@gmail.com)
 - **CI/CD**: GitHub Actions with automated Vercel deployment
-- **Edge Functions**: For server-side logic and API routes
+- **Single Deployment**: Full-stack application on Vercel (no separate backend)
 
 ---
 
@@ -75,13 +78,11 @@ npx create-next-app@latest jurisight --typescript --tailwind --eslint --app
 cd jurisight
 npm install @radix-ui/react-* lucide-react class-variance-authority clsx tailwind-merge
 
-# Sanity CMS Setup
-npm install sanity @sanity/image-url next-sanity
-npx sanity@latest init --env
+# Database & ORM Setup
+npm install @vercel/postgres @vercel/kv drizzle-orm drizzle-kit
 
 # Authentication & Database
-npm install next-auth @auth/sanity-adapter
-npm install @vercel/postgres @vercel/kv
+npm install next-auth
 
 # Google Analytics Setup
 npm install @next/third-parties gtag
@@ -98,7 +99,8 @@ gh repo view --web
 - [ ] Next.js 14 app with App Router configured
 - [ ] Tailwind CSS with custom brand colors implemented
 - [ ] shadcn/ui components initialized
-- [ ] Sanity Studio configured and deployed
+- [ ] Vercel Postgres and Drizzle ORM configured
+- [ ] Database schema designed for legal content
 - [ ] Vercel deployment pipeline established
 - [ ] Google Analytics integration prepared
 
@@ -134,16 +136,16 @@ module.exports = {
 
 #### **Day 5-7: Authentication & User Management**
 ```typescript
-// NextAuth.js configuration with Sanity
+// NextAuth.js configuration with Drizzle adapter
 // app/api/auth/[...nextauth]/route.ts
 import NextAuth from 'next-auth'
-import { SanityAdapter } from '@auth/sanity-adapter'
+import { DrizzleAdapter } from '@auth/drizzle-adapter'
 import GoogleProvider from 'next-auth/providers/google'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import { sanityClient } from '@/lib/sanity'
+import { db } from '@/lib/db'
 
 export const authOptions = {
-  adapter: SanityAdapter(sanityClient),
+  adapter: DrizzleAdapter(db),
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -153,138 +155,68 @@ export const authOptions = {
       // Custom email/password authentication
     })
   ],
-  // Role-based access control
+  // Role-based access control with database
 }
 ```
 
 **Tasks:**
-- [ ] Install and configure NextAuth.js with Sanity adapter
-- [ ] Set up Sanity user schema and permissions
+- [ ] Install and configure NextAuth.js with Drizzle adapter
+- [ ] Set up database user schema and authentication tables
 - [ ] Implement Google OAuth integration
-- [ ] Create email/password authentication with Vercel KV
-- [ ] Build user registration flow
-- [ ] Implement role-based access control in Sanity
+- [ ] Create email/password authentication
+- [ ] Build user registration flow with role assignment
+- [ ] Implement role-based access control with middleware
 
 **Deliverables:**
 - [ ] Authentication system fully functional
 - [ ] User registration and login pages
-- [ ] Role-based permissions in Sanity Studio
-- [ ] Protected routes with middleware
-- [ ] User session management with Vercel Edge
+- [ ] Role-based permissions in database
+- [ ] Protected routes with Next.js middleware
+- [ ] User session management with NextAuth.js
 
 ### **Week 2: Content Management Foundation**
 
-#### **Day 8-10: Sanity CMS Schema Configuration**
-```javascript
-// sanity/schemas/article.ts
-export const article = {
-  name: 'article',
-  title: 'Article',
-  type: 'document',
-  fields: [
-    {
-      name: 'title',
-      title: 'Title',
-      type: 'string',
-      validation: Rule => Rule.required()
-    },
-    {
-      name: 'slug',
-      title: 'Slug',
-      type: 'slug',
-      options: {
-        source: 'title',
-        maxLength: 96
-      }
-    },
-    {
-      name: 'dek',
-      title: 'Summary',
-      type: 'text',
-      rows: 3
-    },
-    {
-      name: 'body',
-      title: 'Body',
-      type: 'array',
-      of: [
-        { type: 'block' },
-        { type: 'citation' },
-        { type: 'sourceLink' }
-      ]
-    },
-    {
-      name: 'status',
-      title: 'Status',
-      type: 'string',
-      options: {
-        list: [
-          {title: 'Draft', value: 'draft'},
-          {title: 'In Review', value: 'inReview'},
-          {title: 'Needs Revisions', value: 'needsRevisions'},
-          {title: 'Approved', value: 'approved'},
-          {title: 'Published', value: 'published'}
-        ]
-      },
-      initialValue: 'draft'
-    },
-    {
-      name: 'author',
-      title: 'Author',
-      type: 'reference',
-      to: [{type: 'user'}]
-    },
-    {
-      name: 'section',
-      title: 'Legal Section',
-      type: 'reference',
-      to: [{type: 'legalSection'}]
-    },
-    {
-      name: 'tags',
-      title: 'Tags',
-      type: 'array',
-      of: [{type: 'reference', to: [{type: 'tag'}]}]
-    },
-    {
-      name: 'featuredImage',
-      title: 'Featured Image',
-      type: 'image',
-      options: {
-        hotspot: true
-      }
-    },
-    {
-      name: 'publishedAt',
-      title: 'Published At',
-      type: 'datetime'
-    }
-  ],
-  preview: {
-    select: {
-      title: 'title',
-      author: 'author.name',
-      media: 'featuredImage',
-      status: 'status'
-    }
-  }
-}
+#### **Day 8-10: Database Schema & API Routes Implementation**
+```typescript
+// src/lib/schema.ts - Drizzle Database Schema
+export const articles = pgTable('articles', {
+  id: serial('id').primaryKey(),
+  title: varchar('title', { length: 255 }).notNull(),
+  slug: varchar('slug', { length: 255 }).notNull().unique(),
+  dek: text('dek'), // Summary/subtitle
+  body: text('body').notNull(),
+  featuredImage: varchar('featured_image', { length: 500 }),
+  status: statusEnum('status').default('DRAFT').notNull(),
+  authorId: integer('author_id').references(() => users.id).notNull(),
+  sectionId: integer('section_id').references(() => legalSections.id).notNull(),
+  readingTime: integer('reading_time'), // in minutes
+  views: integer('views').default(0).notNull(),
+  publishedAt: timestamp('published_at'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+// API Route Examples
+// POST /api/articles - Create article
+// GET /api/articles - Fetch published articles
+// GET /api/articles/[slug] - Individual article
+// PUT /api/articles/[slug] - Update article
 ```
 
 **Tasks:**
-- [ ] Design and implement Article schema in Sanity
-- [ ] Create Legal Section and Tag schemas
-- [ ] Build Citation and Source Link objects
-- [ ] Configure Portable Text for rich content
-- [ ] Set up Sanity Studio customization
-- [ ] Implement editorial workflow with document actions
+- [ ] Design and implement comprehensive database schema with Drizzle ORM
+- [ ] Create articles, users, legal sections, and tags tables
+- [ ] Build case citations and source links tables
+- [ ] Implement editorial workflow status management
+- [ ] Create API routes for article CRUD operations
+- [ ] Set up API routes for legal sections and user management
 
 **Deliverables:**
-- [ ] Complete Sanity content model implemented
-- [ ] Sanity Studio deployed and accessible
-- [ ] Editorial workflow configured with custom actions
-- [ ] Media management through Sanity's asset pipeline
-- [ ] Preview and draft functionality
+- [ ] Complete database schema implemented with Drizzle ORM
+- [ ] API routes for articles, sections, and content management
+- [ ] Editorial workflow configured with status tracking
+- [ ] Database migrations and type-safe operations
+- [ ] RESTful API endpoints for frontend integration
 
 #### **Day 11-14: Basic Frontend Structure**
 ```typescript
@@ -421,16 +353,16 @@ export async function POST(request: NextRequest) {
 - [ ] Implement Resend email service integration
 - [ ] Build email templates with React Email
 - [ ] Create Vercel KV-based notification storage
-- [ ] Set up Sanity webhooks for real-time updates
+- [ ] Set up database triggers for workflow notifications
 - [ ] Implement push notifications with web push API
 - [ ] Build notification preferences in user dashboard
 
 **Deliverables:**
 - [ ] Resend email service integrated
 - [ ] Beautiful HTML email templates with React Email
-- [ ] Real-time notifications via Sanity webhooks
+- [ ] Real-time notifications via API route webhooks
 - [ ] Vercel KV notification queue system
-- [ ] User notification preferences
+- [ ] User notification preferences stored in database
 - [ ] Push notification setup
 
 ---
@@ -676,21 +608,21 @@ jobs:
 - [ ] Configure GitHub CLI with jurisightlegal@gmail.com for deployment
 - [ ] Set up GitHub Secrets for production tokens
 - [ ] Configure Vercel production environment
-- [ ] Set up Vercel Postgres for user sessions (if needed)
-- [ ] Configure Vercel KV for caching and temporary data
+- [ ] Set up Vercel Postgres production database
+- [ ] Configure Vercel KV for caching and sessions
 - [ ] Set up environment variables in Vercel dashboard
 - [ ] Configure custom domain and SSL (automatic with Vercel)
 - [ ] Set up Google Analytics 4 with production tracking ID
-- [ ] Configure Sanity production dataset
+- [ ] Run database migrations in production
 - [ ] Implement Vercel Edge Config for feature flags
 
 **Deliverables:**
 - [ ] GitHub CLI automated deployment pipeline
-- [ ] Vercel production deployment configured
+- [ ] Vercel full-stack deployment configured
 - [ ] Automated CI/CD with GitHub Actions
 - [ ] Google Analytics 4 production tracking
 - [ ] Custom domain with automatic SSL
-- [ ] Sanity production environment ready
+- [ ] Production database with migrations applied
 - [ ] Edge functions optimized for global performance
 
 #### **Day 53-56: Go-Live & Launch**
