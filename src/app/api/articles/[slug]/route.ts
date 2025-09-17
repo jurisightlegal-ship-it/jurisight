@@ -6,10 +6,10 @@ import { eq, sql } from 'drizzle-orm';
 // GET /api/articles/[slug] - Fetch single article by slug
 export async function GET(
   request: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const { slug } = params;
+    const { slug } = await params;
 
     // Fetch article with related data
     const article = await db
@@ -29,7 +29,7 @@ export async function GET(
           id: users.id,
           name: users.name,
           bio: users.bio,
-          avatar: users.avatar,
+          avatar: users.image,
         },
         section: {
           id: legalSections.id,
@@ -92,10 +92,10 @@ export async function GET(
 // PUT /api/articles/[slug] - Update article
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const { slug } = params;
+    const { slug } = await params;
     const body = await request.json();
     const { title, dek, bodyContent, sectionId, featuredImage, status } = body;
 

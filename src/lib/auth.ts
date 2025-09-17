@@ -29,7 +29,8 @@ export const authOptions: NextAuthOptions = {
             id: 'dev-' + Date.now(),
             email: credentials.email,
             name: credentials.email.split('@')[0],
-            role: credentials.role || 'CONTRIBUTOR',
+            role: (credentials.role as 'CONTRIBUTOR' | 'EDITOR' | 'ADMIN') || 'CONTRIBUTOR',
+            isActive: true,
           };
         }
         return null;
@@ -57,7 +58,7 @@ export const authOptions: NextAuthOptions = {
       }
       return token;
     },
-    async signIn({ user, account, profile }) {
+    async signIn({ account }) {
       // Automatically approve sign-ins for Google OAuth
       if (account?.provider === 'google') {
         return true;

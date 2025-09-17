@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { articles, users, legalSections } from '@/lib/schema';
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, and } from 'drizzle-orm';
 
 // GET /api/articles - Fetch published articles
 export async function GET(request: NextRequest) {
@@ -11,7 +11,13 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '10');
     const offset = parseInt(searchParams.get('offset') || '0');
 
-    let query = db
+    const whereConditions = [eq(articles.status, 'PUBLISHED')];
+    
+    if (section) {
+      whereConditions.push(eq(legalSections.slug, section));
+    }
+
+    const query = db
       .select({
         id: articles.id,
         title: articles.title,
@@ -24,7 +30,7 @@ export async function GET(request: NextRequest) {
         author: {
           id: users.id,
           name: users.name,
-          avatar: users.avatar,
+          avatar: users.image,
         },
         section: {
           id: legalSections.id,
@@ -36,14 +42,10 @@ export async function GET(request: NextRequest) {
       .from(articles)
       .leftJoin(users, eq(articles.authorId, users.id))
       .leftJoin(legalSections, eq(articles.sectionId, legalSections.id))
-      .where(eq(articles.status, 'PUBLISHED'))
+      .where(and(...whereConditions))
       .orderBy(desc(articles.publishedAt))
       .limit(limit)
       .offset(offset);
-
-    if (section) {
-      query = query.where(eq(legalSections.slug, section));
-    }
 
     const result = await query;
 

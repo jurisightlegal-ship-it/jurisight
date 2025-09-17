@@ -72,7 +72,7 @@ export default function Dashboard() {
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600">
-                  You're logged in with {session.user?.email}. 
+                  You&apos;re logged in with {session.user?.email}. 
                   {session.user?.role === 'CONTRIBUTOR' && ' You can create and submit articles for review.'}
                   {session.user?.role === 'EDITOR' && ' You can review and approve articles from contributors.'}
                   {session.user?.role === 'ADMIN' && ' You have full access to manage the platform.'}
