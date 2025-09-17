@@ -106,7 +106,7 @@ export function FeaturedBlog() {
         title: "Environmental Law and Climate Change Litigation",
         slug: "environmental-law-climate-change-litigation",
         dek: "A deep dive into emerging trends in environmental litigation and the role of courts in addressing climate change.",
-        featuredImage: "https://images.unsplash.com/photo-1569163139394-de44cb518431?w=800&h=600&fit=crop",
+        featuredImage: "https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?w=800&h=600&fit=crop",
         readingTime: 7,
         views: 634,
         publishedAt: "2024-01-08T16:20:00Z",
@@ -254,7 +254,7 @@ export function FeaturedBlog() {
             </div>
             
             <Link href="/articles">
-              <Button className="bg-jurisight-navy text-white hover:bg-jurisight-navy-dark">
+              <Button className="bg-white text-black hover:bg-gray-100 border border-black/20">
                 View All
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
