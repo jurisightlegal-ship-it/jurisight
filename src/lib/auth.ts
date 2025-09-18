@@ -3,6 +3,8 @@ import GoogleProvider from 'next-auth/providers/google';
 import CredentialsProvider from 'next-auth/providers/credentials';
 
 export const authOptions: NextAuthOptions = {
+  // Remove hard dependency on env vars for URL/secret
+  secret: process.env.NEXTAUTH_SECRET || 'jurisight-secret-do-not-use-in-real-prod',
   // Temporarily disable database adapter for development
   // adapter: DrizzleAdapter(db, {
   //   usersTable: users,
