@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { BackButton } from '@/components/back-button';
 import { ArticlePageClient } from '@/components/article-page-client';
+import { AsyncAvatar } from '@/components/async-avatar';
 import { getImageDisplayUrl } from '@/lib/storage-utils';
 import { supabase } from '@/lib/supabase-db';
 import { 
@@ -301,8 +302,8 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
     notFound();
   }
 
-  // Process avatar URL for proper display
-  const avatarUrl = await getProcessedAvatarUrl(article.author.avatar);
+  // Process avatar URL asynchronously (non-blocking)
+  const avatarUrlPromise = getProcessedAvatarUrl(article.author.avatar);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -396,19 +397,12 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
                 {/* Author Info */}
                 <div className="flex items-center gap-4 py-4 border-t border-b border-gray-200">
                   <div className="flex items-center gap-3">
-                    {avatarUrl ? (
-                      <Image
-                        src={avatarUrl}
-                        alt={article.author.name}
-                        width={48}
-                        height={48}
-                        className="rounded-full"
-                      />
-                    ) : (
-                      <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center">
-                        <User className="h-6 w-6 text-gray-600" />
-                      </div>
-                    )}
+                    <AsyncAvatar
+                      fallbackAvatar={article.author.avatar}
+                      avatarUrlPromise={avatarUrlPromise}
+                      authorName={article.author.name}
+                      className="w-12 h-12 rounded-full"
+                    />
                     <div>
                       <p className="font-semibold text-gray-900">{article.author.name}</p>
                       {article.author.bio && (

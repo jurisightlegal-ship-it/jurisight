@@ -14,10 +14,10 @@ export function ArticlePageClient({ children }: ArticlePageClientProps) {
   useEffect(() => {
     setIsMounted(true);
     
-    // Show preloader for at least 10ms to ensure it's visible
+    // Show preloader for at least 5ms to ensure it's visible
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 10);
+    }, 5);
     
     return () => clearTimeout(timer);
   }, []);
