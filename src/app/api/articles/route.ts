@@ -33,6 +33,7 @@ export async function GET(request: NextRequest) {
     const offset = parseInt(searchParams.get('offset') || '0');
     const page = parseInt(searchParams.get('page') || '1');
     const search = searchParams.get('search') || '';
+    const exclude = searchParams.get('exclude'); // New parameter to exclude specific article IDs
 
     // Calculate offset from page
     const actualOffset = page > 1 ? (page - 1) * limit : offset;
@@ -67,6 +68,14 @@ export async function GET(request: NextRequest) {
     // Handle search
     if (search) {
       query = query.or(`title.ilike.%${search}%,dek.ilike.%${search}%`);
+    }
+
+    // Handle exclude parameter
+    if (exclude) {
+      const excludeIds = exclude.split(',').map(id => parseInt(id.trim())).filter(id => !isNaN(id));
+      if (excludeIds.length > 0) {
+        query = query.not('id', 'in', `(${excludeIds.join(',')})`);
+      }
     }
 
     // Handle single section filtering
