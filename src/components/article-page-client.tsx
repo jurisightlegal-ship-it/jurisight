@@ -10,25 +10,16 @@ interface ArticlePageClientProps {
 export function ArticlePageClient({ children }: ArticlePageClientProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [isMounted, setIsMounted] = useState(false);
-  const [canSkip, setCanSkip] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
     
-    // Allow skipping after 10ms
-    const skipTimer = setTimeout(() => {
-      setCanSkip(true);
-    }, 10);
-    
-    // Auto-hide after 30ms for minimal delay
-    const hideTimer = setTimeout(() => {
+    // Simple loading delay like dashboard
+    const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 30);
+    }, 100);
 
-    return () => {
-      clearTimeout(skipTimer);
-      clearTimeout(hideTimer);
-    };
+    return () => clearTimeout(timer);
   }, []);
 
   // Prevent hydration mismatch
@@ -40,12 +31,8 @@ export function ArticlePageClient({ children }: ArticlePageClientProps) {
     );
   }
 
-  const handleSkip = () => {
-    setIsLoading(false);
-  };
-
   return (
-    <SimplePreloader isLoading={isLoading} onSkip={handleSkip} canSkip={canSkip}>
+    <SimplePreloader isLoading={isLoading}>
       {children}
     </SimplePreloader>
   );
