@@ -388,8 +388,8 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
                 )}
 
                 {/* Social Share Section */}
-                <div className="flex items-center justify-between py-4 border-t border-b border-gray-200 mb-6">
-                  <div className="flex items-center gap-2">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 py-4 border-t border-b border-gray-200 mb-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                     <span className="text-sm font-medium text-gray-700">Share this article:</span>
                     <SocialShareButton
                       title={article.title}
@@ -398,7 +398,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
                       hashtags={['Jurisight', 'Legal', article.section.name]}
                     />
                   </div>
-                  <div className="text-sm text-gray-500">
+                  <div className="text-xs sm:text-sm text-gray-500 text-center sm:text-right">
                     Help others discover this content
                   </div>
                 </div>
