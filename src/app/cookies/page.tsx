@@ -61,7 +61,7 @@ export default function CookiePolicy() {
             </p>
             <div className="mt-4">
               <Badge className="bg-orange-100 text-orange-800 border-orange-200">
-                Last Updated: January 2025
+                Last Updated: August 2025
               </Badge>
             </div>
           </div>

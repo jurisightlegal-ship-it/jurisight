@@ -64,7 +64,7 @@ export default function LegalDisclaimer() {
             </p>
             <div className="mt-4">
               <Badge className="bg-red-100 text-red-800 border-red-200">
-                Last Updated: January 2025
+                Last Updated: August 2025
               </Badge>
             </div>
           </div>

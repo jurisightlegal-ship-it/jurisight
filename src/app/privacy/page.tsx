@@ -61,7 +61,7 @@ export default function PrivacyPolicy() {
             </p>
             <div className="mt-4">
               <Badge className="bg-green-100 text-green-800 border-green-200">
-                Last Updated: January 2025
+                Last Updated: August 2025
               </Badge>
             </div>
           </div>
