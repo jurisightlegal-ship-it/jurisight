@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { BackButton } from '@/components/back-button';
 import { getImageDisplayUrl } from '@/lib/storage-utils';
 import { supabase } from '@/lib/supabase-db';
+import { ArticleClientWrapper } from '@/components/article-client-wrapper';
 import { 
   Calendar, 
   Clock, 
@@ -321,7 +322,8 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <ArticleClientWrapper slug={slug}>
+      <div className="min-h-screen bg-gray-50">
       
       {/* Header */}
       <header className="bg-white shadow-sm border-b">
@@ -485,6 +487,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
           </CardContent>
         </Card>
       </main>
-    </div>
+      </div>
+    </ArticleClientWrapper>
   );
 }

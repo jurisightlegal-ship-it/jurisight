@@ -3,6 +3,8 @@ import { Inter, Crimson_Text, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers/session-provider";
 import { DarkModeProvider } from "@/components/providers/dark-mode-provider";
+import { PreloaderProvider } from "@/components/providers/preloader-provider";
+import { NavigationWrapper } from "@/components/navigation-wrapper";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -37,7 +39,11 @@ export default function RootLayout({
       >
         <Providers>
           <DarkModeProvider>
-            {children}
+            <PreloaderProvider>
+              <NavigationWrapper>
+                {children}
+              </NavigationWrapper>
+            </PreloaderProvider>
           </DarkModeProvider>
         </Providers>
       </body>

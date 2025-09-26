@@ -13,6 +13,7 @@ import { Navbar } from '@/components/navbar';
 import { Footer } from '@/components/footer';
 import { ShaderAnimation } from '@/components/ui/shader-animation';
 import { NewsletterCTA } from '@/components/newsletter-signup';
+import { useAPILoading } from '@/hooks/use-loading';
 import { 
   Search, 
   BookOpen,
@@ -47,6 +48,7 @@ interface Article {
 
 export default function ArticlesPage() {
   const router = useRouter();
+  const { fetchWithLoading } = useAPILoading();
   
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
@@ -73,49 +75,52 @@ export default function ArticlesPage() {
       });
       if (searchTerm) params.append('search', searchTerm);
 
-      const response = await fetch(`/api/articles?${params}`);
-      if (response.ok) {
-        const data = await response.json();
-        const newArticles = data.articles || [];
-        
-        // Check if there are more articles
-        setHasMore(newArticles.length === ARTICLES_PER_PAGE);
-        
-        if (reset) {
-          setArticles(newArticles);
-          setCurrentPage(0);
-        } else {
-          setArticles(prev => [...prev, ...newArticles]);
-          setCurrentPage(prev => prev + 1);
+      const data = await fetchWithLoading<{articles: Article[]}>(
+        `/api/articles?${params}`,
+        {},
+        {
+          message: reset ? 'Loading articles...' : 'Loading more articles...',
+          showProgress: false
         }
-        
-        // Process avatar URLs for new articles
-        const avatarPromises = newArticles.map(async (article: Article) => {
-          if (article.author.avatar) {
-            try {
-              const processedUrl = await getImageDisplayUrl(article.author.avatar);
-              return { id: article.author.id, url: processedUrl };
-            } catch (error) {
-              console.error('Error processing avatar URL:', error);
-              return { id: article.author.id, url: null };
-            }
-          }
-          return { id: article.author.id, url: null };
-        });
-        
-        const avatarResults = await Promise.all(avatarPromises);
-        const avatarMap: Record<string, string | null> = {};
-        avatarResults.forEach(({ id, url }) => {
-          avatarMap[id] = url;
-        });
-        
-        if (reset) {
-          setAvatarUrls(avatarMap);
-        } else {
-          setAvatarUrls(prev => ({ ...prev, ...avatarMap }));
-        }
+      );
+      
+      const newArticles = data.articles || [];
+      
+      // Check if there are more articles
+      setHasMore(newArticles.length === ARTICLES_PER_PAGE);
+      
+      if (reset) {
+        setArticles(newArticles);
+        setCurrentPage(0);
       } else {
-        console.error('Failed to fetch articles');
+        setArticles(prev => [...prev, ...newArticles]);
+        setCurrentPage(prev => prev + 1);
+      }
+      
+      // Process avatar URLs for new articles
+      const avatarPromises = newArticles.map(async (article: Article) => {
+        if (article.author.avatar) {
+          try {
+            const processedUrl = await getImageDisplayUrl(article.author.avatar);
+            return { id: article.author.id, url: processedUrl };
+          } catch (error) {
+            console.error('Error processing avatar URL:', error);
+            return { id: article.author.id, url: null };
+          }
+        }
+        return { id: article.author.id, url: null };
+      });
+      
+      const avatarResults = await Promise.all(avatarPromises);
+      const avatarMap: Record<string, string | null> = {};
+      avatarResults.forEach(({ id, url }) => {
+        avatarMap[id] = url;
+      });
+      
+      if (reset) {
+        setAvatarUrls(avatarMap);
+      } else {
+        setAvatarUrls(prev => ({ ...prev, ...avatarMap }));
       }
     } catch (error) {
       console.error('Error fetching articles:', error);
