@@ -22,8 +22,72 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Jurisight - Legal Knowledge Platform",
-  description: "Democratizing access to legal information and empowering the legal community in India",
+  title: "Jurisight - Legal Knowledge Platform | Supreme Court & High Court Judgements",
+  description: "Democratizing access to legal information and empowering the legal community in India. Explore Supreme Court judgements, High Court rulings, legal analysis, and comprehensive legal resources.",
+  keywords: [
+    "legal knowledge",
+    "Supreme Court judgements",
+    "High Court rulings", 
+    "legal analysis",
+    "Indian law",
+    "legal education",
+    "jurisprudence",
+    "legal research",
+    "court decisions",
+    "legal resources",
+    "law articles",
+    "legal community India"
+  ],
+  authors: [{ name: "Jurisight Team" }],
+  creator: "Jurisight",
+  publisher: "Jurisight",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://jurisight.com'),
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    title: "Jurisight - Legal Knowledge Platform | Supreme Court & High Court Judgements",
+    description: "Democratizing access to legal information and empowering the legal community in India. Explore Supreme Court judgements, High Court rulings, legal analysis, and comprehensive legal resources.",
+    url: '/',
+    siteName: 'Jurisight',
+    images: [
+      {
+        url: '/Jurisight.png',
+        width: 1200,
+        height: 630,
+        alt: 'Jurisight - Legal Knowledge Platform',
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: "Jurisight - Legal Knowledge Platform | Supreme Court & High Court Judgements",
+    description: "Democratizing access to legal information and empowering the legal community in India. Explore Supreme Court judgements, High Court rulings, legal analysis, and comprehensive legal resources.",
+    images: ['/Jurisight.png'],
+    creator: '@jurisight',
+    site: '@jurisight',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  verification: {
+    google: process.env.GOOGLE_SITE_VERIFICATION,
+  },
 };
 
 export default function RootLayout({
@@ -33,6 +97,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </head>
       <body
         className={`${inter.variable} ${crimsonText.variable} ${jetbrainsMono.variable} antialiased`}
       >

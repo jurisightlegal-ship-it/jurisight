@@ -8,10 +8,12 @@ import { HighCourtJudgement } from '@/components/high-court-judgement';
 import { KnowTheLawBlogs } from '@/components/know-the-law-blogs';
 import { WhatsAppCommunityBadge } from '@/components/whatsapp-community-badge';
 import { Footer } from '@/components/footer';
+import { HomepageStructuredData } from '@/components/structured-data';
 
 export default function Home() {
   return (
     <>
+      <HomepageStructuredData />
       <div className="relative min-h-[650px] w-full overflow-hidden">
         {/* Animated Background */}
         <div className="absolute inset-0 z-0">

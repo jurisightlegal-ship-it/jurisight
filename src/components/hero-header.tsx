@@ -18,15 +18,15 @@ export default function HeroHeader() {
   };
 
   return (
-    <div className="relative z-10 mx-auto max-w-3xl px-4 text-center">
+    <header className="relative z-10 mx-auto max-w-3xl px-4 text-center">
       <h1 className="text-4xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white via-jurisight-lime to-jurisight-teal drop-shadow">
-        Explore legal knowledge with Jurisight
+        Explore Legal Knowledge with Jurisight
       </h1>
       <p className="mt-4 text-lg text-white/85 drop-shadow">
-        Search articles, analysis, and resources across the legal landscape.
+        Discover Supreme Court judgements, High Court rulings, legal analysis, and comprehensive legal resources. Search articles, analysis, and insights across India's legal landscape.
       </p>
 
-      <form onSubmit={onSubmit} className="mt-8">
+      <form onSubmit={onSubmit} className="mt-8" role="search" aria-label="Search legal articles">
         <div className="relative mx-auto flex max-w-2xl items-center gap-2">
           <div className="pointer-events-none absolute left-3 text-black/60">
             <Search className="h-5 w-5" />
@@ -34,15 +34,16 @@ export default function HeroHeader() {
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search articles by title or summary..."
+            placeholder="Search Supreme Court judgements, High Court rulings, legal articles..."
             className="h-12 w-full bg-white pl-10 text-base text-black placeholder:text-black/60"
+            aria-label="Search legal articles"
           />
-          <Button type="submit" className="h-12 px-6 bg-jurisight-lime text-white hover:bg-jurisight-lime-dark">
+          <Button type="submit" className="h-12 px-6 bg-jurisight-lime text-white hover:bg-jurisight-lime-dark" aria-label="Search">
             Search
           </Button>
         </div>
       </form>
-    </div>
+    </header>
   );
 }
 

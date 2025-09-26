@@ -1,0 +1,23 @@
+User-agent: *
+Allow: /
+
+# Disallow admin and private areas
+Disallow: /dashboard/
+Disallow: /api/
+Disallow: /auth/
+Disallow: /test/
+
+# Allow important pages
+Allow: /articles/
+Allow: /about
+Allow: /business
+Allow: /news
+Allow: /supreme-court-judgements
+Allow: /high-court-judgements
+Allow: /know-your-law
+
+# Sitemap location
+Sitemap: https://jurisight.com/sitemap.xml
+
+# Crawl delay (optional - helps prevent overloading server)
+Crawl-delay: 1
