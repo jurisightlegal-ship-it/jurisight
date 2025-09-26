@@ -12,7 +12,6 @@ import { getImageDisplayUrl } from '@/lib/client-storage-utils';
 import { Navbar } from '@/components/navbar';
 import { Footer } from '@/components/footer';
 import { ShaderAnimation } from '@/components/ui/shader-animation';
-import { useAPILoading } from '@/hooks/use-loading';
 import { 
   Search, 
   BookOpen,
@@ -50,7 +49,6 @@ interface Article {
 
 export default function KnowYourLawPage() {
   const router = useRouter();
-  const { fetchWithLoading } = useAPILoading();
   
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
@@ -78,16 +76,10 @@ export default function KnowYourLawPage() {
       });
       if (searchTerm) params.append('search', searchTerm);
 
-      const data = await fetchWithLoading<{articles: Article[]}>(
-        `/api/articles?${params}`,
-        {},
-        {
-          message: reset ? 'Loading legal articles...' : 'Loading more articles...',
-          showProgress: false
-        }
-      );
-      
-      const newArticles = data.articles || [];
+      const response = await fetch(`/api/articles?${params}`);
+      if (response.ok) {
+        const data = await response.json();
+        const newArticles = data.articles || [];
         
         // Check if there are more articles
         setHasMore(newArticles.length === ARTICLES_PER_PAGE);
@@ -125,6 +117,9 @@ export default function KnowYourLawPage() {
         } else {
           setAvatarUrls(prev => ({ ...prev, ...avatarMap }));
         }
+      } else {
+        console.error('Failed to fetch articles');
+      }
     } catch (error) {
       console.error('Error fetching articles:', error);
     } finally {

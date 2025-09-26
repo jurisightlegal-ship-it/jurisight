@@ -10,7 +10,6 @@ import { Menu, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useEnhancedRouter } from "@/components/navigation-wrapper";
 
 const navItems = [
   { label: "Home", href: "/" },
@@ -25,7 +24,7 @@ const navItems = [
 
 export function Navbar() {
   const pathname = usePathname();
-  const router = useEnhancedRouter();
+  const router = useRouter();
   const { data: session, status } = useSession();
   const [open, setOpen] = React.useState(false);
 

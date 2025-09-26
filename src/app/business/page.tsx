@@ -13,7 +13,6 @@ import { Navbar } from '@/components/navbar';
 import { Footer } from '@/components/footer';
 import { ShaderAnimation } from '@/components/ui/shader-animation';
 import { NewsletterCTA } from '@/components/newsletter-signup';
-import { useAPILoading } from '@/hooks/use-loading';
 import { 
   Search, 
   BookOpen,
@@ -51,7 +50,6 @@ interface Article {
 function BusinessPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { fetchWithLoading } = useAPILoading();
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -78,16 +76,10 @@ function BusinessPageContent() {
       });
       if (searchTerm) params.append('search', searchTerm);
 
-      const data = await fetchWithLoading<{articles: Article[]}>(
-        `/api/articles?${params}`,
-        {},
-        {
-          message: reset ? 'Loading business articles...' : 'Loading more articles...',
-          showProgress: false
-        }
-      );
-      
-      const newArticles = data.articles || [];
+      const response = await fetch(`/api/articles?${params}`);
+      if (response.ok) {
+        const data = await response.json();
+        const newArticles = data.articles || [];
         
         // Check if there are more articles
         setHasMore(newArticles.length === ARTICLES_PER_PAGE);
@@ -125,6 +117,9 @@ function BusinessPageContent() {
         } else {
           setAvatarUrls(prev => ({ ...prev, ...avatarMap }));
         }
+      } else {
+        console.error('Failed to fetch articles');
+      }
     } catch (error) {
       console.error('Error fetching articles:', error);
     } finally {
