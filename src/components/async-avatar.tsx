@@ -5,7 +5,7 @@ import Image from 'next/image';
 
 interface AsyncAvatarProps {
   fallbackAvatar: string | null;
-  avatarUrlPromise: Promise<string | null>;
+  avatarUrlPromise?: Promise<string | null>;
   authorName: string;
   className?: string;
 }
@@ -15,13 +15,21 @@ export function AsyncAvatar({ fallbackAvatar, avatarUrlPromise, authorName, clas
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    avatarUrlPromise.then((processedUrl) => {
-      setAvatarUrl(processedUrl);
-      setIsLoading(false);
-    }).catch(() => {
+    if (!avatarUrlPromise) {
       setAvatarUrl(fallbackAvatar);
       setIsLoading(false);
-    });
+      return;
+    }
+
+    avatarUrlPromise
+      .then((processedUrl) => {
+        setAvatarUrl(processedUrl);
+        setIsLoading(false);
+      })
+      .catch(() => {
+        setAvatarUrl(fallbackAvatar);
+        setIsLoading(false);
+      });
   }, [avatarUrlPromise, fallbackAvatar]);
 
   if (isLoading) {

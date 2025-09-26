@@ -303,7 +303,9 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
   }
 
   // Process avatar URL asynchronously (non-blocking)
-  const avatarUrlPromise = getProcessedAvatarUrl(article.author.avatar);
+  const avatarUrlPromise = article.author.avatar 
+    ? getProcessedAvatarUrl(article.author.avatar)
+    : Promise.resolve(null);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
