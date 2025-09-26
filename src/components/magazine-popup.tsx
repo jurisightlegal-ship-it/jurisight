@@ -144,13 +144,13 @@ export function MagazinePopup({ isOpen, onClose, className }: MagazinePopupProps
                   Jurisight Legal Magazine
                 </h3>
                 <p className="text-gray-600 dark:text-gray-300 text-xs xs:text-sm sm:text-base md:text-base lg:text-lg leading-relaxed">
-                  Your comprehensive guide to Indian law
+                  Expert insights, case studies & legal updates
                 </p>
                 
                 <div className="flex items-center justify-center gap-2 xs:gap-3 sm:gap-4 text-[10px] xs:text-xs sm:text-sm text-gray-500 dark:text-gray-400">
                   <div className="flex items-center gap-0.5 xs:gap-1">
                     <Calendar className="h-2.5 w-2.5 xs:h-3 xs:w-3 sm:h-4 sm:w-4" />
-                    <span>Monthly</span>
+                    <span>Quarterly</span>
                   </div>
                   <div className="flex items-center gap-0.5 xs:gap-1">
                     <BookOpen className="h-2.5 w-2.5 xs:h-3 xs:w-3 sm:h-4 sm:w-4" />
