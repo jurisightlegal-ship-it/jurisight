@@ -14,8 +14,12 @@ export function ArticlePageClient({ children }: ArticlePageClientProps) {
   useEffect(() => {
     setIsMounted(true);
     
-    // Show preloader instantly, hide immediately for instant effect
-    setIsLoading(false);
+    // Show preloader for at least 10ms to ensure it's visible
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 10);
+    
+    return () => clearTimeout(timer);
   }, []);
 
   // Prevent hydration mismatch
