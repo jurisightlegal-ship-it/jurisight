@@ -66,7 +66,12 @@ export function Footer() {
           {/* Company Info */}
           <div className="lg:col-span-2">
             <div className="flex items-center gap-3 mb-6">
-              <Image src={logo} alt="Jurisight logo" className="h-12 w-auto" />
+              <Image 
+                src={logo} 
+                alt="Jurisight logo" 
+                className="h-12 w-auto" 
+                loading="lazy"
+              />
             </div>
             
             <p className="text-slate-300 mb-6 leading-relaxed">

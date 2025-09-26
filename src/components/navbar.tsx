@@ -37,7 +37,12 @@ export function Navbar() {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center gap-2" aria-label="Jurisight home">
-            <Image src={logo} alt="Jurisight logo" className="h-12 w-auto" priority />
+            <Image 
+              src={logo} 
+              alt="Jurisight logo" 
+              className="h-12 w-auto" 
+              loading="lazy"
+            />
             <span className="sr-only">Jurisight</span>
           </Link>
           
