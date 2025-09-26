@@ -8,32 +8,16 @@ interface ArticlePageClientProps {
 }
 
 export function ArticlePageClient({ children }: ArticlePageClientProps) {
-  const [isLoading, setIsLoading] = useState(true);
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
-    
-    // Simple loading delay like dashboard
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 100);
-
-    return () => clearTimeout(timer);
   }, []);
 
   // Prevent hydration mismatch
   if (!isMounted) {
-    return (
-      <SimplePreloader isLoading={true}>
-        {children}
-      </SimplePreloader>
-    );
+    return <div>{children}</div>;
   }
 
-  return (
-    <SimplePreloader isLoading={isLoading}>
-      {children}
-    </SimplePreloader>
-  );
+  return <div>{children}</div>;
 }
