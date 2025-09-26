@@ -13,10 +13,10 @@ export function ArticlePageClient({ children }: ArticlePageClientProps) {
 
   useEffect(() => {
     setIsMounted(true);
-    // Simulate loading time for better UX
+    // Shorter loading time for better responsiveness
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 800); // 800ms loading time
+    }, 300); // Reduced to 300ms for better UX
 
     return () => clearTimeout(timer);
   }, []);
@@ -30,8 +30,12 @@ export function ArticlePageClient({ children }: ArticlePageClientProps) {
     );
   }
 
+  const handleSkip = () => {
+    setIsLoading(false);
+  };
+
   return (
-    <SimplePreloader isLoading={isLoading}>
+    <SimplePreloader isLoading={isLoading} onSkip={handleSkip}>
       {children}
     </SimplePreloader>
   );

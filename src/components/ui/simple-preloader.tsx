@@ -5,18 +5,16 @@ import { useEffect, useState } from 'react';
 interface SimplePreloaderProps {
   isLoading: boolean;
   children: React.ReactNode;
+  onSkip?: () => void;
 }
 
-export function SimplePreloader({ isLoading, children }: SimplePreloaderProps) {
+export function SimplePreloader({ isLoading, children, onSkip }: SimplePreloaderProps) {
   const [showContent, setShowContent] = useState(false);
 
   useEffect(() => {
     if (!isLoading) {
-      // Small delay to ensure smooth transition
-      const timer = setTimeout(() => {
-        setShowContent(true);
-      }, 100);
-      return () => clearTimeout(timer);
+      // Immediate transition for better responsiveness
+      setShowContent(true);
     } else {
       setShowContent(false);
     }
@@ -44,13 +42,23 @@ export function SimplePreloader({ isLoading, children }: SimplePreloaderProps) {
             <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
             <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
           </div>
+          
+          {/* Skip button */}
+          {onSkip && (
+            <button
+              onClick={onSkip}
+              className="mt-6 text-sm text-blue-600 hover:text-blue-800 underline transition-colors"
+            >
+              Click to continue
+            </button>
+          )}
         </div>
       </div>
     );
   }
 
   return (
-    <div className={`transition-opacity duration-300 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
+    <div className={`transition-opacity duration-150 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
       {children}
     </div>
   );
