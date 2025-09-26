@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
+    "build:analyze": "npm run build && node analyze-bundle.js",
     "start": "next start",
     "lint": "eslint",
     "db:generate": "drizzle-kit generate:pg",

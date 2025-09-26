@@ -1,10 +1,14 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Enable experimental features for better performance
+  // Enable experimental features for maximum performance
   experimental: {
     optimizePackageImports: ['lucide-react', 'framer-motion', '@radix-ui/react-icons'],
+    webVitalsAttribution: ['CLS', 'LCP'],
   },
+
+  // External packages for server components
+  serverExternalPackages: ['canvas'],
 
   // Optimize images for production
   images: {
@@ -36,9 +40,20 @@ const nextConfig: NextConfig = {
     unoptimized: false, // Enable image optimization for production
   },
 
-  // Compiler optimizations
+  // Compiler optimizations for maximum performance
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
+    reactRemoveProperties: process.env.NODE_ENV === 'production' ? { properties: ['^data-testid$'] } : false,
+  },
+
+  // Turbopack optimizations (instead of webpack)
+  turbopack: {
+    rules: {
+      '*.svg': {
+        loaders: ['@svgr/webpack'],
+        as: '*.js',
+      },
+    },
   },
 
   // Headers for better caching

@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import { Inter, Crimson_Text, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import "../styles/critical.css";
 import { Providers } from "@/components/providers/session-provider";
 import { DarkModeProvider } from "@/components/providers/dark-mode-provider";
 import { PreloaderProvider } from "@/components/providers/preloader-provider";
 import { NavigationWrapper } from "@/components/navigation-wrapper";
-import { PerformanceScript } from "@/components/performance-script";
+import { UltraPreloader } from "@/components/ultra-preloader";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -79,7 +80,11 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <PerformanceScript />
+        <UltraPreloader />
+        <link rel="preload" href="/sw.js" as="script" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+        <meta name="theme-color" content="#0f172a" />
+        <meta name="color-scheme" content="light dark" />
       </head>
       <body
         className={`${inter.variable} ${crimsonText.variable} ${jetbrainsMono.variable} antialiased`}
