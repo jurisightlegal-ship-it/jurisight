@@ -82,40 +82,9 @@ export function SocialShareButton({
     window.open(shareUrl, '_blank', 'width=600,height=400,scrollbars=yes,resizable=yes');
   };
 
-  // Native Web Share API (if available)
-  const shareNative = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title,
-          text: description,
-          url,
-        });
-      } catch (err) {
-        console.error('Error sharing:', err);
-      }
-    } else {
-      // Fallback to copy to clipboard
-      copyToClipboard();
-    }
-  };
 
   return (
     <div className={`flex items-center gap-2 ${className}`}>
-      {/* Native Share Button (Mobile) */}
-      {typeof window !== 'undefined' && navigator.share && (
-        <Button
-          onClick={shareNative}
-          variant="outline"
-          size="sm"
-          className="flex items-center gap-2"
-          aria-label="Share this article using native sharing"
-        >
-          <Share2 className="h-4 w-4" />
-          <span className="hidden sm:inline">Share</span>
-        </Button>
-      )}
-
       {/* Desktop Share Dropdown */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
