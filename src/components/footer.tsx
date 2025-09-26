@@ -185,22 +185,24 @@ export function Footer() {
       {/* Bottom Bar */}
       <div className="border-t border-slate-600 bg-slate-800">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="text-sm text-slate-400">
+          <div className="flex flex-col gap-4">
+            {/* Copyright */}
+            <div className="text-sm text-slate-400 text-center md:text-left">
               © 2025 Jurisight. All rights reserved. | Empowering legal knowledge since 2024.
             </div>
             
-            <div className="flex items-center gap-6 text-sm">
-              <Link href="/privacy" className="text-slate-400 hover:text-white transition-colors">
+            {/* Legal Links */}
+            <div className="grid grid-cols-2 sm:flex sm:items-center sm:justify-center md:justify-end gap-3 sm:gap-6 text-sm">
+              <Link href="/privacy" className="text-slate-400 hover:text-white transition-colors text-center sm:text-left">
                 Privacy Policy
               </Link>
-              <Link href="/terms" className="text-slate-400 hover:text-white transition-colors">
+              <Link href="/terms" className="text-slate-400 hover:text-white transition-colors text-center sm:text-left">
                 Terms of Service
               </Link>
-              <Link href="/cookies" className="text-slate-400 hover:text-white transition-colors">
+              <Link href="/cookies" className="text-slate-400 hover:text-white transition-colors text-center sm:text-left">
                 Cookie Policy
               </Link>
-              <Link href="/disclaimer" className="text-slate-400 hover:text-white transition-colors">
+              <Link href="/disclaimer" className="text-slate-400 hover:text-white transition-colors text-center sm:text-left">
                 Legal Disclaimer
               </Link>
             </div>
