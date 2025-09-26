@@ -211,26 +211,31 @@ async function getArticle(slug: string): Promise<Article | null> {
       return null;
     }
 
-    // Fetch case citations
-    const { data: citations } = await supabase
-      .from('case_citations')
-      .select('*')
-      .eq('article_id', article.id);
+    // Fetch case citations and source links in parallel
+    const [citationsResult, sourcesResult] = await Promise.all([
+      supabase
+        .from('case_citations')
+        .select('*')
+        .eq('article_id', article.id),
+      supabase
+        .from('source_links')
+        .select('*')
+        .eq('article_id', article.id)
+    ]);
 
-    // Fetch source links
-    const { data: sources } = await supabase
-      .from('source_links')
-      .select('*')
-      .eq('article_id', article.id);
+    const citations = citationsResult.data || [];
+    const sources = sourcesResult.data || [];
 
-    // Increment view count
-    await supabase
+    // Increment view count asynchronously (don't wait for it)
+    supabase
       .from('articles')
       .update({ 
         views: (article.views || 0) + 1,
         updated_at: new Date().toISOString()
       })
-      .eq('id', article.id);
+      .eq('id', article.id)
+      .then(() => {}) // Fire and forget
+      .catch(() => {}); // Ignore errors
 
     // Transform the data to match expected format
     const transformedArticle: Article = {
@@ -258,8 +263,8 @@ async function getArticle(slug: string): Promise<Article | null> {
         color: (article as { legal_sections?: { color?: string } }).legal_sections?.color || '#6B7280',
         description: (article as { legal_sections?: { description?: string | null } }).legal_sections?.description || null,
       },
-      caseCitations: citations || [],
-      sourceLinks: sources || [],
+      caseCitations: citations,
+      sourceLinks: sources,
     };
 
     return transformedArticle;
@@ -296,11 +301,8 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
     notFound();
   }
 
-  // Process avatar URL
-  console.log('Article author data:', article.author);
-  console.log('Avatar path from database:', article.author.avatar);
-  const avatarUrl = await getProcessedAvatarUrl(article.author.avatar);
-  console.log('Final avatar URL:', avatarUrl);
+  // Use avatar URL directly (process on client side if needed)
+  const avatarUrl = article.author.avatar;
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
