@@ -4,6 +4,8 @@ import "./globals.css";
 import { Providers } from "@/components/providers/session-provider";
 import { DarkModeProvider } from "@/components/providers/dark-mode-provider";
 import { MagazinePopupProvider } from "@/components/magazine-popup-provider";
+import { CookieProvider } from "@/components/providers/cookie-provider";
+import { CookieNotice } from "@/components/cookie-notice";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -115,7 +117,10 @@ export default function RootLayout({
         <Providers>
           <DarkModeProvider>
             <MagazinePopupProvider>
-              {children}
+              <CookieProvider>
+                {children}
+                <CookieNotice />
+              </CookieProvider>
             </MagazinePopupProvider>
           </DarkModeProvider>
         </Providers>
