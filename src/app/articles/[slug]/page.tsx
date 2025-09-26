@@ -359,19 +359,19 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
             <CardContent className="p-8 xl:p-12 2xl:p-16">
               {/* Article Header */}
               <div className="mb-8">
-                <div className="flex items-center gap-2 mb-4">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-4">
                   <Badge 
-                    className="text-sm px-3 py-1"
+                    className="text-xs sm:text-sm px-2 sm:px-3 py-1 w-fit max-w-full"
                     style={{ 
                       backgroundColor: `${article.section.color}20`,
                       color: article.section.color,
                       border: `1px solid ${article.section.color}40`
                     }}
                   >
-                    {article.section.name}
+                    <span className="truncate">{article.section.name}</span>
                   </Badge>
                   {article.publishedAt && (
-                    <span className="text-sm text-gray-500">
+                    <span className="text-xs sm:text-sm text-gray-500">
                       Published {formatDate(article.publishedAt)}
                     </span>
                   )}

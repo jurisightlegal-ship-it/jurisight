@@ -192,14 +192,14 @@ export function RecentArticlesSection({
                 {/* Section Badge */}
                 <div className="mb-3">
                   <Badge 
-                    className="text-xs px-2 py-1"
+                    className="text-xs px-2 py-1 w-fit max-w-full"
                     style={{ 
                       backgroundColor: `${article.section.color}20`,
                       color: article.section.color,
                       border: `1px solid ${article.section.color}40`
                     }}
                   >
-                    {article.section.name}
+                    <span className="truncate">{article.section.name}</span>
                   </Badge>
                 </div>
 
