@@ -14,6 +14,52 @@ export function ArticlePageClient({ children }: ArticlePageClientProps) {
   useEffect(() => {
     setIsMounted(true);
     
+    // Show loading in browser navigation
+    const showBrowserLoading = () => {
+      // Update browser loading state
+      if (typeof window !== 'undefined') {
+        // Update page title to show loading
+        window.document.title = 'Loading... | Jurisight';
+        
+        // Add loading indicator to browser
+        const loadingMeta = document.createElement('meta');
+        loadingMeta.name = 'loading';
+        loadingMeta.content = 'true';
+        document.head.appendChild(loadingMeta);
+        
+        // Add loading class to body for CSS styling
+        document.body.classList.add('loading');
+        
+        // Show browser loading indicator (if supported)
+        if ('loading' in document) {
+          (document as any).loading = true;
+        }
+      }
+    };
+    
+    // Hide loading in browser navigation
+    const hideBrowserLoading = () => {
+      if (typeof window !== 'undefined') {
+        // Restore original title
+        const originalTitle = document.querySelector('meta[property="og:title"]')?.getAttribute('content') || 'Jurisight';
+        window.document.title = `${originalTitle} | Jurisight`;
+        
+        // Remove loading indicator
+        const loadingMeta = document.querySelector('meta[name="loading"]');
+        if (loadingMeta) {
+          loadingMeta.remove();
+        }
+        
+        // Remove loading class from body
+        document.body.classList.remove('loading');
+        
+        // Hide browser loading indicator (if supported)
+        if ('loading' in document) {
+          (document as any).loading = false;
+        }
+      }
+    };
+    
     // Wait for all media to load
     const checkMediaLoaded = () => {
       const images = document.querySelectorAll('img');
@@ -24,6 +70,7 @@ export function ArticlePageClient({ children }: ArticlePageClientProps) {
       
       if (totalMedia === 0) {
         // No media to wait for
+        hideBrowserLoading();
         setIsLoading(false);
         return;
       }
@@ -31,6 +78,7 @@ export function ArticlePageClient({ children }: ArticlePageClientProps) {
       const onMediaLoad = () => {
         loadedCount++;
         if (loadedCount >= totalMedia) {
+          hideBrowserLoading();
           setIsLoading(false);
         }
       };
@@ -57,14 +105,21 @@ export function ArticlePageClient({ children }: ArticlePageClientProps) {
       
       // If all media is already loaded
       if (loadedCount >= totalMedia) {
+        hideBrowserLoading();
         setIsLoading(false);
       }
     };
     
+    // Show loading immediately
+    showBrowserLoading();
+    
     // Check media after a short delay to ensure DOM is ready
     const timer = setTimeout(checkMediaLoaded, 100);
     
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      hideBrowserLoading();
+    };
   }, []);
 
   // Prevent hydration mismatch
