@@ -19,27 +19,24 @@ import {
   Calendar,
   Clock,
   User,
+  Eye,
   ArrowRight,
   Building2,
-  TrendingUp,
-  Briefcase,
-  FileText
+  Briefcase
 } from 'lucide-react';
 
-interface BusinessArticle {
+interface Article {
   id: number;
   title: string;
   slug: string;
   dek: string;
-  featured_image: string | null;
-  reading_time: number;
+  featuredImage: string | null;
+  readingTime: number;
   views: number;
-  published_at: string;
-  created_at: string;
+  publishedAt: string;
   author: {
     id: string;
-    name: string | null;
-    email: string;
+    name: string;
     avatar: string | null;
   };
   section: {
@@ -48,377 +45,402 @@ interface BusinessArticle {
     slug: string;
     color: string;
   };
-  tags: {
-    id: number;
-    name: string;
-    slug: string;
-    color: string;
-  }[];
 }
 
 function BusinessPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [articles, setArticles] = useState<BusinessArticle[]>([]);
+  const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
+  const [avatarUrls, setAvatarUrls] = useState<Record<string, string | null>>({});
+  const [currentPage, setCurrentPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
-  const [page, setPage] = useState(1);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const ARTICLES_PER_PAGE = 12;
 
-  const fetchBusinessArticles = async (pageNum = 1, search = '') => {
+  const fetchArticles = async (reset = true) => {
     try {
+      if (reset) {
+        setLoading(true);
+        setCurrentPage(0);
+      } else {
+        setLoadingMore(true);
+      }
+      
+      const offset = reset ? 0 : (currentPage + 1) * ARTICLES_PER_PAGE;
       const params = new URLSearchParams({
-        page: pageNum.toString(),
-        limit: '12',
-        ...(search && { search }),
+        limit: ARTICLES_PER_PAGE.toString(),
+        offset: offset.toString(),
         sections: 'business,corporate' // Filter for business and corporate sections
       });
+      if (searchTerm) params.append('search', searchTerm);
 
       const response = await fetch(`/api/articles?${params}`);
-      const data = await response.json();
-
       if (response.ok) {
-        if (pageNum === 1) {
-          setArticles(data.articles || []);
+        const data = await response.json();
+        const newArticles = data.articles || [];
+        
+        // Check if there are more articles
+        setHasMore(newArticles.length === ARTICLES_PER_PAGE);
+        
+        if (reset) {
+          setArticles(newArticles);
+          setCurrentPage(0);
         } else {
-          setArticles(prev => [...prev, ...(data.articles || [])]);
+          setArticles(prev => [...prev, ...newArticles]);
+          setCurrentPage(prev => prev + 1);
         }
-        setHasMore(data.hasMore || false);
+        
+        // Process avatar URLs for new articles
+        const avatarPromises = newArticles.map(async (article: Article) => {
+          if (article.author.avatar) {
+            try {
+              const processedUrl = await getImageDisplayUrl(article.author.avatar);
+              return { id: article.author.id, url: processedUrl };
+            } catch (error) {
+              console.error('Error processing avatar URL:', error);
+              return { id: article.author.id, url: null };
+            }
+          }
+          return { id: article.author.id, url: null };
+        });
+        
+        const avatarResults = await Promise.all(avatarPromises);
+        const avatarMap: Record<string, string | null> = {};
+        avatarResults.forEach(({ id, url }) => {
+          avatarMap[id] = url;
+        });
+        
+        if (reset) {
+          setAvatarUrls(avatarMap);
+        } else {
+          setAvatarUrls(prev => ({ ...prev, ...avatarMap }));
+        }
       } else {
-        console.error('Error fetching business articles:', data.error);
+        console.error('Failed to fetch articles');
       }
     } catch (error) {
-      console.error('Error fetching business articles:', error);
+      console.error('Error fetching articles:', error);
     } finally {
       setLoading(false);
-      setIsLoadingMore(false);
+      setLoadingMore(false);
+    }
+  };
+
+  const loadMore = () => {
+    if (!loadingMore && hasMore) {
+      fetchArticles(false);
     }
   };
 
   useEffect(() => {
-    fetchBusinessArticles(1, searchTerm);
+    setCurrentPage(0);
+    setHasMore(true);
+    fetchArticles(true);
   }, [searchTerm]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    setPage(1);
-    fetchBusinessArticles(1, searchTerm);
+    setCurrentPage(0);
+    setHasMore(true);
+    fetchArticles(true);
   };
 
-  const handleLoadMore = () => {
-    const nextPage = page + 1;
-    setPage(nextPage);
-    setIsLoadingMore(true);
-    fetchBusinessArticles(nextPage, searchTerm);
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
   };
-
-  const getSectionIcon = (sectionSlug: string) => {
-    switch (sectionSlug) {
-      case 'business':
-        return <Building2 className="h-4 w-4" />;
-      case 'corporate':
-        return <Briefcase className="h-4 w-4" />;
-      default:
-        return <FileText className="h-4 w-4" />;
-    }
-  };
-
-  const getSectionGradient = (sectionSlug: string) => {
-    switch (sectionSlug) {
-      case 'business':
-        return 'from-emerald-500 to-teal-600';
-      case 'corporate':
-        return 'from-cyan-500 to-blue-600';
-      default:
-        return 'from-gray-500 to-gray-600';
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-jurisight-royal"></div>
-      </div>
-    );
-  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
-      {/* Animated Background */}
+    <div className="min-h-screen relative">
+      {/* Full-screen Shader Animation Background */}
       <div className="fixed inset-0 z-0">
         <ShaderAnimation />
       </div>
-
-      {/* Content */}
-      <div className="relative z-10">
+      
+      {/* Overlay */}
+      <div className="fixed inset-0 bg-black/40 z-10"></div>
+      
+      {/* Navbar */}
+      <div className="relative z-20">
         <Navbar />
-
-        {/* Hero Section */}
-        <section className="relative py-20 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-7xl mx-auto text-center">
-            <div className="flex justify-center mb-6">
-              <div className="p-4 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl shadow-xl">
-                <Building2 className="h-12 w-12 text-white" />
-              </div>
-            </div>
-            
-            <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
-              Business & Corporate Law
-            </h1>
-            
-            <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-4xl mx-auto leading-relaxed">
-              Navigate the complex world of business law with expert insights, 
-              corporate regulations, and commercial legal guidance.
-            </p>
-
-            {/* Search Bar */}
-            <div className="max-w-2xl mx-auto">
-              <form onSubmit={handleSearch} className="flex gap-3">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                  <Input
-                    type="text"
-                    placeholder="Search business articles..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 h-12 text-lg border-2 border-gray-200 focus:border-emerald-500 rounded-xl"
-                  />
-                </div>
-                <Button 
-                  type="submit" 
-                  className="h-12 px-8 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-semibold rounded-xl shadow-lg"
-                >
-                  Search
-                </Button>
-              </form>
-            </div>
+      </div>
+      
+      {/* Hero Section */}
+      <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden">
+        {/* Content */}
+        <div className="relative z-20 max-w-7xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm text-white text-sm font-medium mb-6">
+            <Building2 className="h-4 w-4" />
+            Business & Corporate Law
           </div>
-        </section>
+          
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
+            Business
+            <span className="bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent"> Legal Insights</span>
+          </h1>
+          
+          <p className="text-xl text-white/90 mb-8 max-w-3xl mx-auto leading-relaxed">
+            Navigate the complex world of business law with expert insights, corporate regulations, and commercial legal guidance.
+          </p>
 
-        {/* Business Categories */}
-        <section className="py-16 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">Business Law Categories</h2>
-              <p className="text-lg text-gray-600">Explore different aspects of business and corporate law</p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* Business Law */}
-              <Card className="group hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-emerald-50 to-teal-50">
-                <CardContent className="p-8">
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="p-3 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl">
-                      <Building2 className="h-8 w-8 text-white" />
+            {/* Enhanced Search Bar */}
+            <form onSubmit={handleSearch} className="max-w-3xl mx-auto mb-8">
+              <div className="relative group">
+                {/* Glow effect */}
+                <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 rounded-3xl blur opacity-30 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+                
+                {/* Main search container */}
+                <div className="relative bg-white/15 backdrop-blur-md rounded-3xl border border-white/20 shadow-2xl" style={{ zIndex: 25 }}>
+                  <div className="flex items-center relative" style={{ zIndex: 30 }}>
+                    {/* Search icon */}
+                    <div className="pl-6 pr-4">
+                      <Search className="h-6 w-6 text-white/80 group-hover:text-white transition-colors duration-200" />
                     </div>
-                    <div>
-                      <h3 className="text-2xl font-bold text-gray-900">Business Law</h3>
-                      <p className="text-gray-600">General business regulations and practices</p>
-                    </div>
+                    
+                    {/* Input field */}
+                    <input
+                      type="text"
+                      placeholder="Search business articles, cases, or legal topics..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="flex-1 bg-transparent border-0 text-white placeholder:text-white/60 text-lg py-6 pr-4 focus:ring-0 focus:outline-none w-full"
+                      style={{ zIndex: 30 }}
+                    />
+                    
+                    {/* Search button */}
+                    <Button
+                      type="submit"
+                      className="m-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-8 py-3 rounded-2xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 border-0"
+                    >
+                      <Search className="h-5 w-5 mr-2" />
+                      Search
+                    </Button>
                   </div>
-                  <p className="text-gray-700 mb-6">
-                    Comprehensive coverage of business law including contracts, 
-                    partnerships, sole proprietorships, and business formation.
-                  </p>
-                  <Button 
-                    variant="outline" 
-                    className="group-hover:bg-emerald-500 group-hover:text-white group-hover:border-emerald-500 transition-all duration-300"
-                  >
-                    Explore Articles
-                    <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                  </Button>
-                </CardContent>
-              </Card>
-
-              {/* Corporate Law */}
-              <Card className="group hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-cyan-50 to-blue-50">
-                <CardContent className="p-8">
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="p-3 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl">
-                      <Briefcase className="h-8 w-8 text-white" />
-                    </div>
-                    <div>
-                      <h3 className="text-2xl font-bold text-gray-900">Corporate Law</h3>
-                      <p className="text-gray-600">Corporate governance and regulations</p>
-                    </div>
-                  </div>
-                  <p className="text-gray-700 mb-6">
-                    In-depth analysis of corporate law including company formation, 
-                    governance, mergers, acquisitions, and regulatory compliance.
-                  </p>
-                  <Button 
-                    variant="outline" 
-                    className="group-hover:bg-cyan-500 group-hover:text-white group-hover:border-cyan-500 transition-all duration-300"
-                  >
-                    Explore Articles
-                    <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </section>
-
-        {/* Articles Section */}
-        <section className="py-16 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-3xl font-bold text-gray-900">Latest Business Articles</h2>
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <TrendingUp className="h-4 w-4" />
-                <span>Updated regularly</span>
-              </div>
-            </div>
-
-            {articles.length === 0 ? (
-              <div className="text-center py-16">
-                <div className="p-4 bg-gray-100 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
-                  <FileText className="h-10 w-10 text-gray-400" />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">No Business Articles Found</h3>
+                
+                {/* Animated border */}
+                <div className="absolute inset-0 rounded-3xl border-2 border-transparent bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 bg-clip-border opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" style={{ zIndex: 20 }}></div>
+              </div>
+              
+              {/* Search suggestions */}
+              <div className="mt-4 flex flex-wrap justify-center gap-2">
+                {['Corporate Law', 'Business Formation', 'Contracts', 'Mergers & Acquisitions', 'Commercial Law'].map((suggestion) => (
+                  <button
+                    key={suggestion}
+                    onClick={() => setSearchTerm(suggestion)}
+                    className="px-4 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white/80 hover:text-white text-sm rounded-full border border-white/20 transition-all duration-200 hover:scale-105"
+                  >
+                    {suggestion}
+                  </button>
+                ))}
+              </div>
+            </form>
+
+        </div>
+      </section>
+
+      {/* All Articles Section */}
+      <section className="relative py-16 px-4 sm:px-6 lg:px-8 bg-white/95 backdrop-blur-sm z-20">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Business & Corporate Articles</h2>
+            <p className="text-lg text-gray-600">Discover our latest business law insights and analysis</p>
+          </div>
+
+          {/* Articles Grid */}
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, i) => (
+                <Card key={i} className="overflow-hidden">
+                  <div className="h-48 bg-gray-200 animate-pulse" />
+                  <CardContent className="p-6">
+                    <div className="h-4 bg-gray-200 rounded animate-pulse mb-2" />
+                    <div className="h-4 bg-gray-200 rounded animate-pulse mb-4 w-3/4" />
+                    <div className="h-3 bg-gray-200 rounded animate-pulse mb-2" />
+                    <div className="h-3 bg-gray-200 rounded animate-pulse w-1/2" />
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : articles.length === 0 ? (
+            <Card className="text-center py-16">
+              <CardContent>
+                <BookOpen className="h-16 w-16 mx-auto text-gray-400 mb-4" />
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">No articles found</h3>
                 <p className="text-gray-600 mb-6">
-                  {searchTerm 
-                    ? `No articles found matching "${searchTerm}"`
-                    : 'No business articles have been published yet.'
-                  }
+                  {searchTerm ? 'Try adjusting your search terms' : 'No published business articles available yet'}
                 </p>
                 {searchTerm && (
-                  <Button 
-                    onClick={() => {
-                      setSearchTerm('');
-                      fetchBusinessArticles(1, '');
-                    }}
-                    variant="outline"
-                  >
+                  <Button onClick={() => {
+                    setSearchTerm('');
+                    fetchArticles();
+                  }}>
                     Clear Search
                   </Button>
                 )}
-              </div>
-            ) : (
-              <>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {articles.map((article) => (
-                    <Card key={article.id} className="group hover:shadow-xl transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm">
-                      <div className="relative overflow-hidden rounded-t-lg">
-                        {article.featured_image ? (
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {articles.map((article) => (
+                <Card key={article.id} className="group overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                  {/* Featured Image */}
+                  {article.featuredImage && (
+                    <div className="relative h-48 overflow-hidden">
+                      <Image
+                        src={article.featuredImage}
+                        alt={article.title}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                      <div className="absolute top-4 left-4">
+                        <Badge 
+                          className="text-xs px-3 py-1 backdrop-blur-sm"
+                          style={{ 
+                            backgroundColor: `${article.section.color}20`,
+                            color: article.section.color,
+                            border: `1px solid ${article.section.color}40`
+                          }}
+                        >
+                          {article.section.name}
+                        </Badge>
+                      </div>
+                    </div>
+                  )}
+
+                  <CardContent className="p-6">
+                    <h3 className="text-xl font-semibold text-gray-900 mb-3 line-clamp-2 group-hover:text-emerald-600 transition-colors">
+                      {article.title}
+                    </h3>
+                    
+                    {article.dek && (
+                      <p className="text-gray-600 mb-4 line-clamp-3">{article.dek}</p>
+                    )}
+
+                    {/* Author Info */}
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
+                        {avatarUrls[article.author.id] ? (
                           <Image
-                            src={getImageDisplayUrl(article.featured_image)}
-                            alt={article.title}
-                            width={400}
-                            height={200}
-                            className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                            src={avatarUrls[article.author.id]!}
+                            alt={article.author.name}
+                            width={32}
+                            height={32}
+                            className="w-full h-full object-cover"
                           />
                         ) : (
-                          <div className="w-full h-48 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-                            <FileText className="h-16 w-16 text-gray-400" />
-                          </div>
+                          <User className="h-4 w-4 text-gray-500" />
                         )}
-                        <div className="absolute top-4 left-4">
-                          <Badge 
-                            className={`bg-gradient-to-r ${getSectionGradient(article.section.slug)} text-white border-0 shadow-lg`}
-                          >
-                            {getSectionIcon(article.section.slug)}
-                            <span className="ml-1">{article.section.name}</span>
-                          </Badge>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate">{article.author.name}</p>
+                        <p className="text-xs text-gray-500">{formatDate(article.publishedAt)}</p>
+                      </div>
+                    </div>
+
+                    {/* Article Meta */}
+                    <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-1">
+                          <Clock className="h-4 w-4" />
+                          {article.readingTime} min
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Eye className="h-4 w-4" />
+                          {article.views}
                         </div>
                       </div>
-                      
-                      <CardContent className="p-6">
-                        <h3 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-emerald-600 transition-colors">
-                          {article.title}
-                        </h3>
-                        
-                        {article.dek && (
-                          <p className="text-gray-600 mb-4 line-clamp-3">
-                            {article.dek}
-                          </p>
-                        )}
+                    </div>
 
-                        <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
-                          <div className="flex items-center gap-1">
-                            <User className="h-4 w-4" />
-                            <span>{article.author.name || 'Anonymous'}</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Calendar className="h-4 w-4" />
-                            <span>{new Date(article.published_at).toLocaleDateString()}</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Clock className="h-4 w-4" />
-                            <span>{article.reading_time} min read</span>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2 text-sm text-gray-500">
-                            <BookOpen className="h-4 w-4" />
-                            <span>{article.views} views</span>
-                          </div>
-                          
-                          <Link href={`/articles/${article.slug}`}>
-                            <Button 
-                              size="sm" 
-                              className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white group-hover:shadow-lg transition-all duration-300"
-                            >
-                              Read More
-                              <ArrowRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" />
-                            </Button>
-                          </Link>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-
-                {/* Load More Button */}
-                {hasMore && (
-                  <div className="text-center mt-12">
                     <Button
-                      onClick={handleLoadMore}
-                      disabled={isLoadingMore}
-                      className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white px-8 py-3 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+                      variant="outline"
+                      className="w-full group-hover:bg-emerald-600 group-hover:text-white group-hover:border-emerald-600 transition-all duration-300"
+                      onClick={() => router.push(`/articles/${article.slug}`)}
                     >
-                      {isLoadingMore ? (
-                        <>
-                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                          Loading...
-                        </>
-                      ) : (
-                        'Load More Articles'
-                      )}
+                      Read Article
+                      <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
                     </Button>
-                  </div>
-                )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
 
-                {/* Articles Count */}
-                {!loading && articles.length > 0 && (
-                  <div className="text-center mt-6">
-                    <p className="text-sm text-gray-500">
-                      Showing {articles.length} article{articles.length !== 1 ? 's' : ''}
-                      {!hasMore && ` (all articles loaded)`}
-                    </p>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-        </section>
+          {/* Loading More Skeletons */}
+          {loadingMore && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+              {[...Array(6)].map((_, i) => (
+                <Card key={`loading-${i}`} className="overflow-hidden">
+                  <div className="h-48 bg-gray-200 animate-pulse" />
+                  <CardContent className="p-6">
+                    <div className="h-4 bg-gray-200 rounded animate-pulse mb-2" />
+                    <div className="h-4 bg-gray-200 rounded animate-pulse mb-4 w-3/4" />
+                    <div className="h-3 bg-gray-200 rounded animate-pulse mb-2" />
+                    <div className="h-3 bg-gray-200 rounded animate-pulse w-1/2" />
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
 
-        {/* Newsletter CTA */}
-        <NewsletterCTA
-          title="Stay Updated with Business Law"
-          description="Get the latest business law insights, corporate regulations, and commercial legal analysis delivered to your inbox."
-          gradient="from-emerald-600 to-teal-600"
-          textColor="text-emerald-100"
-          buttonColor="text-emerald-600"
-          variant="premium"
-          badgeText="Business Law Updates"
-        />
+          {/* Load More Button */}
+          {!loading && articles.length > 0 && (
+            <div className="text-center mt-12">
+              {hasMore ? (
+                <Button
+                  onClick={loadMore}
+                  disabled={loadingMore}
+                  className="px-8 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                >
+                  {loadingMore ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Loading More...
+                    </>
+                  ) : (
+                    <>
+                      Load More Articles
+                      <ArrowRight className="h-4 w-4 ml-2" />
+                    </>
+                  )}
+                </Button>
+              ) : (
+                <p className="text-gray-500 font-medium">
+                  No more articles to load
+                </p>
+              )}
+            </div>
+          )}
 
-        <div className="relative z-20">
-          <Footer />
+          {/* Articles Count */}
+          {!loading && articles.length > 0 && (
+            <div className="text-center mt-6">
+              <p className="text-sm text-gray-500">
+                Showing {articles.length} article{articles.length !== 1 ? 's' : ''}
+                {!hasMore && ` (all articles loaded)`}
+              </p>
+            </div>
+          )}
         </div>
+      </section>
+
+      <NewsletterCTA
+        title="Stay Updated with Business Law"
+        description="Get the latest business law insights, corporate regulations, and commercial legal analysis delivered to your inbox."
+        gradient="from-emerald-600 to-teal-600"
+        textColor="text-emerald-100"
+        buttonColor="text-emerald-600"
+        variant="premium"
+        badgeText="Business Law Updates"
+      />
+
+      <div className="relative z-20">
+        <Footer />
       </div>
     </div>
   );
