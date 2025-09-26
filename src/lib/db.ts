@@ -1,5 +1,3 @@
-import { drizzle } from 'drizzle-orm/vercel-postgres';
-import { sql } from '@vercel/postgres';
-import * as schema from './schema';
-
-export const db = drizzle(sql, { schema });
+// This file is no longer needed since we're using Supabase client directly
+// All database operations are now handled through SupabaseDB class
+export {};

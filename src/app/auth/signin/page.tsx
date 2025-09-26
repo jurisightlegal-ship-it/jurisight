@@ -3,17 +3,18 @@
 import { signIn, getSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { SunIcon as Sunburst } from 'lucide-react';
+import { AnimatedButton } from '@/components/ui/animated-button';
 
 export default function SignIn() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
-  const [role, setRole] = useState('CONTRIBUTOR');
+  const [password, setPassword] = useState('');
+  const [message, setMessage] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [isMagicLinkMode, setIsMagicLinkMode] = useState(false);
 
   useEffect(() => {
     // Check if user is already signed in
@@ -24,130 +25,240 @@ export default function SignIn() {
     });
   }, [router]);
 
-  const handleDevelopmentSignIn = async (e: React.FormEvent) => {
+  const validateEmail = (value: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+  };
+
+  const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email) return;
+    if (!email || !password) return;
     
     setIsLoading(true);
+    setMessage('');
+    setEmailError('');
+    setPasswordError('');
+    
     try {
-      await signIn('credentials', { 
+      const result = await signIn('credentials', { 
         email,
-        role,
+        password,
         callbackUrl: '/dashboard',
-        redirect: true 
+        redirect: false 
       });
+      
+      if (result?.error) {
+        setMessage('Invalid email or password');
+      } else if (result?.ok) {
+        router.push('/dashboard');
+      }
     } catch (error) {
       console.error('Sign in error:', error);
+      setMessage('An error occurred during sign in');
     } finally {
       setIsLoading(false);
     }
   };
 
+  const handleMagicLinkSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) return;
+    
+    if (!validateEmail(email)) {
+      setEmailError('Please enter a valid email address.');
+      return;
+    }
+    
+    setIsLoading(true);
+    setMessage('');
+    setEmailError('');
+    
+    try {
+      const response = await fetch('/api/auth/magic-link', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setMessage('Magic link sent! Check your email.');
+      } else {
+        setMessage(data.error || 'Failed to send magic link');
+      }
+    } catch (error) {
+      console.error('Magic link error:', error);
+      setMessage('Failed to send magic link');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validateEmail(email)) {
+      setEmailError('Please enter a valid email address.');
+      return;
+    } else {
+      setEmailError('');
+    }
+
+    if (isMagicLinkMode) {
+      handleMagicLinkSignIn(e);
+    } else {
+      if (!password) {
+        setPasswordError('Password is required.');
+        return;
+      } else {
+        setPasswordError('');
+      }
+      handleEmailSignIn(e);
+    }
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold text-jurisight-navy">
-            Welcome to Jurisight
-          </CardTitle>
-          <CardDescription>
-            Development Login - Enter any email to test the platform
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          
-          {/* Development Login Form */}
-          <form onSubmit={handleDevelopmentSignIn} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="your-email@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="role">Role</Label>
-              <Select value={role} onValueChange={setRole}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select your role" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="CONTRIBUTOR">Contributor</SelectItem>
-                  <SelectItem value="EDITOR">Editor</SelectItem>
-                  <SelectItem value="ADMIN">Admin</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+    <div className="min-h-screen flex items-center justify-center overflow-hidden p-4">
+      <div className="w-full relative max-w-5xl overflow-hidden flex flex-col md:flex-row shadow-xl">
+        <div className="w-full h-full z-2 absolute bg-gradient-to-t from-transparent to-black"></div>
+        <div className="flex absolute z-2 overflow-hidden backdrop-blur-2xl">
+          <div className="h-[40rem] z-2 w-[4rem] bg-gradient-to-r from-[#ffffff00] via-[#000000] via-[69%] to-[#ffffff30] opacity-30 overflow-hidden"></div>
+          <div className="h-[40rem] z-2 w-[4rem] bg-gradient-to-r from-[#ffffff00] via-[#000000] via-[69%] to-[#ffffff30] opacity-30 overflow-hidden"></div>
+          <div className="h-[40rem] z-2 w-[4rem] bg-gradient-to-r from-[#ffffff00] via-[#000000] via-[69%] to-[#ffffff30] opacity-30 overflow-hidden"></div>
+          <div className="h-[40rem] z-2 w-[4rem] bg-gradient-to-r from-[#ffffff00] via-[#000000] via-[69%] to-[#ffffff30] opacity-30 overflow-hidden"></div>
+          <div className="h-[40rem] z-2 w-[4rem] bg-gradient-to-r from-[#ffffff00] via-[#000000] via-[69%] to-[#ffffff30] opacity-30 overflow-hidden"></div>
+          <div className="h-[40rem] z-2 w-[4rem] bg-gradient-to-r from-[#ffffff00] via-[#000000] via-[69%] to-[#ffffff30] opacity-30 overflow-hidden"></div>
+        </div>
+        <div className="w-[15rem] h-[15rem] bg-gradient-to-br from-jurisight-royal to-jurisight-navy absolute z-1 rounded-full bottom-0"></div>
+        <div className="w-[8rem] h-[5rem] bg-white absolute z-1 rounded-full bottom-0"></div>
+        <div className="w-[8rem] h-[5rem] bg-white absolute z-1 rounded-full bottom-0"></div>
 
-            <Button
-              type="submit"
-              disabled={isLoading || !email}
-              className="w-full bg-jurisight-royal hover:bg-jurisight-royal-dark"
-              size="lg"
-            >
-              {isLoading ? (
-                <div className="flex items-center">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Signing in...
-                </div>
-              ) : (
-                'Sign In (Development)'
-              )}
-            </Button>
-          </form>
+        <div className="bg-black text-white p-8 md:p-12 md:w-1/2 relative rounded-bl-3xl overflow-hidden">
+          <h1 className="text-2xl md:text-3xl font-medium leading-tight z-10 tracking-tight relative">
+            Your trusted source for legal insights, court judgments, and comprehensive analysis of the Indian legal landscape.
+          </h1>
+        </div>
 
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
+        <div className="p-8 md:p-12 md:w-1/2 flex flex-col bg-secondary z-99 text-secondary-foreground">
+          <div className="flex flex-col items-left mb-8">
+            <div className="text-jurisight-royal mb-4">
+              <Sunburst className="h-10 w-10" />
             </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
-                For production use
-              </span>
-            </div>
-          </div>
-
-          {/* Google OAuth - Disabled for development */}
-          <Button
-            disabled
-            className="w-full bg-gray-300 text-gray-500 cursor-not-allowed"
-            size="lg"
-          >
-            <div className="flex items-center">
-              <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
-                <path
-                  fill="currentColor"
-                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                />
-                <path
-                  fill="currentColor"
-                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                />
-                <path
-                  fill="currentColor"
-                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                />
-                <path
-                  fill="currentColor"
-                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                />
-              </svg>
-              Google OAuth (Setup Required)
-            </div>
-          </Button>
-          
-          <div className="text-center">
-            <p className="text-xs text-gray-500">
-              Development mode: Use any email to test the platform
+            <h2 className="text-3xl font-medium mb-2 tracking-tight">
+              Welcome Back
+            </h2>
+            <p className="text-left opacity-80">
+              Sign in to access your legal insights dashboard
             </p>
           </div>
-        </CardContent>
-      </Card>
+
+          <form
+            className="flex flex-col gap-4"
+            onSubmit={handleSubmit}
+            noValidate
+          >
+            <div>
+              <label htmlFor="email" className="block text-sm mb-2">
+                Your email
+              </label>
+              <input
+                type="email"
+                id="email"
+                placeholder="your-email@example.com"
+                className={`text-sm w-full py-2 px-3 border rounded-lg focus:outline-none focus:ring-1 bg-white text-black focus:ring-jurisight-royal ${
+                  emailError ? "border-red-500" : "border-gray-300"
+                }`}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                aria-invalid={!!emailError}
+                aria-describedby="email-error"
+              />
+              {emailError && (
+                <p id="email-error" className="text-red-500 text-xs mt-1">
+                  {emailError}
+                </p>
+              )}
+            </div>
+
+            {!isMagicLinkMode && (
+              <div>
+                <label htmlFor="password" className="block text-sm mb-2">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  id="password"
+                  placeholder="Enter your password"
+                  className={`text-sm w-full py-2 px-3 border rounded-lg focus:outline-none focus:ring-1 bg-white text-black focus:ring-jurisight-royal ${
+                    passwordError ? "border-red-500" : "border-gray-300"
+                  }`}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  aria-invalid={!!passwordError}
+                  aria-describedby="password-error"
+                />
+                {passwordError && (
+                  <p id="password-error" className="text-red-500 text-xs mt-1">
+                    {passwordError}
+                  </p>
+                )}
+              </div>
+            )}
+
+            <div className="w-full flex justify-center">
+              <AnimatedButton
+                type="submit"
+                disabled={isLoading || !email || (!isMagicLinkMode && !password)}
+                variant="secondary"
+                className="w-full max-w-xs"
+              >
+                {isLoading ? (
+                  <div className="flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    {isMagicLinkMode ? 'Sending...' : 'Signing in...'}
+                  </div>
+                ) : (
+                  isMagicLinkMode ? 'Send Magic Link' : 'Sign In'
+                )}
+              </AnimatedButton>
+            </div>
+
+            <div className="w-full flex justify-center">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMagicLinkMode(!isMagicLinkMode);
+                  setMessage('');
+                  setEmailError('');
+                  setPasswordError('');
+                }}
+                className="w-full max-w-xs text-jurisight-royal hover:text-jurisight-royal-dark font-medium py-2 px-4 rounded-lg transition-colors border border-jurisight-royal/20 hover:border-jurisight-royal/40 hover:bg-jurisight-royal/5"
+              >
+                {isMagicLinkMode ? 'Use Email & Password' : 'Use Magic Link Instead'}
+              </button>
+            </div>
+
+            {message && (
+              <div className={`text-center text-sm ${
+                message.includes('sent') || message.includes('success') 
+                  ? 'text-green-600' 
+                  : 'text-red-600'
+              }`}>
+                {message}
+              </div>
+            )}
+
+            <div className="text-center text-gray-600 text-sm">
+              Don&apos;t have an account?{" "}
+              <span className="text-secondary-foreground font-medium">
+                Contact an administrator to get started.
+              </span>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   );
 }

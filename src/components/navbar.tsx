@@ -14,7 +14,11 @@ import { cn } from "@/lib/utils";
 const navItems = [
   { label: "Home", href: "/" },
   { label: "Articles", href: "/articles" },
-  { label: "Sections", href: "/sections" },
+  { label: "Business", href: "/business" },
+  { label: "Supreme Court Judgements", href: "/supreme-court-judgements" },
+  { label: "High Court Judgements", href: "/high-court-judgements" },
+  { label: "News", href: "/news" },
+  { label: "Know Your Law", href: "/know-your-law" },
   { label: "About", href: "/about" },
 ];
 

@@ -37,7 +37,7 @@ export default function HeroHeader() {
             placeholder="Search articles by title or summary..."
             className="h-12 w-full bg-white pl-10 text-base text-black placeholder:text-black/60"
           />
-          <Button type="submit" className="h-12 px-6 bg-jurisight-lime text-jurisight-navy hover:bg-jurisight-lime-dark">
+          <Button type="submit" className="h-12 px-6 bg-jurisight-lime text-white hover:bg-jurisight-lime-dark">
             Search
           </Button>
         </div>

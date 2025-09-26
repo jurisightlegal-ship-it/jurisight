@@ -19,42 +19,33 @@ import {
   Youtube,
   ExternalLink
 } from "lucide-react";
+import { NewsletterSignup } from "@/components/newsletter-signup";
 
 export function Footer() {
-  const [email, setEmail] = React.useState("");
-
-  const handleNewsletterSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Handle newsletter subscription
-    console.log("Newsletter subscription:", email);
-    setEmail("");
-  };
 
   const quickLinks = [
+    { name: "Home", href: "/" },
     { name: "Articles", href: "/articles" },
-    { name: "Supreme Court", href: "/sections/constitutional" },
-    { name: "High Courts", href: "/sections/civil" },
-    { name: "Know the Law", href: "/categories/know-the-law" },
-    { name: "Legal Updates", href: "/updates" },
-    { name: "Case Studies", href: "/case-studies" },
+    { name: "Business", href: "/business" },
+    { name: "Supreme Court Judgements", href: "/supreme-court-judgements" },
+    { name: "High Court Judgements", href: "/high-court-judgements" },
+    { name: "News", href: "/news" },
+    { name: "Know Your Law", href: "/know-your-law" },
+    { name: "Dashboard", href: "/dashboard" },
   ];
 
   const practiceAreas = [
-    { name: "Constitutional Law", href: "/practice/constitutional" },
-    { name: "Corporate Law", href: "/practice/corporate" },
-    { name: "Criminal Law", href: "/practice/criminal" },
-    { name: "Civil Law", href: "/practice/civil" },
-    { name: "Family Law", href: "/practice/family" },
-    { name: "Employment Law", href: "/practice/employment" },
+    { name: "Business Law", href: "/business" },
+    { name: "Supreme Court Judgements", href: "/supreme-court-judgements" },
+    { name: "High Court Judgements", href: "/high-court-judgements" },
+    { name: "Legal News", href: "/news" },
+    { name: "Know Your Law", href: "/know-your-law" },
+    { name: "Article Categories", href: "/articles" },
+    { name: "Legal Analysis", href: "/articles" },
   ];
 
   const resources = [
-    { name: "Legal Forms", href: "/resources/forms" },
-    { name: "Case Citations", href: "/resources/citations" },
-    { name: "Legal Dictionary", href: "/resources/dictionary" },
-    { name: "Court Directories", href: "/resources/courts" },
-    { name: "Bar Associations", href: "/resources/bar" },
-    { name: "Legal Aid", href: "/resources/aid" },
+    { name: "Sign In", href: "/auth/signin" },
   ];
 
 
@@ -67,7 +58,7 @@ export function Footer() {
   ];
 
   return (
-    <footer className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
+    <footer className="bg-gradient-to-br from-slate-800 via-slate-700 to-slate-800 text-white">
       {/* Main Footer Content */}
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12">
@@ -107,7 +98,7 @@ export function Footer() {
                     href={social.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="p-2 bg-slate-700 hover:bg-jurisight-navy rounded-lg transition-colors duration-200"
+                    className="p-2 bg-slate-600 hover:bg-jurisight-navy rounded-lg transition-colors duration-200"
                   >
                     <Icon className="h-4 w-4" />
                   </Link>
@@ -172,7 +163,7 @@ export function Footer() {
         </div>
 
         {/* Newsletter Section */}
-        <div className="mt-12 pt-8 border-t border-slate-700">
+        <div className="mt-12 pt-8 border-t border-slate-600">
           <Card className="bg-gradient-to-r from-jurisight-navy to-jurisight-royal border-0 p-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
               <div>
@@ -182,27 +173,22 @@ export function Footer() {
                 </p>
               </div>
               
-              <form onSubmit={handleNewsletterSubmit} className="flex gap-3">
-                <Input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email"
-                  className="bg-white/10 border-white/20 text-white placeholder:text-slate-300"
-                  required
-                />
-                <Button type="submit" className="bg-white text-jurisight-navy hover:bg-slate-100 font-semibold">
-                  <Send className="h-4 w-4 mr-2" />
-                  Subscribe
-                </Button>
-              </form>
+              <NewsletterSignup
+                title="Stay Updated"
+                description="Get the latest legal insights, court judgments, and analysis delivered to your inbox weekly."
+                variant="footer"
+                showIcon={true}
+                showBadge={false}
+                placeholder="Enter your email"
+                buttonText="Subscribe"
+              />
             </div>
           </Card>
         </div>
       </div>
 
       {/* Bottom Bar */}
-      <div className="border-t border-slate-700 bg-slate-900">
+      <div className="border-t border-slate-600 bg-slate-800">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="text-sm text-slate-400">

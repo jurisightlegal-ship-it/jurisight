@@ -1,6 +1,6 @@
 import { Navbar } from '@/components/navbar';
-import { ShaderBackground } from '@/components/ui/hero-shader';
 import HeroHeader from '@/components/hero-header';
+import AnimatedBackgroundWrapper from '@/components/animated-background-wrapper';
 import { FeaturedBlog } from '@/components/featured-blog';
 import { TopNews } from '@/components/top-news';
 import { SupremeCourtJudgement } from '@/components/supreme-court-judgement';
@@ -12,12 +12,20 @@ import { Footer } from '@/components/footer';
 export default function Home() {
   return (
     <>
-      <ShaderBackground>
-        <Navbar />
-        <div className="relative flex min-h-[650px] items-center justify-center py-20 sm:py-24">
-          <HeroHeader />
+      <div className="relative min-h-[650px] w-full overflow-hidden">
+        {/* Animated Background */}
+        <div className="absolute inset-0 z-0">
+          <AnimatedBackgroundWrapper />
         </div>
-      </ShaderBackground>
+        
+        {/* Content */}
+        <div className="relative z-10">
+          <Navbar />
+          <div className="relative flex min-h-[650px] items-center justify-center py-20 sm:py-24">
+            <HeroHeader />
+          </div>
+        </div>
+      </div>
       <FeaturedBlog />
       <TopNews />
       <SupremeCourtJudgement />

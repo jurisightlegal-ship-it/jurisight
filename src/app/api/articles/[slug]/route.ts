@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
-import { articles, users, legalSections, caseCitations, sourceLinks } from '@/lib/schema';
-import { eq, sql } from 'drizzle-orm';
+import { supabase } from '@/lib/supabase-db';
+
 
 // GET /api/articles/[slug] - Fetch single article by slug
 export async function GET(
@@ -12,73 +11,106 @@ export async function GET(
     const { slug } = await params;
 
     // Fetch article with related data
-    const article = await db
-      .select({
-        id: articles.id,
-        title: articles.title,
-        slug: articles.slug,
-        dek: articles.dek,
-        body: articles.body,
-        featuredImage: articles.featuredImage,
-        readingTime: articles.readingTime,
-        views: articles.views,
-        publishedAt: articles.publishedAt,
-        createdAt: articles.createdAt,
-        updatedAt: articles.updatedAt,
-        author: {
-          id: users.id,
-          name: users.name,
-          bio: users.bio,
-          avatar: users.image,
-        },
-        section: {
-          id: legalSections.id,
-          name: legalSections.name,
-          slug: legalSections.slug,
-          color: legalSections.color,
-          description: legalSections.description,
-        }
-      })
-      .from(articles)
-      .leftJoin(users, eq(articles.authorId, users.id))
-      .leftJoin(legalSections, eq(articles.sectionId, legalSections.id))
-      .where(eq(articles.slug, slug))
-      .limit(1);
+    const { data: article, error } = await supabase
+      .from('articles')
+      .select(`
+        id,
+        title,
+        slug,
+        dek,
+        body,
+        featured_image,
+        reading_time,
+        views,
+        published_at,
+        created_at,
+        updated_at,
+        users(
+          id,
+          name,
+          bio,
+          image
+        ),
+        legal_sections(
+          id,
+          name,
+          slug,
+          color,
+          description
+        )
+      `)
+      .eq('slug', slug)
+      .single();
 
-    if (!article[0]) {
+    if (error || !article) {
       return NextResponse.json(
         { error: 'Article not found' },
         { status: 404 }
       );
     }
 
-    // Fetch case citations
-    const citations = await db
-      .select()
-      .from(caseCitations)
-      .where(eq(caseCitations.articleId, article[0].id));
+    // Fetch case citations (if you have this table)
+    const { data: citations } = await supabase
+      .from('case_citations')
+      .select('*')
+      .eq('article_id', article.id);
 
-    // Fetch source links
-    const sources = await db
-      .select()
-      .from(sourceLinks)
-      .where(eq(sourceLinks.articleId, article[0].id));
+    // Fetch source links (if you have this table)
+    const { data: sources } = await supabase
+      .from('source_links')
+      .select('*')
+      .eq('article_id', article.id);
 
     // Increment view count
-    await db
-      .update(articles)
-      .set({ 
-        views: sql`${articles.views} + 1` 
+    await supabase
+      .from('articles')
+      .update({ 
+        views: (article.views || 0) + 1,
+        updated_at: new Date().toISOString()
       })
-      .where(eq(articles.id, article[0].id));
+      .eq('id', article.id);
+
+    // Transform the data to match expected format
+    const transformedArticle = {
+      id: article.id,
+      title: article.title,
+      slug: article.slug,
+      dek: article.dek,
+      body: article.body,
+      featuredImage: article.featured_image,
+      readingTime: article.reading_time,
+      views: (article.views || 0) + 1, // Return updated view count
+      publishedAt: article.published_at,
+      createdAt: article.created_at,
+      updatedAt: article.updated_at,
+      author: {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        id: (article as any).users?.id || (article as any).author_id,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        name: (article as any).users?.name || 'Unknown Author',
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        bio: (article as any).users?.bio || null,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        avatar: (article as any).users?.image || null,
+      },
+      section: {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        id: (article as any).legal_sections?.id || (article as any).section_id,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        name: (article as any).legal_sections?.name || 'Unknown Section',
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        slug: (article as any).legal_sections?.slug || 'unknown',
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        color: (article as any).legal_sections?.color || '#6B7280',
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        description: (article as any).legal_sections?.description || null,
+      },
+      caseCitations: citations || [],
+      sourceLinks: sources || [],
+    };
 
     return NextResponse.json({
-      article: {
-        ...article[0],
-        views: article[0].views + 1, // Return updated view count
-        caseCitations: citations,
-        sourceLinks: sources,
-      }
+      article: transformedArticle
     });
   } catch (error) {
     console.error('Error fetching article:', error);
@@ -99,30 +131,45 @@ export async function PUT(
     const body = await request.json();
     const { title, dek, bodyContent, sectionId, featuredImage, status } = body;
 
-    // Update article
-    const updatedArticle = await db
-      .update(articles)
-      .set({
-        title,
-        dek,
-        body: bodyContent,
-        sectionId,
-        featuredImage,
-        status,
-        updatedAt: new Date(),
-        ...(status === 'PUBLISHED' && { publishedAt: new Date() })
-      })
-      .where(eq(articles.slug, slug))
-      .returning();
+    const updateData: {
+      title: string;
+      dek: string;
+      body: string;
+      section_id: string;
+      featured_image: string;
+      status: string;
+      updated_at: string;
+      published_at?: string;
+    } = {
+      title,
+      dek,
+      body: bodyContent,
+      section_id: sectionId,
+      featured_image: featuredImage,
+      status,
+      updated_at: new Date().toISOString()
+    };
 
-    if (!updatedArticle[0]) {
+    if (status === 'PUBLISHED') {
+      updateData.published_at = new Date().toISOString();
+    }
+
+    // Update article
+    const { data: updatedArticle, error } = await supabase
+      .from('articles')
+      .update(updateData)
+      .eq('slug', slug)
+      .select()
+      .single();
+
+    if (error || !updatedArticle) {
       return NextResponse.json(
-        { error: 'Article not found' },
+        { error: 'Article not found or failed to update' },
         { status: 404 }
       );
     }
 
-    return NextResponse.json({ article: updatedArticle[0] });
+    return NextResponse.json({ article: updatedArticle });
   } catch (error) {
     console.error('Error updating article:', error);
     return NextResponse.json(

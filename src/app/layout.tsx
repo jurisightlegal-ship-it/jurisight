@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Crimson_Text, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers/session-provider";
+import { DarkModeProvider } from "@/components/providers/dark-mode-provider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -35,7 +36,9 @@ export default function RootLayout({
         className={`${inter.variable} ${crimsonText.variable} ${jetbrainsMono.variable} antialiased`}
       >
         <Providers>
-          {children}
+          <DarkModeProvider>
+            {children}
+          </DarkModeProvider>
         </Providers>
       </body>
     </html>
