@@ -1,13 +1,7 @@
 import { Navbar } from '@/components/navbar';
 import HeroHeader from '@/components/hero-header';
-import AnimatedBackgroundWrapper from '@/components/animated-background-wrapper';
-import { FeaturedBlog } from '@/components/featured-blog';
-import { TopNews } from '@/components/top-news';
-import { SupremeCourtJudgement } from '@/components/supreme-court-judgement';
-import { HighCourtJudgement } from '@/components/high-court-judgement';
-import { KnowTheLawBlogs } from '@/components/know-the-law-blogs';
-import { WhatsAppCommunityBadge } from '@/components/whatsapp-community-badge';
 import { Footer } from '@/components/footer';
+import { HomePageClient } from '@/components/home-page-client';
 
 export default function Home() {
   return (
@@ -15,7 +9,7 @@ export default function Home() {
       <div className="relative min-h-[650px] w-full overflow-hidden">
         {/* Animated Background */}
         <div className="absolute inset-0 z-0">
-          <AnimatedBackgroundWrapper />
+          <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900" />
         </div>
         
         {/* Content */}
@@ -26,12 +20,7 @@ export default function Home() {
           </div>
         </div>
       </div>
-      <FeaturedBlog />
-      <TopNews />
-      <SupremeCourtJudgement />
-      <HighCourtJudgement />
-      <KnowTheLawBlogs />
-      <WhatsAppCommunityBadge />
+      <HomePageClient />
       <Footer />
     </>
   );
