@@ -301,8 +301,8 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
     notFound();
   }
 
-  // Use avatar URL directly (process on client side if needed)
-  const avatarUrl = article.author.avatar;
+  // Process avatar URL for proper display
+  const avatarUrl = await getProcessedAvatarUrl(article.author.avatar);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
