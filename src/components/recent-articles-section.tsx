@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { getImageDisplayUrl } from '@/lib/client-storage-utils';
 import { 
   Calendar, 
@@ -49,6 +50,7 @@ export function RecentArticlesSection({
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [imageUrls, setImageUrls] = React.useState<Map<number, string>>(new Map());
+  const [avatarUrls, setAvatarUrls] = React.useState<Map<number, string>>(new Map());
 
   React.useEffect(() => {
     const fetchRecentArticles = async () => {
@@ -66,7 +68,10 @@ export function RecentArticlesSection({
 
         // Process image URLs - if they're already full URLs, use them directly
         const imageUrlMap = new Map<number, string>();
+        const avatarUrlMap = new Map<number, string>();
+        
         for (const article of fetchedArticles) {
+          // Process featured images
           if (article.featuredImage) {
             // If it's already a full URL, use it directly
             if (article.featuredImage.startsWith('http')) {
@@ -83,8 +88,28 @@ export function RecentArticlesSection({
               }
             }
           }
+          
+          // Process avatar images
+          if (article.author.avatar) {
+            // If it's already a full URL, use it directly
+            if (article.author.avatar.startsWith('http')) {
+              avatarUrlMap.set(article.id, article.author.avatar);
+            } else {
+              // Otherwise, get the signed URL
+              try {
+                const avatarUrl = await getImageDisplayUrl(article.author.avatar);
+                if (avatarUrl) {
+                  avatarUrlMap.set(article.id, avatarUrl);
+                }
+              } catch (err) {
+                console.error(`Error loading avatar for article ${article.id}:`, err);
+              }
+            }
+          }
         }
+        
         setImageUrls(imageUrlMap);
+        setAvatarUrls(avatarUrlMap);
       } catch (err) {
         console.error('Error fetching recent articles:', err);
         setError('Failed to load recent articles');
@@ -147,7 +172,6 @@ export function RecentArticlesSection({
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
         {articles.map((article) => (
           <Card key={article.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-200">
-            <Link href={`/articles/${article.slug}`}>
               {/* Featured Image */}
               {article.featuredImage && imageUrls.has(article.id) ? (
                 <div className="relative h-48">
@@ -210,14 +234,38 @@ export function RecentArticlesSection({
                 </div>
 
                 {/* Author Info */}
-                <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-100">
-                  <div className="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center">
-                    <User className="h-3 w-3 text-gray-500" />
+                <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
+                  <div className="flex items-center gap-2">
+                    {article.author.avatar && avatarUrls.has(article.id) ? (
+                      <div className="w-6 h-6 rounded-full overflow-hidden">
+                        <Image
+                          src={avatarUrls.get(article.id)!}
+                          alt={article.author.name}
+                          width={24}
+                          height={24}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <div className="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center">
+                        <User className="h-3 w-3 text-gray-500" />
+                      </div>
+                    )}
+                    <span className="text-xs text-gray-600">{article.author.name}</span>
                   </div>
-                  <span className="text-xs text-gray-600">{article.author.name}</span>
+                  
+                  {/* Read Now Button */}
+                  <Button
+                    size="sm"
+                    className="h-7 px-3 text-xs bg-blue-600 hover:bg-blue-700 text-white"
+                    asChild
+                  >
+                    <Link href={`/articles/${article.slug}`}>
+                      Read Now
+                    </Link>
+                  </Button>
                 </div>
               </CardContent>
-            </Link>
           </Card>
         ))}
       </div>
