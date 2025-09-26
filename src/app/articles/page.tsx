@@ -357,7 +357,11 @@ export default function ArticlesPage() {
                     <Button
                       variant="outline"
                       className="w-full group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition-all duration-300"
-                      onClick={() => router.push(`/articles/${article.slug}`)}
+                      onClick={() => {
+                        // Prefetch the article page for faster navigation
+                        router.prefetch(`/articles/${article.slug}`);
+                        router.push(`/articles/${article.slug}`);
+                      }}
                     >
                       Read Article
                       <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />

@@ -113,8 +113,8 @@ export function ArticlePageClient({ children }: ArticlePageClientProps) {
     // Show loading immediately
     showBrowserLoading();
     
-    // Check media after a short delay to ensure DOM is ready
-    const timer = setTimeout(checkMediaLoaded, 100);
+    // Check media immediately for faster response
+    const timer = setTimeout(checkMediaLoaded, 10);
     
     return () => {
       clearTimeout(timer);
