@@ -383,11 +383,7 @@ export default function CookiePolicy() {
                   <div className="space-y-2 text-sm">
                     <div className="flex items-center gap-2">
                       <FileText className="h-4 w-4 text-orange-600" />
-                      <span><strong>Email:</strong> privacy@jurisight.com</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <FileText className="h-4 w-4 text-orange-600" />
-                      <span><strong>General Inquiries:</strong> editorial@jurisight.in</span>
+                      <span><strong>Email:</strong> editorial@jurisight.in</span>
                     </div>
                   </div>
                 </div>
