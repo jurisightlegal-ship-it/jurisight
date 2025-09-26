@@ -356,9 +356,24 @@ export default function Dashboard() {
       {/* Header */}
       <header className="bg-white shadow-sm border-b dark:bg-gray-800 dark:border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-jurisight-navy dark:text-white">Jurisight</h1>
+          <div className="flex justify-between items-center min-h-16 py-2">
+            <div className="flex items-center py-2">
+              <Image 
+                src="/1.png" 
+                alt="Jurisight logo" 
+                className="h-16 w-auto dark:hidden" 
+                width={240}
+                height={64}
+                priority
+              />
+              <Image 
+                src="/dark.png" 
+                alt="Jurisight logo" 
+                className="h-16 w-auto hidden dark:block" 
+                width={240}
+                height={64}
+                priority
+              />
             </div>
             <div className="flex items-center space-x-4">
               <DarkModeToggle />

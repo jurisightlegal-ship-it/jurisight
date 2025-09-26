@@ -72,7 +72,7 @@ export default function SupremeCourtJudgementsPage() {
       const params = new URLSearchParams({
         limit: ARTICLES_PER_PAGE.toString(),
         offset: offset.toString(),
-        section: 'supreme-court-judgement' // Filter for Supreme Court judgements
+        section: 'constitutional' // Filter for Supreme Court judgements
       });
       if (searchTerm) params.append('search', searchTerm);
 

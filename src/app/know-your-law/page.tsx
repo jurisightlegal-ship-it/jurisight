@@ -72,7 +72,7 @@ export default function KnowYourLawPage() {
       const params = new URLSearchParams({
         limit: ARTICLES_PER_PAGE.toString(),
         offset: offset.toString(),
-        section: 'know-your-law' // Filter for know your law articles
+        section: 'academic' // Filter for know your law articles
       });
       if (searchTerm) params.append('search', searchTerm);
 

@@ -6,99 +6,75 @@ import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, CalendarDays, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { getImageDisplayUrl } from "@/lib/client-storage-utils";
 
-type HCJudgement = {
+type Article = {
   id: number;
   title: string;
   slug: string;
-  summary: string;
-  date: string;
-  court: string;
-  bench?: string;
-  citation?: string;
-  featuredImage?: string | null;
+  dek: string;
+  featuredImage: string | null;
+  readingTime: number;
+  views: number;
+  publishedAt: string;
+  author: {
+    id: string;
+    name: string;
+    avatar: string | null;
+  };
+  section: {
+    id: number;
+    name: string;
+    slug: string;
+    color: string;
+  };
 };
 
 export function HighCourtJudgement() {
-  const [items, setItems] = React.useState<HCJudgement[]>([]);
+  const [items, setItems] = React.useState<Article[]>([]);
   const [loading, setLoading] = React.useState(true);
+  const [avatarUrls, setAvatarUrls] = React.useState<Record<string, string | null>>({});
 
   React.useEffect(() => {
-    const demo: HCJudgement[] = [
-      {
-        id: 1,
-        title: "Delhi HC on Data Retention: Proportionality and Deletion Timelines",
-        slug: "delhi-hc-data-retention-deletion-timelines",
-        summary: "Court underscores minimal retention and strict deletion protocols for platforms handling sensitive data.",
-        date: "2024-02-12",
-        court: "Delhi High Court",
-        bench: "CJ Sharma, J. Ahuja",
-        citation: "2024/DHC/1201",
-        featuredImage: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=800&h=600&fit=crop",
-      },
-      {
-        id: 2,
-        title: "Bombay HC: Free Speech and Satire – Boundaries Revisited",
-        slug: "bombay-hc-free-speech-satire",
-        summary: "Clarifies the scope of satire in political discourse and the threshold for defamation actions.",
-        date: "2024-01-30",
-        court: "Bombay High Court",
-        bench: "J. Patel, J. Fernandes",
-        citation: "2024/BOM/843",
-        featuredImage: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&h=600&fit=crop",
-      },
-      {
-        id: 3,
-        title: "Madras HC: Environmental Clearances – Local Participation Mandated",
-        slug: "madras-hc-environmental-clearances",
-        summary: "Mandates structured public consultations and reasoned orders for high-impact projects.",
-        date: "2024-01-18",
-        court: "Madras High Court",
-        bench: "J. Krishnan, J. Noor",
-        citation: "2024/MAD/512",
-        featuredImage: "https://images.unsplash.com/photo-1607462109225-6b64ae2dd3cb?w=800&h=600&fit=crop"
-      },
-      {
-        id: 4,
-        title: "Karnataka HC: Platform Liability – Notice-and-Action Reinforced",
-        slug: "karnataka-hc-platform-liability",
-        summary: "Provides a refined workflow for illegal content notices and counter-notice adjudication.",
-        date: "2023-12-27",
-        court: "Karnataka High Court",
-        bench: "J. Rao",
-        citation: "2023/KAR/1290",
-        featuredImage: "https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?w=800&h=600&fit=crop"
-      },
-      {
-        id: 5,
-        title: "Calcutta HC: Labour Platforms – Worker Status Factors Clarified",
-        slug: "calcutta-hc-worker-status",
-        summary: "Sets out indicia for determining control and dependency in gig economy contracts.",
-        date: "2023-12-10",
-        court: "Calcutta High Court",
-        bench: "CJ Banerjee, J. Sen",
-        citation: "2023/CAL/970",
-        featuredImage: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&h=600&fit=crop"
-      },
-      {
-        id: 6,
-        title: "Gujarat HC: Procurement – Blacklisting Requires Reasons and Hearing",
-        slug: "gujarat-hc-procurement-blacklisting",
-        summary: "Affirms due process in blacklisting with mandatory pre-decisional hearing and reasoned orders.",
-        date: "2023-11-22",
-        court: "Gujarat High Court",
-        bench: "J. Trivedi",
-        citation: "2023/GUJ/802",
-        featuredImage: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=800&h=600&fit=crop"
-      },
-    ];
+    const fetchArticles = async () => {
+      try {
+        const response = await fetch('/api/articles?section=civil&limit=6');
+        if (response.ok) {
+          const data = await response.json();
+          const articles = data.articles || [];
+          setItems(articles);
 
-    const timer = setTimeout(() => {
-      setItems(demo);
-      setLoading(false);
-    }, 600);
+          // Process avatar URLs
+          const avatarPromises = articles.map(async (article: Article) => {
+            if (article.author.avatar) {
+              try {
+                const processedUrl = await getImageDisplayUrl(article.author.avatar);
+                return { id: article.author.id, url: processedUrl };
+              } catch (error) {
+                console.error('Error processing avatar URL:', error);
+                return { id: article.author.id, url: null };
+              }
+            }
+            return { id: article.author.id, url: null };
+          });
+          
+          const avatarResults = await Promise.all(avatarPromises);
+          const avatarMap: Record<string, string | null> = {};
+          avatarResults.forEach(({ id, url }) => {
+            avatarMap[id] = url;
+          });
+          setAvatarUrls(avatarMap);
+        } else {
+          console.error('Failed to fetch articles');
+        }
+      } catch (error) {
+        console.error('Error fetching articles:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    return () => clearTimeout(timer);
+    fetchArticles();
   }, []);
 
   if (loading) {
@@ -134,14 +110,14 @@ export function HighCourtJudgement() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {items.map((j, index) => (
-            <Link key={j.id} href={`/articles/${j.slug}`}>
+          {items.map((article, index) => (
+            <Link key={article.id} href={`/articles/${article.slug}`}>
               <Card className="group overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
                 <div className="relative aspect-video overflow-hidden">
-                  {j.featuredImage ? (
+                  {article.featuredImage ? (
                     <Image
-                      src={j.featuredImage}
-                      alt={j.title}
+                      src={article.featuredImage}
+                      alt={article.title}
                       fill
                       sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
                       unoptimized
@@ -149,42 +125,53 @@ export function HighCourtJudgement() {
                       className="object-cover transition-transform duration-300 group-hover:scale-105"
                     />
                   ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-jurisight-navy via-jurisight-royal to-jurisight-teal" />
+                    <div className="w-full h-full bg-gradient-to-br from-jurisight-navy via-jurisight-royal to-jurisight-teal flex items-center justify-center">
+                      <MapPin className="h-8 w-8 text-white" />
+                    </div>
                   )}
 
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
 
                   <div className="absolute top-4 left-4 flex items-center gap-2">
                     <span className="px-3 py-1 text-xs font-medium text-white rounded-full bg-black/40 backdrop-blur inline-flex items-center gap-1.5">
-                      <MapPin className="h-3.5 w-3.5" /> {j.court}
+                      <MapPin className="h-3.5 w-3.5" /> High Court
                     </span>
                   </div>
 
                   <div className="absolute bottom-4 left-4 right-4 flex items-center gap-2 text-white/90 text-xs">
                     <span className="inline-flex items-center gap-1.5 bg-white/10 px-2.5 py-1 rounded-full backdrop-blur">
                       <CalendarDays className="h-3.5 w-3.5" />
-                      {new Date(j.date).toLocaleDateString()}
+                      {new Date(article.publishedAt).toLocaleDateString()}
                     </span>
-                    {j.citation && (
-                      <span className="inline-flex items-center bg-white/10 px-2.5 py-1 rounded-full backdrop-blur truncate max-w-[40%]" title={j.citation}>
-                        {j.citation}
-                      </span>
-                    )}
                   </div>
                 </div>
 
                 <CardContent className="p-6">
                   <h3 className="text-xl font-bold text-black group-hover:text-jurisight-navy transition-colors line-clamp-2">
-                    {j.title}
+                    {article.title}
                   </h3>
-                  <p className="text-sm text-black/70 mt-2 line-clamp-3">{j.summary}</p>
+                  <p className="text-sm text-black/70 mt-2 line-clamp-3">{article.dek}</p>
 
-                  <div className="mt-4 flex flex-wrap items-center gap-2">
-                    {j.bench && (
-                      <span className="inline-flex items-center text-[11px] font-medium bg-black/5 text-black/70 px-2.5 py-1 rounded-full" title={j.bench}>
-                        Bench: <span className="ml-1 truncate max-w-[220px]">{j.bench}</span>
-                      </span>
-                    )}
+                  <div className="mt-4 flex items-center gap-3">
+                    <div className="w-6 h-6 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
+                      {avatarUrls[article.author.id] ? (
+                        <Image
+                          src={avatarUrls[article.author.id]!}
+                          alt={article.author.name}
+                          width={24}
+                          height={24}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gray-300 flex items-center justify-center text-xs text-gray-600">
+                          {article.author.name.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium text-gray-900 truncate">{article.author.name}</p>
+                      <p className="text-xs text-gray-500">{article.readingTime} min read</p>
+                    </div>
                   </div>
 
                   <div className="mt-6 flex justify-end">

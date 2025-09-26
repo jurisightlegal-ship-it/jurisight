@@ -6,99 +6,75 @@ import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, BookOpen, CalendarDays, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { getImageDisplayUrl } from "@/lib/client-storage-utils";
 
-type KnowTheLawBlog = {
+type Article = {
   id: number;
   title: string;
   slug: string;
-  summary: string;
-  date: string;
-  author: string;
+  dek: string;
+  featuredImage: string | null;
   readingTime: number;
-  category: string;
-  featuredImage?: string | null;
+  views: number;
+  publishedAt: string;
+  author: {
+    id: string;
+    name: string;
+    avatar: string | null;
+  };
+  section: {
+    id: number;
+    name: string;
+    slug: string;
+    color: string;
+  };
 };
 
 export function KnowTheLawBlogs() {
-  const [items, setItems] = React.useState<KnowTheLawBlog[]>([]);
+  const [items, setItems] = React.useState<Article[]>([]);
   const [loading, setLoading] = React.useState(true);
+  const [avatarUrls, setAvatarUrls] = React.useState<Record<string, string | null>>({});
 
   React.useEffect(() => {
-    const demo: KnowTheLawBlog[] = [
-      {
-        id: 1,
-        title: "Understanding Your Rights: A Guide to Consumer Protection Laws",
-        slug: "understanding-consumer-protection-laws",
-        summary: "Learn about your rights as a consumer, how to file complaints, and what legal remedies are available when things go wrong.",
-        date: "2024-02-15",
-        author: "Adv. Priya Sharma",
-        readingTime: 8,
-        category: "Consumer Rights",
-        featuredImage: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=800&h=600&fit=crop",
-      },
-      {
-        id: 2,
-        title: "Employment Law Basics: Know Your Workplace Rights",
-        slug: "employment-law-workplace-rights",
-        summary: "Essential knowledge about employment contracts, termination procedures, and workplace harassment laws every employee should know.",
-        date: "2024-02-08",
-        author: "Rajesh Kumar",
-        readingTime: 10,
-        category: "Employment",
-        featuredImage: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&h=600&fit=crop",
-      },
-      {
-        id: 3,
-        title: "Property Law Simplified: Buying Your First Home",
-        slug: "property-law-buying-first-home",
-        summary: "Navigate property transactions with confidence. Understanding due diligence, documentation, and legal safeguards.",
-        date: "2024-01-28",
-        author: "Dr. Meera Gupta",
-        readingTime: 12,
-        category: "Property",
-        featuredImage: "https://images.unsplash.com/photo-1607462109225-6b64ae2dd3cb?w=800&h=600&fit=crop",
-      },
-      {
-        id: 4,
-        title: "Family Law Essentials: Marriage, Divorce, and Child Custody",
-        slug: "family-law-marriage-divorce-custody",
-        summary: "Comprehensive guide to family law matters including marriage rights, divorce procedures, and child custody arrangements.",
-        date: "2024-01-15",
-        author: "Sneha Reddy",
-        readingTime: 15,
-        category: "Family Law",
-        featuredImage: "https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?w=800&h=600&fit=crop",
-      },
-      {
-        id: 5,
-        title: "Digital Privacy Rights: Protecting Yourself Online",
-        slug: "digital-privacy-rights-online-protection",
-        summary: "Understanding data protection laws, privacy policies, and your rights in the digital age of social media and e-commerce.",
-        date: "2024-01-10",
-        author: "Arjun Patel",
-        readingTime: 7,
-        category: "Digital Rights",
-        featuredImage: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&h=600&fit=crop",
-      },
-      {
-        id: 6,
-        title: "Start-up Legal Guide: From Incorporation to Compliance",
-        slug: "startup-legal-guide-incorporation-compliance",
-        summary: "Essential legal steps for entrepreneurs including business registration, intellectual property, and regulatory compliance.",
-        date: "2023-12-20",
-        author: "Anil Krishnan",
-        readingTime: 11,
-        category: "Business Law",
-        featuredImage: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=800&h=600&fit=crop",
-      },
-    ];
+    const fetchArticles = async () => {
+      try {
+        const response = await fetch('/api/articles?section=academic&limit=6');
+        if (response.ok) {
+          const data = await response.json();
+          const articles = data.articles || [];
+          setItems(articles);
 
-    const timer = setTimeout(() => {
-      setItems(demo);
-      setLoading(false);
-    }, 600);
+          // Process avatar URLs
+          const avatarPromises = articles.map(async (article: Article) => {
+            if (article.author.avatar) {
+              try {
+                const processedUrl = await getImageDisplayUrl(article.author.avatar);
+                return { id: article.author.id, url: processedUrl };
+              } catch (error) {
+                console.error('Error processing avatar URL:', error);
+                return { id: article.author.id, url: null };
+              }
+            }
+            return { id: article.author.id, url: null };
+          });
+          
+          const avatarResults = await Promise.all(avatarPromises);
+          const avatarMap: Record<string, string | null> = {};
+          avatarResults.forEach(({ id, url }) => {
+            avatarMap[id] = url;
+          });
+          setAvatarUrls(avatarMap);
+        } else {
+          console.error('Failed to fetch articles');
+        }
+      } catch (error) {
+        console.error('Error fetching articles:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    return () => clearTimeout(timer);
+    fetchArticles();
   }, []);
 
   if (loading) {
@@ -134,14 +110,14 @@ export function KnowTheLawBlogs() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {items.map((blog, index) => (
-            <Link key={blog.id} href={`/articles/${blog.slug}`}>
+          {items.map((article, index) => (
+            <Link key={article.id} href={`/articles/${article.slug}`}>
               <Card className="group overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 bg-white">
                 <div className="relative aspect-video overflow-hidden">
-                  {blog.featuredImage ? (
+                  {article.featuredImage ? (
                     <Image
-                      src={blog.featuredImage}
-                      alt={blog.title}
+                      src={article.featuredImage}
+                      alt={article.title}
                       fill
                       sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
                       unoptimized
@@ -158,33 +134,48 @@ export function KnowTheLawBlogs() {
 
                   <div className="absolute top-4 left-4">
                     <span className="px-3 py-1 text-xs font-medium text-white rounded-full bg-emerald-600/90 backdrop-blur">
-                      {blog.category}
+                      Know Your Law
                     </span>
                   </div>
 
                   <div className="absolute bottom-4 left-4 right-4 flex items-center gap-2 text-white/90 text-xs">
                     <span className="inline-flex items-center gap-1.5 bg-white/10 px-2.5 py-1 rounded-full backdrop-blur">
                       <CalendarDays className="h-3.5 w-3.5" />
-                      {new Date(blog.date).toLocaleDateString()}
+                      {new Date(article.publishedAt).toLocaleDateString()}
                     </span>
                     <span className="inline-flex items-center gap-1.5 bg-white/10 px-2.5 py-1 rounded-full backdrop-blur">
                       <BookOpen className="h-3.5 w-3.5" />
-                      {blog.readingTime} min read
+                      {article.readingTime} min read
                     </span>
                   </div>
                 </div>
 
                 <CardContent className="p-6">
                   <h3 className="text-xl font-bold text-black group-hover:text-emerald-700 transition-colors line-clamp-2">
-                    {blog.title}
+                    {article.title}
                   </h3>
-                  <p className="text-sm text-black/70 mt-2 line-clamp-3">{blog.summary}</p>
+                  <p className="text-sm text-black/70 mt-2 line-clamp-3">{article.dek}</p>
 
-                  <div className="mt-4 flex items-center gap-2">
-                    <span className="inline-flex items-center text-[11px] font-medium bg-black/5 text-black/70 px-2.5 py-1 rounded-full">
-                      <User className="h-3.5 w-3.5 mr-1" />
-                      {blog.author}
-                    </span>
+                  <div className="mt-4 flex items-center gap-3">
+                    <div className="w-6 h-6 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
+                      {avatarUrls[article.author.id] ? (
+                        <Image
+                          src={avatarUrls[article.author.id]!}
+                          alt={article.author.name}
+                          width={24}
+                          height={24}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gray-300 flex items-center justify-center text-xs text-gray-600">
+                          {article.author.name.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium text-gray-900 truncate">{article.author.name}</p>
+                      <p className="text-xs text-gray-500">{article.views} views</p>
+                    </div>
                   </div>
 
                   <div className="mt-6 flex justify-end">
