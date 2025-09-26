@@ -54,7 +54,7 @@ export function RecentArticlesSection({
     const fetchRecentArticles = async () => {
       try {
         setLoading(true);
-        const response = await fetch('/api/articles?limit=3&exclude=' + currentArticleId);
+        const response = await fetch('/api/articles?limit=9&exclude=' + currentArticleId);
         
         if (!response.ok) {
           throw new Error('Failed to fetch recent articles');
@@ -108,8 +108,8 @@ export function RecentArticlesSection({
     return (
       <div className="mt-12 pt-8 border-t border-gray-200">
         <h3 className="text-xl font-semibold text-gray-900 mb-6">Recent Articles</h3>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {[1, 2, 3].map((i) => (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => (
             <Card key={i} className="overflow-hidden">
               <div className="h-48 bg-gray-200 animate-pulse" />
               <CardContent className="p-4">
@@ -144,7 +144,7 @@ export function RecentArticlesSection({
         </Link>
       </div>
       
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
         {articles.map((article) => (
           <Card key={article.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-200">
             <Link href={`/articles/${article.slug}`}>
