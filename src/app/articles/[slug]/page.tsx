@@ -401,7 +401,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
                   <div className="flex items-center gap-3">
                     <AsyncAvatar
                       fallbackAvatar={article.author.avatar}
-                      avatarUrlPromise={avatarUrlPromise}
+                      avatarUrlPromise={avatarUrlPromise || Promise.resolve(null)}
                       authorName={article.author.name}
                       className="w-12 h-12 rounded-full"
                     />

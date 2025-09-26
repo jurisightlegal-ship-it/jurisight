@@ -15,21 +15,30 @@ export function AsyncAvatar({ fallbackAvatar, avatarUrlPromise, authorName, clas
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (!avatarUrlPromise) {
+    // Handle case where avatarUrlPromise is undefined or null
+    if (!avatarUrlPromise || typeof avatarUrlPromise.then !== 'function') {
       setAvatarUrl(fallbackAvatar);
       setIsLoading(false);
       return;
     }
 
-    avatarUrlPromise
-      .then((processedUrl) => {
-        setAvatarUrl(processedUrl);
-        setIsLoading(false);
-      })
-      .catch(() => {
-        setAvatarUrl(fallbackAvatar);
-        setIsLoading(false);
-      });
+    // Ensure we have a valid promise before calling .then()
+    try {
+      avatarUrlPromise
+        .then((processedUrl) => {
+          setAvatarUrl(processedUrl);
+          setIsLoading(false);
+        })
+        .catch((error) => {
+          console.warn('Avatar processing failed:', error);
+          setAvatarUrl(fallbackAvatar);
+          setIsLoading(false);
+        });
+    } catch (error) {
+      console.warn('Invalid promise for avatar processing:', error);
+      setAvatarUrl(fallbackAvatar);
+      setIsLoading(false);
+    }
   }, [avatarUrlPromise, fallbackAvatar]);
 
   if (isLoading) {
