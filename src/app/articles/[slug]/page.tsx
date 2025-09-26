@@ -7,6 +7,7 @@ import { BackButton } from '@/components/back-button';
 import { ArticlePageClient } from '@/components/article-page-client';
 import { AsyncAvatar } from '@/components/async-avatar';
 import { SocialShareButton } from '@/components/social-share-button';
+import { CommentSection } from '@/components/comment-section';
 import { supabase } from '@/lib/supabase-db';
 import { 
   Calendar, 
@@ -510,6 +511,12 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
                   </div>
                 </div>
               </div>
+
+              {/* Comments Section */}
+              <CommentSection 
+                articleId={article.id} 
+                articleTitle={article.title} 
+              />
             </CardContent>
           </Card>
         </main>
