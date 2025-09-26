@@ -315,24 +315,15 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
           <div className="max-w-4xl xl:max-w-6xl 2xl:max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               <BackButton />
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-4 text-sm text-gray-500">
-                  <div className="flex items-center gap-1">
-                    <Eye className="h-4 w-4" />
-                    {article.views} views
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Clock className="h-4 w-4" />
-                    {article.readingTime} min read
-                  </div>
+              <div className="flex items-center gap-4 text-sm text-gray-500">
+                <div className="flex items-center gap-1">
+                  <Eye className="h-4 w-4" />
+                  {article.views} views
                 </div>
-                <SocialShareButton
-                  title={article.title}
-                  url={`${process.env.NEXT_PUBLIC_SITE_URL || 'https://jurisight.com'}/articles/${article.slug}`}
-                  description={article.dek || ''}
-                  hashtags={['Jurisight', 'Legal', article.section.name]}
-                  className="hidden sm:flex"
-                />
+                <div className="flex items-center gap-1">
+                  <Clock className="h-4 w-4" />
+                  {article.readingTime} min read
+                </div>
               </div>
             </div>
           </div>
