@@ -8,6 +8,7 @@ import { ArticlePageClient } from '@/components/article-page-client';
 import { AsyncAvatar } from '@/components/async-avatar';
 import { SocialShareButton } from '@/components/social-share-button';
 import { RecentArticlesSection } from '@/components/recent-articles-section';
+import { Footer } from '@/components/footer';
 import { supabase } from '@/lib/supabase-db';
 import { 
   Calendar, 
@@ -520,6 +521,9 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
             currentSectionId={article.section.id}
           />
         </main>
+
+        {/* Footer */}
+        <Footer />
       </div>
     </ArticlePageClient>
   );
