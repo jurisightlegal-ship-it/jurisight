@@ -388,18 +388,24 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
                 )}
 
                 {/* Social Share Section */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 py-4 border-t border-b border-gray-200 mb-6">
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                    <span className="text-sm font-medium text-gray-700">Share this article:</span>
-                    <SocialShareButton
-                      title={article.title}
-                      url={`${process.env.NEXT_PUBLIC_SITE_URL || 'https://jurisight.com'}/articles/${article.slug}`}
-                      description={article.dek || ''}
-                      hashtags={['Jurisight', 'Legal', article.section.name]}
-                    />
-                  </div>
-                  <div className="text-xs sm:text-sm text-gray-500 text-center sm:text-right">
-                    Help others discover this content
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 sm:p-6 mb-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                        <span className="text-sm font-semibold text-gray-800">Share this article</span>
+                      </div>
+                      <SocialShareButton
+                        title={article.title}
+                        url={`${process.env.NEXT_PUBLIC_SITE_URL || 'https://jurisight.com'}/articles/${article.slug}`}
+                        description={article.dek || ''}
+                        hashtags={['Jurisight', 'Legal', article.section.name]}
+                        className="w-fit"
+                      />
+                    </div>
+                    <div className="text-xs sm:text-sm text-gray-600 text-center sm:text-right italic">
+                      Help others discover valuable legal insights
+                    </div>
                   </div>
                 </div>
 
