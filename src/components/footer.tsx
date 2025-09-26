@@ -9,8 +9,6 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { 
   Mail, 
-  Phone, 
-  MapPin, 
   Send,
   Twitter,
   Linkedin,
@@ -82,14 +80,6 @@ export function Footer() {
               <div className="flex items-center gap-3 text-slate-300">
                 <Mail className="h-4 w-4 text-jurisight-teal" />
                 <span className="text-sm">editorial@jurisight.in</span>
-              </div>
-              <div className="flex items-center gap-3 text-slate-300">
-                <Phone className="h-4 w-4 text-jurisight-teal" />
-                <span className="text-sm">+91 11 4567 8900</span>
-              </div>
-              <div className="flex items-center gap-3 text-slate-300">
-                <MapPin className="h-4 w-4 text-jurisight-teal" />
-                <span className="text-sm">New Delhi, India</span>
               </div>
             </div>
 
