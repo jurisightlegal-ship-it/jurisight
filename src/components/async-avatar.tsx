@@ -5,41 +5,38 @@ import Image from 'next/image';
 
 interface AsyncAvatarProps {
   fallbackAvatar: string | null;
-  avatarUrlPromise?: Promise<string | null>;
+  avatarPath?: string | null;
   authorName: string;
   className?: string;
 }
 
-export function AsyncAvatar({ fallbackAvatar, avatarUrlPromise, authorName, className = "w-12 h-12 rounded-full" }: AsyncAvatarProps) {
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(fallbackAvatar);
+export function AsyncAvatar({ fallbackAvatar, avatarPath, authorName, className = "w-12 h-12 rounded-full" }: AsyncAvatarProps) {
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Handle case where avatarUrlPromise is undefined or null
-    if (!avatarUrlPromise || typeof avatarUrlPromise.then !== 'function') {
-      setAvatarUrl(fallbackAvatar);
-      setIsLoading(false);
-      return;
-    }
+    const processAvatar = async () => {
+      if (!avatarPath) {
+        setAvatarUrl(null);
+        setIsLoading(false);
+        return;
+      }
 
-    // Ensure we have a valid promise before calling .then()
-    try {
-      avatarUrlPromise
-        .then((processedUrl) => {
-          setAvatarUrl(processedUrl);
-          setIsLoading(false);
-        })
-        .catch((error) => {
-          console.warn('Avatar processing failed:', error);
-          setAvatarUrl(fallbackAvatar);
-          setIsLoading(false);
-        });
-    } catch (error) {
-      console.warn('Invalid promise for avatar processing:', error);
-      setAvatarUrl(fallbackAvatar);
-      setIsLoading(false);
-    }
-  }, [avatarUrlPromise, fallbackAvatar]);
+      try {
+        // Import the client-side storage utils
+        const { getImageDisplayUrl } = await import('@/lib/client-storage-utils');
+        const processedUrl = await getImageDisplayUrl(avatarPath);
+        setAvatarUrl(processedUrl);
+        setIsLoading(false);
+      } catch (error) {
+        console.warn('Avatar processing failed:', error);
+        setAvatarUrl(null);
+        setIsLoading(false);
+      }
+    };
+
+    processAvatar();
+  }, [avatarPath]);
 
   if (isLoading) {
     return (
@@ -49,12 +46,12 @@ export function AsyncAvatar({ fallbackAvatar, avatarUrlPromise, authorName, clas
 
   return (
     <Image
-      src={avatarUrl || '/default-avatar.png'}
+      src={avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(authorName)}&background=random&color=fff&size=48`}
       alt={`${authorName} avatar`}
       width={48}
       height={48}
       className={className}
-      onError={() => setAvatarUrl('/default-avatar.png')}
+      onError={() => setAvatarUrl(`https://ui-avatars.com/api/?name=${encodeURIComponent(authorName)}&background=random&color=fff&size=48`)}
     />
   );
 }

@@ -6,7 +6,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { BackButton } from '@/components/back-button';
 import { ArticlePageClient } from '@/components/article-page-client';
 import { AsyncAvatar } from '@/components/async-avatar';
-import { getImageDisplayUrl } from '@/lib/storage-utils';
 import { supabase } from '@/lib/supabase-db';
 import { 
   Calendar, 
@@ -275,24 +274,6 @@ async function getArticle(slug: string): Promise<Article | null> {
   }
 }
 
-// Process avatar URL server-side
-async function getProcessedAvatarUrl(avatarPath: string | null): Promise<string | null> {
-  if (!avatarPath) {
-    console.log('No avatar path provided');
-    return null;
-  }
-  
-  console.log('Processing avatar path:', avatarPath);
-  
-  try {
-    const processedUrl = await getImageDisplayUrl(avatarPath);
-    console.log('Processed avatar URL:', processedUrl);
-    return processedUrl;
-  } catch (error) {
-    console.error('Error processing avatar URL:', error);
-    return null;
-  }
-}
 
 export default async function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -302,10 +283,8 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
     notFound();
   }
 
-  // Process avatar URL asynchronously (non-blocking)
-  const avatarUrlPromise = article.author.avatar 
-    ? getProcessedAvatarUrl(article.author.avatar)
-    : Promise.resolve(null);
+  // Pass raw avatar path to client component for processing
+  const avatarPath = article.author.avatar;
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -400,8 +379,8 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
                 <div className="flex items-center gap-4 py-4 border-t border-b border-gray-200">
                   <div className="flex items-center gap-3">
                     <AsyncAvatar
-                      fallbackAvatar={article.author.avatar}
-                      avatarUrlPromise={avatarUrlPromise || Promise.resolve(null)}
+                      fallbackAvatar={avatarPath}
+                      avatarPath={avatarPath}
                       authorName={article.author.name}
                       className="w-12 h-12 rounded-full"
                     />
