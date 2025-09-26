@@ -27,7 +27,7 @@ export function ArticleClientWrapper({ children, slug }: ArticleClientWrapperPro
     const timer = setTimeout(() => {
       setIsLoading(false);
       hideLoading();
-    }, 800); // Slightly faster for better UX
+    }, 400); // Much faster for better UX
 
     return () => clearTimeout(timer);
   }, [showPageTransition, hideLoading, slug, currentSlug]);

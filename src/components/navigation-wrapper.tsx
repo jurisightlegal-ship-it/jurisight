@@ -23,56 +23,88 @@ export function NavigationWrapper({ children }: NavigationWrapperProps) {
     return () => clearTimeout(timer);
   }, [hideLoading]);
 
+  // Add immediate response to navigation links
+  useEffect(() => {
+    const handleLinkClick = (e: Event) => {
+      const target = e.target as HTMLElement;
+      const link = target.closest('a[href]') as HTMLAnchorElement;
+      
+      if (link && link.href && !link.href.startsWith('mailto:') && !link.href.startsWith('tel:')) {
+        const url = new URL(link.href);
+        const pathname = url.pathname;
+        
+        // Only show preloader for internal navigation
+        if (pathname.startsWith('/') && !pathname.startsWith('//')) {
+          showPageTransition();
+        }
+      }
+    };
+
+    // Add event listeners for immediate response
+    document.addEventListener('click', handleLinkClick, true);
+    document.addEventListener('touchstart', handleLinkClick, true);
+
+    return () => {
+      document.removeEventListener('click', handleLinkClick, true);
+      document.removeEventListener('touchstart', handleLinkClick, true);
+    };
+  }, [showPageTransition]);
+
   // Enhanced router with loading states
   const enhancedRouter = {
     push: useCallback((href: string) => {
       if (href !== pathname) {
-        setIsNavigating(true);
+        // Show preloader immediately
         showPageTransition();
+        setIsNavigating(true);
         
-        // Add a small delay to show the loading animation
+        // Navigate immediately with minimal delay
         setTimeout(() => {
           router.push(href);
-        }, 300);
+        }, 50);
       }
     }, [router, pathname, showPageTransition]),
 
     replace: useCallback((href: string) => {
       if (href !== pathname) {
-        setIsNavigating(true);
+        // Show preloader immediately
         showPageTransition();
+        setIsNavigating(true);
         
         setTimeout(() => {
           router.replace(href);
-        }, 300);
+        }, 50);
       }
     }, [router, pathname, showPageTransition]),
 
     back: useCallback(() => {
-      setIsNavigating(true);
+      // Show preloader immediately
       showPageTransition();
+      setIsNavigating(true);
       
       setTimeout(() => {
         router.back();
-      }, 300);
+      }, 50);
     }, [router, showPageTransition]),
 
     forward: useCallback(() => {
-      setIsNavigating(true);
+      // Show preloader immediately
       showPageTransition();
+      setIsNavigating(true);
       
       setTimeout(() => {
         router.forward();
-      }, 300);
+      }, 50);
     }, [router, showPageTransition]),
 
     refresh: useCallback(() => {
-      setIsNavigating(true);
+      // Show preloader immediately
       showPageTransition();
+      setIsNavigating(true);
       
       setTimeout(() => {
         router.refresh();
-      }, 300);
+      }, 50);
     }, [router, showPageTransition])
   };
 
@@ -103,51 +135,56 @@ export function useEnhancedRouter() {
 
   const push = useCallback((href: string) => {
     if (href !== pathname) {
+      // Show preloader immediately
       showPageTransition();
       
       setTimeout(() => {
         router.push(href);
-        setTimeout(() => hideLoading(), 500);
-      }, 300);
+        setTimeout(() => hideLoading(), 200);
+      }, 50);
     }
   }, [router, pathname, showPageTransition, hideLoading]);
 
   const replace = useCallback((href: string) => {
     if (href !== pathname) {
+      // Show preloader immediately
       showPageTransition();
       
       setTimeout(() => {
         router.replace(href);
-        setTimeout(() => hideLoading(), 500);
-      }, 300);
+        setTimeout(() => hideLoading(), 200);
+      }, 50);
     }
   }, [router, pathname, showPageTransition, hideLoading]);
 
   const back = useCallback(() => {
+    // Show preloader immediately
     showPageTransition();
     
     setTimeout(() => {
       router.back();
-      setTimeout(() => hideLoading(), 500);
-    }, 300);
+      setTimeout(() => hideLoading(), 200);
+    }, 50);
   }, [router, showPageTransition, hideLoading]);
 
   const forward = useCallback(() => {
+    // Show preloader immediately
     showPageTransition();
     
     setTimeout(() => {
       router.forward();
-      setTimeout(() => hideLoading(), 500);
-    }, 300);
+      setTimeout(() => hideLoading(), 200);
+    }, 50);
   }, [router, showPageTransition, hideLoading]);
 
   const refresh = useCallback(() => {
+    // Show preloader immediately
     showPageTransition();
     
     setTimeout(() => {
       router.refresh();
-      setTimeout(() => hideLoading(), 500);
-    }, 300);
+      setTimeout(() => hideLoading(), 200);
+    }, 50);
   }, [router, showPageTransition, hideLoading]);
 
   return {

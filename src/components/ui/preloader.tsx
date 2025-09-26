@@ -59,7 +59,7 @@ export function Preloader({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
+          transition={{ duration: 0.1 }}
           className={`${currentVariant.container} ${className}`}
         >
           <div className={currentVariant.content}>
@@ -69,7 +69,7 @@ export function Preloader({
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              transition={{ delay: 0.2, duration: 0.3 }}
+              transition={{ delay: 0.05, duration: 0.2 }}
               className="flex justify-center"
             >
               <div className={currentVariant.spinner} />
@@ -100,7 +100,7 @@ export function Preloader({
               <motion.div
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.4, duration: 0.5 }}
+                transition={{ delay: 0.1, duration: 0.3 }}
                 className="space-y-2"
               >
                 <p className={`text-lg font-medium ${variant === 'fullscreen' ? 'text-white' : 'text-gray-900'}`}>
