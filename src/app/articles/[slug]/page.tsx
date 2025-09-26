@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { BackButton } from '@/components/back-button';
 import { ArticlePageClient } from '@/components/article-page-client';
 import { AsyncAvatar } from '@/components/async-avatar';
+import { SocialShareButton } from '@/components/social-share-button';
 import { supabase } from '@/lib/supabase-db';
 import { 
   Calendar, 
@@ -314,15 +315,24 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
           <div className="max-w-4xl xl:max-w-6xl 2xl:max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               <BackButton />
-              <div className="flex items-center gap-4 text-sm text-gray-500">
-                <div className="flex items-center gap-1">
-                  <Eye className="h-4 w-4" />
-                  {article.views} views
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 text-sm text-gray-500">
+                  <div className="flex items-center gap-1">
+                    <Eye className="h-4 w-4" />
+                    {article.views} views
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Clock className="h-4 w-4" />
+                    {article.readingTime} min read
+                  </div>
                 </div>
-                <div className="flex items-center gap-1">
-                  <Clock className="h-4 w-4" />
-                  {article.readingTime} min read
-                </div>
+                <SocialShareButton
+                  title={article.title}
+                  url={`${process.env.NEXT_PUBLIC_SITE_URL || 'https://jurisight.com'}/articles/${article.slug}`}
+                  description={article.dek || ''}
+                  hashtags={['Jurisight', 'Legal', article.section.name]}
+                  className="hidden sm:flex"
+                />
               </div>
             </div>
           </div>
@@ -374,6 +384,22 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
                     {article.dek}
                   </p>
                 )}
+
+                {/* Social Share Section */}
+                <div className="flex items-center justify-between py-4 border-t border-b border-gray-200 mb-6">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-gray-700">Share this article:</span>
+                    <SocialShareButton
+                      title={article.title}
+                      url={`${process.env.NEXT_PUBLIC_SITE_URL || 'https://jurisight.com'}/articles/${article.slug}`}
+                      description={article.dek || ''}
+                      hashtags={['Jurisight', 'Legal', article.section.name]}
+                    />
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    Help others discover this content
+                  </div>
+                </div>
 
                 {/* Author Info */}
                 <div className="flex items-center gap-4 py-4 border-t border-b border-gray-200">
@@ -461,6 +487,29 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
                   </div>
                 </div>
               )}
+
+              {/* Final Social Share Section */}
+              <div className="mt-12 pt-8 border-t border-gray-200">
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 text-center">
+                  <h3 className="text-lg xl:text-xl 2xl:text-xl font-semibold text-gray-900 mb-2">
+                    Found this article helpful?
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                    Share it with your network and help others discover valuable legal insights.
+                  </p>
+                  <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <SocialShareButton
+                      title={article.title}
+                      url={`${process.env.NEXT_PUBLIC_SITE_URL || 'https://jurisight.com'}/articles/${article.slug}`}
+                      description={article.dek || ''}
+                      hashtags={['Jurisight', 'Legal', article.section.name]}
+                    />
+                    <div className="text-sm text-gray-500">
+                      Spread legal knowledge across India
+                    </div>
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </main>
