@@ -376,21 +376,6 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
                   </p>
                 )}
 
-                {/* Social Share Section */}
-                <div className="flex items-center justify-between py-4 border-t border-b border-gray-200 mb-6">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-gray-700">Share this article:</span>
-                    <SocialShareButton
-                      title={article.title}
-                      url={`${process.env.NEXT_PUBLIC_SITE_URL || 'https://jurisight.com'}/articles/${article.slug}`}
-                      description={article.dek || ''}
-                      hashtags={['Jurisight', 'Legal', article.section.name]}
-                    />
-                  </div>
-                  <div className="text-sm text-gray-500">
-                    Help others discover this content
-                  </div>
-                </div>
 
                 {/* Author Info */}
                 <div className="flex items-center gap-4 py-4 border-t border-b border-gray-200">
