@@ -48,6 +48,7 @@ export function RecentArticlesSection({
   const [articles, setArticles] = React.useState<RecentArticle[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
+  const [imageUrls, setImageUrls] = React.useState<Map<number, string>>(new Map());
 
   React.useEffect(() => {
     const fetchRecentArticles = async () => {
@@ -60,7 +61,30 @@ export function RecentArticlesSection({
         }
         
         const data = await response.json();
-        setArticles(data.articles || []);
+        const fetchedArticles = data.articles || [];
+        setArticles(fetchedArticles);
+
+        // Process image URLs - if they're already full URLs, use them directly
+        const imageUrlMap = new Map<number, string>();
+        for (const article of fetchedArticles) {
+          if (article.featuredImage) {
+            // If it's already a full URL, use it directly
+            if (article.featuredImage.startsWith('http')) {
+              imageUrlMap.set(article.id, article.featuredImage);
+            } else {
+              // Otherwise, get the signed URL
+              try {
+                const imageUrl = await getImageDisplayUrl(article.featuredImage);
+                if (imageUrl) {
+                  imageUrlMap.set(article.id, imageUrl);
+                }
+              } catch (err) {
+                console.error(`Error loading image for article ${article.id}:`, err);
+              }
+            }
+          }
+        }
+        setImageUrls(imageUrlMap);
       } catch (err) {
         console.error('Error fetching recent articles:', err);
         setError('Failed to load recent articles');
@@ -125,10 +149,10 @@ export function RecentArticlesSection({
           <Card key={article.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-200">
             <Link href={`/articles/${article.slug}`}>
               {/* Featured Image */}
-              {article.featuredImage ? (
+              {article.featuredImage && imageUrls.has(article.id) ? (
                 <div className="relative h-48">
                   <Image
-                    src={getImageDisplayUrl(article.featuredImage)}
+                    src={imageUrls.get(article.id)!}
                     alt={article.title}
                     fill
                     className="object-cover"
