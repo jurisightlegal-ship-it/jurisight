@@ -27,14 +27,15 @@ The system includes several components for automatic publishing:
 
 #### Cron Job Script: `scripts/publish-scheduled.js`
 - **Purpose**: Executes the publishing check
-- **Frequency**: Every 5 minutes (configurable)
+- **Frequency**: Once daily at 9:00 AM UTC (Vercel Hobby plan compatible)
 - **Dependencies**: Node.js, API endpoint
 - **Logging**: Detailed console output
 
 #### Vercel Cron Configuration: `vercel.json`
 - **Purpose**: Automatic execution on Vercel platform
-- **Schedule**: Every 5 minutes (`*/5 * * * *`)
+- **Schedule**: Once daily at 9:00 AM UTC (`0 9 * * *`)
 - **Endpoint**: `/api/publish-scheduled`
+- **Note**: Compatible with Vercel Hobby plan (daily cron jobs only)
 
 ## Setup Instructions
 

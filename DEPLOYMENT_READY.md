@@ -58,7 +58,7 @@ The Jurisight blog application is now **deployment ready** for `jurisight-omega.
 - **Business Page**: Dedicated business law content section
 - **Search & Filtering**: Advanced article search and filtering
 - **Media Upload**: Image and file upload system
-- **Scheduled Publishing**: Automatic article publishing via cron jobs
+- **Scheduled Publishing**: Daily article publishing (9:00 AM UTC) - Vercel Hobby compatible
 
 ### ✅ Admin Dashboard
 - **Article Management**: Full CRUD operations
