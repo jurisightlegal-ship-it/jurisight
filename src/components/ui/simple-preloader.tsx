@@ -6,9 +6,10 @@ interface SimplePreloaderProps {
   isLoading: boolean;
   children: React.ReactNode;
   onSkip?: () => void;
+  canSkip?: boolean;
 }
 
-export function SimplePreloader({ isLoading, children, onSkip }: SimplePreloaderProps) {
+export function SimplePreloader({ isLoading, children, onSkip, canSkip = true }: SimplePreloaderProps) {
   const [showContent, setShowContent] = useState(false);
 
   useEffect(() => {
@@ -44,12 +45,12 @@ export function SimplePreloader({ isLoading, children, onSkip }: SimplePreloader
           </div>
           
           {/* Skip button */}
-          {onSkip && (
+          {onSkip && canSkip && (
             <button
               onClick={onSkip}
-              className="mt-6 text-sm text-blue-600 hover:text-blue-800 underline transition-colors"
+              className="mt-6 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
             >
-              Click to continue
+              Continue Reading
             </button>
           )}
         </div>
@@ -58,7 +59,7 @@ export function SimplePreloader({ isLoading, children, onSkip }: SimplePreloader
   }
 
   return (
-    <div className={`transition-opacity duration-150 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
+    <div className={`transition-opacity duration-50 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
       {children}
     </div>
   );
