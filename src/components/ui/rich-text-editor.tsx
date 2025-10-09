@@ -5,13 +5,28 @@ import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
 import YouTube from '@tiptap/extension-youtube';
+import Heading from '@tiptap/extension-heading';
+import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
+import { Table } from '@tiptap/extension-table';
+import { TableRow } from '@tiptap/extension-table-row';
+import { TableCell } from '@tiptap/extension-table-cell';
+import { TableHeader } from '@tiptap/extension-table-header';
+import { TextAlign } from '@tiptap/extension-text-align';
+import { Color } from '@tiptap/extension-color';
+import { Highlight } from '@tiptap/extension-highlight';
+import { HorizontalRule } from '@tiptap/extension-horizontal-rule';
+import { TextStyle } from '@tiptap/extension-text-style';
+import { Underline } from '@tiptap/extension-underline';
+import { Subscript } from '@tiptap/extension-subscript';
+import { Superscript } from '@tiptap/extension-superscript';
+import { CharacterCount } from '@tiptap/extension-character-count';
 import { Node, mergeAttributes } from '@tiptap/core';
 import { Button } from './button';
 import { useState, useCallback, useEffect } from 'react';
 import { 
   Bold, 
   Italic, 
-  Underline, 
+  Underline as UnderlineIcon, 
   List, 
   ListOrdered, 
   Quote, 
@@ -22,8 +37,30 @@ import {
   Video,
   Upload,
   ExternalLink,
-  Loader2
+  Loader2,
+  Heading1,
+  Heading2,
+  Heading3,
+  Code,
+  Table as TableIcon,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  AlignJustify,
+  Palette,
+  Highlighter,
+  Minus,
+  Type,
+  Subscript as SubscriptIcon,
+  Superscript as SuperscriptIcon,
+  Hash,
+  BarChart3
 } from 'lucide-react';
+import { createLowlight } from 'lowlight';
+import './rich-text-editor.css';
+
+// Create lowlight instance for syntax highlighting
+const lowlight = createLowlight();
 
 // Custom Image extension that tracks uploaded images for deletion
 const CustomImage = Image.extend({
@@ -88,7 +125,9 @@ export const RichTextEditor = ({
 
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        codeBlock: false, // We'll use CodeBlockLowlight instead
+      }),
       CustomImage.configure({
         HTMLAttributes: {
           class: 'rounded-lg max-w-full h-auto',
@@ -107,6 +146,54 @@ export const RichTextEditor = ({
           class: 'rounded-lg',
         },
       }),
+      Heading.configure({
+        levels: [1, 2, 3, 4, 5, 6],
+      }),
+      CodeBlockLowlight.configure({
+        lowlight,
+        HTMLAttributes: {
+          class: 'bg-gray-100 dark:bg-gray-800 rounded-lg p-4 my-4',
+        },
+      }),
+      Table.configure({
+        resizable: true,
+        HTMLAttributes: {
+          class: 'border-collapse border border-gray-300 dark:border-gray-600 my-4',
+        },
+      }),
+      TableRow,
+      TableHeader.configure({
+        HTMLAttributes: {
+          class: 'border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 px-4 py-2 font-semibold',
+        },
+      }),
+      TableCell.configure({
+        HTMLAttributes: {
+          class: 'border border-gray-300 dark:border-gray-600 px-4 py-2',
+        },
+      }),
+      TextAlign.configure({
+        types: ['heading', 'paragraph'],
+      }),
+      Color.configure({
+        types: ['textStyle'],
+      }),
+      Highlight.configure({
+        multicolor: true,
+        HTMLAttributes: {
+          class: 'px-1 rounded',
+        },
+      }),
+      HorizontalRule.configure({
+        HTMLAttributes: {
+          class: 'my-8 border-t border-gray-300 dark:border-gray-600',
+        },
+      }),
+      TextStyle,
+      Underline,
+      Subscript,
+      Superscript,
+      CharacterCount,
     ],
     content,
     immediatelyRender: false,
@@ -115,7 +202,7 @@ export const RichTextEditor = ({
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none min-h-[200px] p-4',
+        class: 'focus:outline-none min-h-[200px]',
       },
     },
   });
@@ -343,6 +430,46 @@ export const RichTextEditor = ({
     }
   };
 
+  const addTable = () => {
+    if (editor) {
+      editor.commands.insertTable({
+        rows: 3,
+        cols: 3,
+        withHeaderRow: true,
+      });
+    }
+  };
+
+  const addHorizontalRule = () => {
+    if (editor) {
+      editor.commands.setHorizontalRule();
+    }
+  };
+
+  const setTextColor = (color: string) => {
+    if (editor) {
+      editor.chain().focus().setColor(color).run();
+    }
+  };
+
+  const setHighlightColor = (color: string) => {
+    if (editor) {
+      editor.chain().focus().setHighlight({ color }).run();
+    }
+  };
+
+  const toggleCodeBlock = () => {
+    if (editor) {
+      editor.chain().focus().toggleCodeBlock().run();
+    }
+  };
+
+  const toggleInlineCode = () => {
+    if (editor) {
+      editor.chain().focus().toggleCode().run();
+    }
+  };
+
   if (!editor) {
     return null;
   }
@@ -351,161 +478,379 @@ export const RichTextEditor = ({
     <div className="border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden dark:bg-gray-800">
       {/* Toolbar */}
       <div className="border-b border-gray-200 dark:border-gray-600 p-2 flex flex-wrap gap-1 bg-gray-50 dark:bg-gray-700">
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().toggleBold().run()}
-          className={editor.isActive('bold') ? 'bg-gray-200 dark:bg-gray-600' : 'dark:text-gray-300 dark:hover:bg-gray-600'}
-        >
-          <Bold className="h-4 w-4" />
-        </Button>
-        
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().toggleItalic().run()}
-          className={editor.isActive('italic') ? 'bg-gray-200 dark:bg-gray-600' : 'dark:text-gray-300 dark:hover:bg-gray-600'}
-        >
-          <Italic className="h-4 w-4" />
-        </Button>
-
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().toggleStrike().run()}
-          className={editor.isActive('strike') ? 'bg-gray-200 dark:bg-gray-600' : 'dark:text-gray-300 dark:hover:bg-gray-600'}
-        >
-          <Underline className="h-4 w-4" />
-        </Button>
-
-        <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
-
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
-          className={editor.isActive('bulletList') ? 'bg-gray-200 dark:bg-gray-600' : 'dark:text-gray-300 dark:hover:bg-gray-600'}
-        >
-          <List className="h-4 w-4" />
-        </Button>
-
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
-          className={editor.isActive('orderedList') ? 'bg-gray-200 dark:bg-gray-600' : 'dark:text-gray-300 dark:hover:bg-gray-600'}
-        >
-          <ListOrdered className="h-4 w-4" />
-        </Button>
-
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().toggleBlockquote().run()}
-          className={editor.isActive('blockquote') ? 'bg-gray-200 dark:bg-gray-600' : 'dark:text-gray-300 dark:hover:bg-gray-600'}
-        >
-          <Quote className="h-4 w-4" />
-        </Button>
-
-        <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
-
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={addImage}
-          className="dark:text-gray-300 dark:hover:bg-gray-600"
-        >
-          <ImageIcon className="h-4 w-4" />
-        </Button>
-
-        {shouldShowImageUpload && (
+        {/* Headings */}
+        <div className="flex gap-1">
           <Button
             type="button"
             variant="ghost"
             size="sm"
-            onClick={uploadImage}
-            disabled={isUploading}
-            className="dark:text-gray-300 dark:hover:bg-gray-600"
+            onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+            className={editor.isActive('heading', { level: 1 }) ? 'bg-gray-200 dark:bg-gray-600' : 'dark:text-gray-300 dark:hover:bg-gray-600'}
           >
-            {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-            <span className="ml-1 text-xs dark:text-gray-300">Image</span>
+            <Heading1 className="h-4 w-4" />
           </Button>
-        )}
-
-        {(onVideoUpload || userId) && (
           <Button
             type="button"
             variant="ghost"
             size="sm"
-            onClick={uploadVideo}
-            disabled={isUploadingVideo}
-            className="dark:text-gray-300 dark:hover:bg-gray-600"
+            onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+            className={editor.isActive('heading', { level: 2 }) ? 'bg-gray-200 dark:bg-gray-600' : 'dark:text-gray-300 dark:hover:bg-gray-600'}
           >
-            {isUploadingVideo ? <Loader2 className="h-4 w-4 animate-spin" /> : <Video className="h-4 w-4" />}
-            <span className="ml-1 text-xs dark:text-gray-300">Video</span>
+            <Heading2 className="h-4 w-4" />
           </Button>
-        )}
-
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={addLink}
-          disabled={isFetchingLink}
-          className="dark:text-gray-300 dark:hover:bg-gray-600"
-        >
-          {isFetchingLink ? <Loader2 className="h-4 w-4 animate-spin" /> : <LinkIcon className="h-4 w-4" />}
-          <span className="ml-1 text-xs dark:text-gray-300">Link</span>
-        </Button>
-
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={addYouTubeVideo}
-          className="dark:text-gray-300 dark:hover:bg-gray-600"
-        >
-          <Video className="h-4 w-4" />
-          <span className="ml-1 text-xs dark:text-gray-300">YouTube</span>
-        </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+            className={editor.isActive('heading', { level: 3 }) ? 'bg-gray-200 dark:bg-gray-600' : 'dark:text-gray-300 dark:hover:bg-gray-600'}
+          >
+            <Heading3 className="h-4 w-4" />
+          </Button>
+        </div>
 
         <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
 
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().undo().run()}
-          disabled={!editor.can().undo()}
-          className="dark:text-gray-300 dark:hover:bg-gray-600"
-        >
-          <Undo className="h-4 w-4" />
-        </Button>
+        {/* Text Formatting */}
+        <div className="flex gap-1">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => editor.chain().focus().toggleBold().run()}
+            className={editor.isActive('bold') ? 'bg-gray-200 dark:bg-gray-600' : 'dark:text-gray-300 dark:hover:bg-gray-600'}
+          >
+            <Bold className="h-4 w-4" />
+          </Button>
+          
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => editor.chain().focus().toggleItalic().run()}
+            className={editor.isActive('italic') ? 'bg-gray-200 dark:bg-gray-600' : 'dark:text-gray-300 dark:hover:bg-gray-600'}
+          >
+            <Italic className="h-4 w-4" />
+          </Button>
 
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().redo().run()}
-          disabled={!editor.can().redo()}
-          className="dark:text-gray-300 dark:hover:bg-gray-600"
-        >
-          <Redo className="h-4 w-4" />
-        </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => editor.chain().focus().toggleUnderline().run()}
+            className={editor.isActive('underline') ? 'bg-gray-200 dark:bg-gray-600' : 'dark:text-gray-300 dark:hover:bg-gray-600'}
+          >
+            <UnderlineIcon className="h-4 w-4" />
+          </Button>
+
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => editor.chain().focus().toggleStrike().run()}
+            className={editor.isActive('strike') ? 'bg-gray-200 dark:bg-gray-600' : 'dark:text-gray-300 dark:hover:bg-gray-600'}
+          >
+            <Type className="h-4 w-4" />
+          </Button>
+
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => editor.chain().focus().toggleSubscript().run()}
+            className={editor.isActive('subscript') ? 'bg-gray-200 dark:bg-gray-600' : 'dark:text-gray-300 dark:hover:bg-gray-600'}
+          >
+            <SubscriptIcon className="h-4 w-4" />
+          </Button>
+
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => editor.chain().focus().toggleSuperscript().run()}
+            className={editor.isActive('superscript') ? 'bg-gray-200 dark:bg-gray-600' : 'dark:text-gray-300 dark:hover:bg-gray-600'}
+          >
+            <SuperscriptIcon className="h-4 w-4" />
+          </Button>
+        </div>
+
+        <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
+
+        {/* Lists and Structure */}
+        <div className="flex gap-1">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => editor.chain().focus().toggleBulletList().run()}
+            className={editor.isActive('bulletList') ? 'bg-gray-200 dark:bg-gray-600' : 'dark:text-gray-300 dark:hover:bg-gray-600'}
+          >
+            <List className="h-4 w-4" />
+          </Button>
+
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => editor.chain().focus().toggleOrderedList().run()}
+            className={editor.isActive('orderedList') ? 'bg-gray-200 dark:bg-gray-600' : 'dark:text-gray-300 dark:hover:bg-gray-600'}
+          >
+            <ListOrdered className="h-4 w-4" />
+          </Button>
+
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => editor.chain().focus().toggleBlockquote().run()}
+            className={editor.isActive('blockquote') ? 'bg-gray-200 dark:bg-gray-600' : 'dark:text-gray-300 dark:hover:bg-gray-600'}
+          >
+            <Quote className="h-4 w-4" />
+          </Button>
+
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={toggleCodeBlock}
+            className={editor.isActive('codeBlock') ? 'bg-gray-200 dark:bg-gray-600' : 'dark:text-gray-300 dark:hover:bg-gray-600'}
+          >
+            <Code className="h-4 w-4" />
+          </Button>
+
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={toggleInlineCode}
+            className={editor.isActive('code') ? 'bg-gray-200 dark:bg-gray-600' : 'dark:text-gray-300 dark:hover:bg-gray-600'}
+          >
+            <Hash className="h-4 w-4" />
+          </Button>
+
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={addHorizontalRule}
+            className="dark:text-gray-300 dark:hover:bg-gray-600"
+          >
+            <Minus className="h-4 w-4" />
+          </Button>
+        </div>
+
+        <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
+
+        {/* Text Alignment */}
+        <div className="flex gap-1">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => editor.chain().focus().setTextAlign('left').run()}
+            className={editor.isActive({ textAlign: 'left' }) ? 'bg-gray-200 dark:bg-gray-600' : 'dark:text-gray-300 dark:hover:bg-gray-600'}
+          >
+            <AlignLeft className="h-4 w-4" />
+          </Button>
+
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => editor.chain().focus().setTextAlign('center').run()}
+            className={editor.isActive({ textAlign: 'center' }) ? 'bg-gray-200 dark:bg-gray-600' : 'dark:text-gray-300 dark:hover:bg-gray-600'}
+          >
+            <AlignCenter className="h-4 w-4" />
+          </Button>
+
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => editor.chain().focus().setTextAlign('right').run()}
+            className={editor.isActive({ textAlign: 'right' }) ? 'bg-gray-200 dark:bg-gray-600' : 'dark:text-gray-300 dark:hover:bg-gray-600'}
+          >
+            <AlignRight className="h-4 w-4" />
+          </Button>
+
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => editor.chain().focus().setTextAlign('justify').run()}
+            className={editor.isActive({ textAlign: 'justify' }) ? 'bg-gray-200 dark:bg-gray-600' : 'dark:text-gray-300 dark:hover:bg-gray-600'}
+          >
+            <AlignJustify className="h-4 w-4" />
+          </Button>
+        </div>
+
+        <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
+
+        {/* Colors */}
+        <div className="flex gap-1">
+          <div className="relative group">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="dark:text-gray-300 dark:hover:bg-gray-600"
+            >
+              <Palette className="h-4 w-4" />
+            </Button>
+            <div className="absolute top-full left-0 mt-1 p-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="grid grid-cols-4 gap-1">
+                {['#000000', '#ef4444', '#f97316', '#eab308', '#22c55e', '#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899', '#6b7280', '#ffffff', '#f3f4f6'].map((color) => (
+                  <button
+                    key={color}
+                    className="w-6 h-6 rounded border border-gray-300 dark:border-gray-600"
+                    style={{ backgroundColor: color }}
+                    onClick={() => setTextColor(color)}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="relative group">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="dark:text-gray-300 dark:hover:bg-gray-600"
+            >
+              <Highlighter className="h-4 w-4" />
+            </Button>
+            <div className="absolute top-full left-0 mt-1 p-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="grid grid-cols-4 gap-1">
+                {['#fef3c7', '#fde68a', '#fcd34d', '#fbbf24', '#f59e0b', '#d97706', '#92400e', '#78350f', '#451a03', '#1f2937', '#111827', '#000000'].map((color) => (
+                  <button
+                    key={color}
+                    className="w-6 h-6 rounded border border-gray-300 dark:border-gray-600"
+                    style={{ backgroundColor: color }}
+                    onClick={() => setHighlightColor(color)}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
+
+        {/* Media */}
+        <div className="flex gap-1">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={addImage}
+            className="dark:text-gray-300 dark:hover:bg-gray-600"
+          >
+            <ImageIcon className="h-4 w-4" />
+          </Button>
+
+          {shouldShowImageUpload && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={uploadImage}
+              disabled={isUploading}
+              className="dark:text-gray-300 dark:hover:bg-gray-600"
+            >
+              {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+              <span className="ml-1 text-xs dark:text-gray-300">Image</span>
+            </Button>
+          )}
+
+          {(onVideoUpload || userId) && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={uploadVideo}
+              disabled={isUploadingVideo}
+              className="dark:text-gray-300 dark:hover:bg-gray-600"
+            >
+              {isUploadingVideo ? <Loader2 className="h-4 w-4 animate-spin" /> : <Video className="h-4 w-4" />}
+              <span className="ml-1 text-xs dark:text-gray-300">Video</span>
+            </Button>
+          )}
+
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={addLink}
+            disabled={isFetchingLink}
+            className="dark:text-gray-300 dark:hover:bg-gray-600"
+          >
+            {isFetchingLink ? <Loader2 className="h-4 w-4 animate-spin" /> : <LinkIcon className="h-4 w-4" />}
+            <span className="ml-1 text-xs dark:text-gray-300">Link</span>
+          </Button>
+
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={addYouTubeVideo}
+            className="dark:text-gray-300 dark:hover:bg-gray-600"
+          >
+            <Video className="h-4 w-4" />
+            <span className="ml-1 text-xs dark:text-gray-300">YouTube</span>
+          </Button>
+
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={addTable}
+            className="dark:text-gray-300 dark:hover:bg-gray-600"
+          >
+            <TableIcon className="h-4 w-4" />
+            <span className="ml-1 text-xs dark:text-gray-300">Table</span>
+          </Button>
+        </div>
+
+        <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
+
+        {/* History */}
+        <div className="flex gap-1">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => editor.chain().focus().undo().run()}
+            disabled={!editor.can().undo()}
+            className="dark:text-gray-300 dark:hover:bg-gray-600"
+          >
+            <Undo className="h-4 w-4" />
+          </Button>
+
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => editor.chain().focus().redo().run()}
+            disabled={!editor.can().redo()}
+            className="dark:text-gray-300 dark:hover:bg-gray-600"
+          >
+            <Redo className="h-4 w-4" />
+          </Button>
+        </div>
+
+        {/* Character Count */}
+        <div className="ml-auto flex items-center text-xs text-gray-500 dark:text-gray-400">
+          <BarChart3 className="h-3 w-3 mr-1" />
+          {editor.storage.characterCount?.characters() || 0} characters
+        </div>
       </div>
 
       {/* Editor Content */}
       <div className="min-h-[300px] max-h-[600px] overflow-y-auto dark:bg-gray-800">
         <EditorContent 
           editor={editor} 
-          className="prose max-w-none dark:prose-invert"
+          className="focus:outline-none"
           placeholder={placeholder}
         />
       </div>

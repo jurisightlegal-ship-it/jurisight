@@ -19,6 +19,7 @@ import {
   ExternalLink,
   Linkedin
 } from 'lucide-react';
+import './article-content.css';
 
 interface Article {
   id: number;
@@ -448,7 +449,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
 
               {/* Article Body */}
               <div 
-                className="prose prose-base xl:prose-lg 2xl:prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-blue-600 prose-strong:text-gray-900 prose-code:text-gray-800 prose-pre:bg-gray-100 prose-blockquote:border-l-blue-500 prose-blockquote:bg-blue-50 prose-blockquote:pl-4 prose-blockquote:py-2"
+                className="article-content max-w-none"
                 dangerouslySetInnerHTML={{ 
                   __html: decodeHtmlEntities(article.body)
                 }}

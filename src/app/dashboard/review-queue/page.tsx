@@ -18,6 +18,7 @@ import {
   X
 } from 'lucide-react';
 import { useUserUpdates } from '@/lib/user-updates';
+import '../../articles/[slug]/article-content.css';
 
 interface ReviewArticle {
   id: number;
@@ -409,7 +410,7 @@ export default function ReviewQueue() {
               </div>
             </div>
             <div className="p-4 sm:p-6 overflow-y-auto max-h-[50vh] sm:max-h-[60vh]">
-              <div className="prose max-w-none text-sm sm:text-base">
+              <div className="article-content max-w-none text-sm sm:text-base">
                 <div dangerouslySetInnerHTML={{ __html: selectedArticle.body }} />
               </div>
             </div>
