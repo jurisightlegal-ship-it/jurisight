@@ -302,12 +302,12 @@ export default function AboutPage() {
                             <span 
                               className="cursor-pointer hover:text-gray-700 transition-colors"
                               onClick={() => {
-                                navigator.clipboard.writeText(member.email || 'contact@jurisight.com');
+                                navigator.clipboard.writeText(member.email || 'contact@jurisight.in');
                                 alert('Email copied to clipboard!');
                               }}
                               title="Click to copy email"
                             >
-                              {member.email || 'contact@jurisight.com'}
+                              {member.email || 'contact@jurisight.in'}
                             </span>
                           </div>
                         </div>

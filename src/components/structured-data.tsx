@@ -14,8 +14,8 @@ export function StructuredData({ type, data }: StructuredDataProps) {
           '@type': 'Organization',
           name: 'Jurisight',
           description: 'Legal Knowledge Platform democratizing access to legal information and empowering the legal community in India',
-          url: process.env.NEXT_PUBLIC_SITE_URL || 'https://jurisight.com',
-          logo: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://jurisight.com'}/Jurisight.png`,
+          url: process.env.NEXT_PUBLIC_SITE_URL || 'https://jurisight.in',
+          logo: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://jurisight.in'}/Jurisight.png`,
           sameAs: [
             'https://twitter.com/jurisight',
             'https://linkedin.com/company/jurisight',
@@ -23,7 +23,7 @@ export function StructuredData({ type, data }: StructuredDataProps) {
           contactPoint: {
             '@type': 'ContactPoint',
             contactType: 'customer service',
-            email: 'contact@jurisight.com',
+            email: 'contact@jurisight.in',
           },
           address: {
             '@type': 'PostalAddress',
@@ -38,12 +38,12 @@ export function StructuredData({ type, data }: StructuredDataProps) {
           '@type': 'WebSite',
           name: 'Jurisight',
           description: 'Legal Knowledge Platform democratizing access to legal information and empowering the legal community in India',
-          url: process.env.NEXT_PUBLIC_SITE_URL || 'https://jurisight.com',
+          url: process.env.NEXT_PUBLIC_SITE_URL || 'https://jurisight.in',
           potentialAction: {
             '@type': 'SearchAction',
             target: {
               '@type': 'EntryPoint',
-              urlTemplate: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://jurisight.com'}/articles?query={search_term_string}`,
+              urlTemplate: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://jurisight.in'}/articles?query={search_term_string}`,
             },
             'query-input': 'required name=search_term_string',
           },
@@ -52,7 +52,7 @@ export function StructuredData({ type, data }: StructuredDataProps) {
             name: 'Jurisight',
             logo: {
               '@type': 'ImageObject',
-              url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://jurisight.com'}/Jurisight.png`,
+              url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://jurisight.in'}/Jurisight.png`,
             },
           },
           ...data,

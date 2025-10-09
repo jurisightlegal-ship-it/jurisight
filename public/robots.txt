@@ -17,7 +17,7 @@ Allow: /high-court-judgements
 Allow: /know-your-law
 
 # Sitemap location
-Sitemap: https://jurisight.com/sitemap.xml
+Sitemap: https://jurisight.in/sitemap.xml
 
 # Crawl delay (optional - helps prevent overloading server)
 Crawl-delay: 1

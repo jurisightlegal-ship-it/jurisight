@@ -48,7 +48,7 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://jurisight.com'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://jurisight.in'),
   alternates: {
     canonical: '/',
   },

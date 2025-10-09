@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next'
 import { supabase } from '@/lib/supabase-db'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://jurisight.com'
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://jurisight.in'
   
   // Static pages
   const staticPages: MetadataRoute.Sitemap = [

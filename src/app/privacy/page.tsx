@@ -289,8 +289,8 @@ export default function PrivacyPolicy() {
                       <h3 className="font-semibold text-yellow-900 mb-1">Exercise Your Rights</h3>
                       <p className="text-yellow-800 text-sm">
                         To exercise any of these rights, please contact us at{' '}
-                        <a href="mailto:privacy@jurisight.com" className="underline hover:text-yellow-900">
-                          privacy@jurisight.com
+                        <a href="mailto:privacy@jurisight.in" className="underline hover:text-yellow-900">
+                          privacy@jurisight.in
                         </a>
                         . We will respond to your request within 30 days.
                       </p>

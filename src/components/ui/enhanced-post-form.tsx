@@ -751,7 +751,7 @@ export const EnhancedPostForm = ({
                         className="mt-2"
                       />
                       <p className="text-xs text-gray-500 mt-1">
-                        jurisight.com/articles/{formData.slug}
+                        jurisight.in/articles/{formData.slug}
                       </p>
                     </div>
 

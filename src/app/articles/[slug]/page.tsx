@@ -111,8 +111,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
     // Create Open Graph image URL
     const ogImage = featuredImage ? 
-      `${process.env.NEXT_PUBLIC_SITE_URL || 'https://jurisight.com'}${featuredImage}` :
-      `${process.env.NEXT_PUBLIC_SITE_URL || 'https://jurisight.com'}/api/og?title=${encodeURIComponent(article.title)}&author=${encodeURIComponent(authorName)}`;
+      `${process.env.NEXT_PUBLIC_SITE_URL || 'https://jurisight.in'}${featuredImage}` :
+      `${process.env.NEXT_PUBLIC_SITE_URL || 'https://jurisight.in'}/api/og?title=${encodeURIComponent(article.title)}&author=${encodeURIComponent(authorName)}`;
 
     return {
       title: `${article.title} | Jurisight`,
@@ -155,7 +155,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         site: '@jurisight',
       },
       alternates: {
-        canonical: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://jurisight.com'}/articles/${slug}`,
+        canonical: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://jurisight.in'}/articles/${slug}`,
       },
       robots: {
         index: true,
@@ -335,7 +335,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
                 </div>
                 <SocialShareButton
                   title={article.title}
-                  url={`${process.env.NEXT_PUBLIC_SITE_URL || 'https://jurisight.com'}/articles/${article.slug}`}
+                  url={`${process.env.NEXT_PUBLIC_SITE_URL || 'https://jurisight.in'}/articles/${article.slug}`}
                   description={article.dek || ''}
                   hashtags={['Jurisight', 'Legal', article.section.name]}
                   className="hidden sm:flex"
@@ -402,7 +402,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
                       </div>
                       <SocialShareButton
                         title={article.title}
-                        url={`${process.env.NEXT_PUBLIC_SITE_URL || 'https://jurisight.com'}/articles/${article.slug}`}
+                        url={`${process.env.NEXT_PUBLIC_SITE_URL || 'https://jurisight.in'}/articles/${article.slug}`}
                         description={article.dek || ''}
                         hashtags={['Jurisight', 'Legal', article.section.name]}
                         className="w-fit"
@@ -521,7 +521,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
                   <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                     <SocialShareButton
                       title={article.title}
-                      url={`${process.env.NEXT_PUBLIC_SITE_URL || 'https://jurisight.com'}/articles/${article.slug}`}
+                      url={`${process.env.NEXT_PUBLIC_SITE_URL || 'https://jurisight.in'}/articles/${article.slug}`}
                       description={article.dek || ''}
                       hashtags={['Jurisight', 'Legal', article.section.name]}
                     />
