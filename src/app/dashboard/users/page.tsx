@@ -19,7 +19,8 @@ import {
   Plus,
   X,
   Edit,
-  Key
+  Key,
+  Trash2
 } from 'lucide-react';
 import { userUpdateEvents } from '@/lib/user-updates';
 
@@ -73,6 +74,9 @@ export default function UsersPage() {
   const [addingUser, setAddingUser] = useState(false);
   const [updatingUser, setUpdatingUser] = useState(false);
   const [resolvedImageUrls, setResolvedImageUrls] = useState<Record<string, string>>({});
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<User | null>(null);
+  const [deletingUser, setDeletingUser] = useState(false);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -390,6 +394,51 @@ export default function UsersPage() {
     }
   };
 
+  const handleDeleteUser = (user: User) => {
+    setUserToDelete(user);
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!userToDelete) return;
+
+    setDeletingUser(true);
+    
+    try {
+      const response = await fetch(`/api/dashboard/users/${userToDelete.id}/delete`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        
+        // Remove user from local state
+        setUsers(users.filter(user => user.id !== userToDelete.id));
+        
+        // Show success message
+        alert(`User ${userToDelete.name} and ${data.deletedArticles} articles deleted successfully`);
+        
+        // Close modal
+        setShowDeleteModal(false);
+        setUserToDelete(null);
+      } else {
+        const error = await response.json();
+        alert(error.error || 'Failed to delete user');
+      }
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      alert('Failed to delete user');
+    } finally {
+      setDeletingUser(false);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteModal(false);
+    setUserToDelete(null);
+  };
+
   const userStats = {
     total: users.length,
     active: users.filter(u => u.isActive).length,
@@ -596,6 +645,17 @@ export default function UsersPage() {
                             <option value="EDITOR">Editor</option>
                             <option value="ADMIN">Admin</option>
                           </select>
+                          {user.role !== 'ADMIN' && user.id !== session?.user?.id && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleDeleteUser(user)}
+                              className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
+                              title="Delete user permanently"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -980,6 +1040,78 @@ export default function UsersPage() {
                 </Button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete User Confirmation Modal */}
+      {showDeleteModal && userToDelete && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg max-w-md w-full">
+            <div className="p-6 border-b">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-bold text-red-600">Delete User</h2>
+                <Button
+                  variant="ghost"
+                  onClick={handleCancelDelete}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+            <div className="p-6">
+              <div className="space-y-4">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-red-100 rounded-full">
+                    <Trash2 className="h-6 w-6 text-red-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      Are you sure you want to delete this user?
+                    </h3>
+                    <p className="text-sm text-gray-600">
+                      This action cannot be undone.
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                  <h4 className="font-medium text-red-800 mb-2">User Details:</h4>
+                  <p className="text-sm text-red-700">
+                    <strong>Name:</strong> {userToDelete.name || 'No name set'}<br />
+                    <strong>Email:</strong> {userToDelete.email}<br />
+                    <strong>Role:</strong> {userToDelete.role}
+                  </p>
+                </div>
+
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                  <h4 className="font-medium text-yellow-800 mb-2">⚠️ Warning:</h4>
+                  <p className="text-sm text-yellow-700">
+                    This will permanently delete the user and <strong>all articles</strong> authored by them. 
+                    This action cannot be undone.
+                  </p>
+                </div>
+              </div>
+              
+              <div className="flex justify-end space-x-2 mt-6">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleCancelDelete}
+                  disabled={deletingUser}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="button"
+                  onClick={handleConfirmDelete}
+                  disabled={deletingUser}
+                  className="bg-red-600 text-white hover:bg-red-700"
+                >
+                  {deletingUser ? 'Deleting...' : 'Delete User'}
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       )}

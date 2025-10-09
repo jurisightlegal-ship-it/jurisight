@@ -223,6 +223,7 @@ export class SupabaseDB {
       const { data, error } = await supabase
         .from('users')
         .select('id, name, email, role, is_active, created_at, updated_at, bio, image, linkedin_url, personal_email')
+        .eq('is_active', true) // Only fetch active users
         .order('created_at', { ascending: false });
 
       if (error) throw error;
