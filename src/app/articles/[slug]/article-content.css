@@ -14,6 +14,214 @@
   color: inherit !important;
 }
 
+/* Force override any Tailwind or parent container styles */
+.article-content,
+.article-content p,
+.article-content div,
+.article-content span,
+.article-content h1,
+.article-content h2,
+.article-content h3,
+.article-content h4,
+.article-content h5,
+.article-content h6,
+.article-content li,
+.article-content ul,
+.article-content ol,
+.article-content strong,
+.article-content em,
+.article-content a {
+  color: #000000 !important;
+  opacity: 1 !important;
+  font-weight: 400 !important;
+}
+
+/* Override any prose classes that might be interfering */
+.prose .article-content,
+.prose .article-content * {
+  color: #000000 !important;
+  opacity: 1 !important;
+}
+
+/* Override any CardContent or parent container styles */
+[class*="CardContent"] .article-content,
+[class*="card"] .article-content,
+[class*="prose"] .article-content {
+  color: #000000 !important;
+  opacity: 1 !important;
+}
+
+[class*="CardContent"] .article-content *,
+[class*="card"] .article-content *,
+[class*="prose"] .article-content * {
+  color: #000000 !important;
+  opacity: 1 !important;
+}
+
+/* Nuclear option - override everything that might be affecting text color */
+div[class*="article-content"],
+div[class*="article-content"] *,
+div[class*="article-content"] p,
+div[class*="article-content"] div,
+div[class*="article-content"] span,
+div[class*="article-content"] h1,
+div[class*="article-content"] h2,
+div[class*="article-content"] h3,
+div[class*="article-content"] h4,
+div[class*="article-content"] h5,
+div[class*="article-content"] h6,
+div[class*="article-content"] li,
+div[class*="article-content"] ul,
+div[class*="article-content"] ol,
+div[class*="article-content"] strong,
+div[class*="article-content"] em,
+div[class*="article-content"] a {
+  color: #000000 !important;
+  opacity: 1 !important;
+  font-weight: 400 !important;
+}
+
+/* Override any Tailwind text color classes */
+.text-gray-700,
+.text-gray-600,
+.text-gray-500,
+.text-gray-400,
+.text-gray-300,
+.text-gray-200,
+.text-gray-100 {
+  color: #000000 !important;
+  opacity: 1 !important;
+}
+
+/* Override global prose styles from globals.css */
+.prose .article-content,
+.prose .article-content p,
+.prose .article-content div,
+.prose .article-content span,
+.prose .article-content h1,
+.prose .article-content h2,
+.prose .article-content h3,
+.prose .article-content h4,
+.prose .article-content h5,
+.prose .article-content h6,
+.prose .article-content li,
+.prose .article-content ul,
+.prose .article-content ol,
+.prose .article-content strong,
+.prose .article-content em,
+.prose .article-content a {
+  color: #000000 !important;
+  opacity: 1 !important;
+}
+
+/* Override any inherited text colors from parent containers */
+.article-content p,
+.article-content div,
+.article-content span,
+.article-content h1,
+.article-content h2,
+.article-content h3,
+.article-content h4,
+.article-content h5,
+.article-content h6,
+.article-content li,
+.article-content ul,
+.article-content ol,
+.article-content strong,
+.article-content em,
+.article-content a,
+.article-content blockquote,
+.article-content code,
+.article-content pre {
+  color: #000000 !important;
+  opacity: 1 !important;
+  font-weight: 400 !important;
+}
+
+/* Force override any CSS custom properties that might be affecting color */
+.article-content,
+.article-content * {
+  color: #000000 !important;
+  opacity: 1 !important;
+  --tw-text-opacity: 1 !important;
+  --tw-bg-opacity: 1 !important;
+}
+
+/* Target the specific container structure from the article page */
+div[class*="CardContent"] div[class*="article-content"],
+div[class*="CardContent"] div[class*="article-content"] *,
+div[class*="CardContent"] div[class*="article-content"] p,
+div[class*="CardContent"] div[class*="article-content"] div,
+div[class*="CardContent"] div[class*="article-content"] span,
+div[class*="CardContent"] div[class*="article-content"] h1,
+div[class*="CardContent"] div[class*="article-content"] h2,
+div[class*="CardContent"] div[class*="article-content"] h3,
+div[class*="CardContent"] div[class*="article-content"] h4,
+div[class*="CardContent"] div[class*="article-content"] h5,
+div[class*="CardContent"] div[class*="article-content"] h6,
+div[class*="CardContent"] div[class*="article-content"] li,
+div[class*="CardContent"] div[class*="article-content"] ul,
+div[class*="CardContent"] div[class*="article-content"] ol,
+div[class*="CardContent"] div[class*="article-content"] strong,
+div[class*="CardContent"] div[class*="article-content"] em,
+div[class*="CardContent"] div[class*="article-content"] a {
+  color: #000000 !important;
+  opacity: 1 !important;
+  font-weight: 400 !important;
+}
+
+/* Override any potential CSS-in-JS styles */
+[style*="color"] .article-content,
+[style*="color"] .article-content * {
+  color: #000000 !important;
+  opacity: 1 !important;
+}
+
+/* Nuclear option - force all text to be black regardless of inheritance */
+.article-content,
+.article-content *,
+.article-content p,
+.article-content div,
+.article-content span,
+.article-content h1,
+.article-content h2,
+.article-content h3,
+.article-content h4,
+.article-content h5,
+.article-content h6,
+.article-content li,
+.article-content ul,
+.article-content ol,
+.article-content strong,
+.article-content em,
+.article-content a,
+.article-content blockquote,
+.article-content code,
+.article-content pre,
+.article-content table,
+.article-content th,
+.article-content td {
+  color: #000000 !important;
+  opacity: 1 !important;
+  font-weight: 400 !important;
+  text-decoration-color: #000000 !important;
+  border-color: #000000 !important;
+}
+
+/* Override any potential Tailwind utility classes */
+.article-content .text-gray-700,
+.article-content .text-gray-600,
+.article-content .text-gray-500,
+.article-content .text-gray-400,
+.article-content .text-gray-300,
+.article-content .text-gray-200,
+.article-content .text-gray-100,
+.article-content .text-gray-900,
+.article-content .text-gray-800 {
+  color: #000000 !important;
+  opacity: 1 !important;
+}
+
 .article-content p {
   margin-bottom: 1.25rem !important;
   line-height: 1.7 !important;
