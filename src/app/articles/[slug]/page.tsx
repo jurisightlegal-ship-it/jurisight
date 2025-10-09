@@ -16,7 +16,8 @@ import {
   User, 
   Eye, 
   BookOpen,
-  ExternalLink
+  ExternalLink,
+  Linkedin
 } from 'lucide-react';
 
 interface Article {
@@ -36,6 +37,7 @@ interface Article {
     name: string;
     bio: string | null;
     avatar: string | null;
+    linkedinUrl: string | null;
   };
   section: {
     id: number;
@@ -197,7 +199,8 @@ async function getArticle(slug: string): Promise<Article | null> {
           id,
           name,
           bio,
-          image
+          image,
+          linkedin_url
         ),
         legal_sections(
           id,
@@ -258,6 +261,7 @@ async function getArticle(slug: string): Promise<Article | null> {
         name: (article as { users?: { name?: string } }).users?.name || 'Unknown Author',
         bio: (article as { users?: { bio?: string | null } }).users?.bio || null,
         avatar: (article as { users?: { image?: string | null } }).users?.image || null,
+        linkedinUrl: (article as { users?: { linkedin_url?: string | null } }).users?.linkedin_url || null,
       },
       section: {
         id: (article as { legal_sections?: { id?: number }; section_id?: number }).legal_sections?.id || (article as { section_id?: number }).section_id || 0,
@@ -418,10 +422,18 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
                       authorName={article.author.name}
                       className="w-12 h-12 rounded-full"
                     />
-                    <div>
+                    <div className="flex items-center gap-2">
                       <p className="font-semibold text-gray-900">{article.author.name}</p>
-                      {article.author.bio && (
-                        <p className="text-sm text-gray-600">{article.author.bio}</p>
+                      {article.author.linkedinUrl && (
+                        <a
+                          href={article.author.linkedinUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800 transition-colors"
+                          title="View LinkedIn profile"
+                        >
+                          <Linkedin className="h-4 w-4" />
+                        </a>
                       )}
                     </div>
                   </div>

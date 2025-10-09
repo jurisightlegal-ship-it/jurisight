@@ -241,53 +241,56 @@ export default function ReviewQueue() {
       {/* Header */}
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 py-4 sm:py-0 sm:h-16">
             <div className="flex items-center">
               <Button
                 variant="ghost"
                 onClick={() => router.push('/dashboard')}
-                className="mr-4"
+                className="mr-2 sm:mr-4 text-sm sm:text-base"
               >
-                ← Back to Dashboard
+                ← <span className="hidden sm:inline">Back to Dashboard</span>
+                <span className="sm:hidden">Back</span>
               </Button>
-              <h1 className="text-2xl font-bold text-jurisight-navy">Review Queue</h1>
+              <h1 className="text-xl sm:text-2xl font-bold text-jurisight-navy">Review Queue</h1>
             </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-gray-700">{articles.length} articles pending review</span>
+            <div className="flex items-center">
+              <span className="text-sm sm:text-base text-gray-700">
+                {articles.length} articles pending review
+              </span>
             </div>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
+      <main className="max-w-7xl mx-auto py-4 sm:py-6 px-4 sm:px-6 lg:px-8">
+        <div className="py-4 sm:py-6">
           {articles.length > 0 ? (
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               {articles.map((article) => (
                 <Card key={article.id} className="hover:shadow-md transition-shadow">
-                  <CardHeader>
-                    <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+                  <CardHeader className="pb-4">
+                    <div className="flex flex-col gap-4">
                       <div className="flex-1">
-                        <CardTitle className="text-xl text-jurisight-navy mb-2">
+                        <CardTitle className="text-lg sm:text-xl text-jurisight-navy mb-2 line-clamp-2">
                           {article.title}
                         </CardTitle>
                         {article.dek && (
-                          <CardDescription className="text-base mb-4">
+                          <CardDescription className="text-sm sm:text-base mb-3 sm:mb-4 line-clamp-2">
                             {article.dek}
                           </CardDescription>
                         )}
-                        <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
+                        <div className="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600">
                           <div className="flex items-center">
-                            <User className="h-4 w-4 mr-1" />
-                            <span>{article.author.name || article.author.email}</span>
+                            <User className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                            <span className="truncate">{article.author.name || article.author.email}</span>
                           </div>
                           <div className="flex items-center">
-                            <Calendar className="h-4 w-4 mr-1" />
+                            <Calendar className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                             <span>{new Date(article.createdAt).toLocaleDateString()}</span>
                           </div>
                           <div className="flex items-center">
-                            <BookOpen className="h-4 w-4 mr-1" />
+                            <BookOpen className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                             <span>{article.readingTime} min read</span>
                           </div>
                           <div className="flex items-center">
@@ -299,75 +302,76 @@ export default function ReviewQueue() {
                           </div>
                         </div>
                       </div>
-                      <div className="flex lg:flex-col items-center lg:items-end space-x-2 lg:space-x-0 lg:space-y-2">
-                        {getStatusBadge(article.status)}
-                        <div className="flex space-x-2">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                        <div className="flex items-center justify-center sm:justify-start">
+                          {getStatusBadge(article.status)}
+                        </div>
+                        <div className="flex flex-wrap justify-center sm:justify-end gap-2">
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => handleEdit(article.id)}
-                            className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                            className="text-blue-600 border-blue-200 hover:bg-blue-50 text-xs sm:text-sm"
                           >
-                            <Edit className="h-4 w-4 mr-1" />
+                            <Edit className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                             Edit
                           </Button>
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => setSelectedArticle(article)}
+                            className="text-gray-600 border-gray-200 hover:bg-gray-50 text-xs sm:text-sm"
                           >
-                            <Eye className="h-4 w-4 mr-1" />
+                            <Eye className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                             Preview
                           </Button>
                         </div>
                       </div>
                     </div>
                   </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                      <div className="text-sm text-gray-500">
+                  <CardContent className="pt-0">
+                    <div className="flex flex-col gap-3 sm:gap-4">
+                      <div className="text-xs sm:text-sm text-gray-500 text-center sm:text-left">
                         Submitted {new Date(article.createdAt).toLocaleString()}
                       </div>
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex flex-wrap justify-center sm:justify-end gap-2">
                         {article.status === 'NEEDS_REVISIONS' && (
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => handleSendRevisionNotes(article.id)}
-                            className="text-purple-600 border-purple-200 hover:bg-purple-50"
+                            className="text-purple-600 border-purple-200 hover:bg-purple-50 text-xs sm:text-sm"
                           >
-                            <Edit className="h-4 w-4 mr-1" />
-                            <span className="hidden sm:inline">Send Revision Notes</span>
-                            <span className="sm:hidden">Notes</span>
+                            <Edit className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                            <span className="hidden xs:inline">Send Revision Notes</span>
+                            <span className="xs:hidden">Notes</span>
                           </Button>
                         )}
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => handleRequestRevisions(article.id)}
-                          className="text-orange-600 border-orange-200 hover:bg-orange-50"
+                          className="text-orange-600 border-orange-200 hover:bg-orange-50 text-xs sm:text-sm"
                         >
-                          <AlertCircle className="h-4 w-4 mr-1" />
-                          <span className="hidden sm:inline">Request Revisions</span>
-                          <span className="sm:hidden">Revisions</span>
+                          <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                          <span className="hidden xs:inline">Request Revisions</span>
+                          <span className="xs:hidden">Revisions</span>
                         </Button>
                         <Button
                           size="sm"
                           onClick={() => handleApprove(article.id)}
-                          className="bg-blue-600 hover:bg-blue-700 text-white"
+                          className="bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm"
                         >
-                          <CheckCircle className="h-4 w-4 mr-1" />
-                          <span className="hidden sm:inline">Approve</span>
-                          <span className="sm:hidden">Approve</span>
+                          <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                          Approve
                         </Button>
                         <Button
                           size="sm"
                           onClick={() => handlePublish(article.id)}
-                          className="bg-green-600 hover:bg-green-700 text-white"
+                          className="bg-green-600 hover:bg-green-700 text-white text-xs sm:text-sm"
                         >
-                          <CheckCircle className="h-4 w-4 mr-1" />
-                          <span className="hidden sm:inline">Publish</span>
-                          <span className="sm:hidden">Publish</span>
+                          <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                          Publish
                         </Button>
                       </div>
                     </div>
@@ -387,40 +391,43 @@ export default function ReviewQueue() {
 
       {/* Article Preview Modal */}
       {selectedArticle && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden">
-            <div className="p-6 border-b">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-50">
+          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-hidden">
+            <div className="p-4 sm:p-6 border-b">
               <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold text-jurisight-navy">
+                <h2 className="text-lg sm:text-xl font-bold text-jurisight-navy pr-2">
                   {selectedArticle.title}
                 </h2>
                 <Button
                   variant="ghost"
+                  size="sm"
                   onClick={() => setSelectedArticle(null)}
+                  className="flex-shrink-0"
                 >
-                  ×
+                  <X className="h-4 w-4" />
                 </Button>
               </div>
             </div>
-            <div className="p-6 overflow-y-auto max-h-[60vh]">
-              <div className="prose max-w-none">
+            <div className="p-4 sm:p-6 overflow-y-auto max-h-[50vh] sm:max-h-[60vh]">
+              <div className="prose max-w-none text-sm sm:text-base">
                 <div dangerouslySetInnerHTML={{ __html: selectedArticle.body }} />
               </div>
             </div>
-            <div className="p-6 border-t bg-gray-50">
-              <div className="flex justify-between">
+            <div className="p-4 sm:p-6 border-t bg-gray-50">
+              <div className="flex flex-col sm:flex-row sm:justify-between gap-3">
                 <Button
                   variant="outline"
                   onClick={() => handleEdit(selectedArticle.id)}
-                  className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                  className="text-blue-600 border-blue-200 hover:bg-blue-50 text-sm"
                 >
                   <Edit className="h-4 w-4 mr-1" />
                   Edit Article
                 </Button>
-                <div className="flex space-x-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <Button
                     variant="outline"
                     onClick={() => setSelectedArticle(null)}
+                    className="text-sm"
                   >
                     <X className="h-4 w-4 mr-1" />
                     Close
@@ -428,21 +435,21 @@ export default function ReviewQueue() {
                   <Button
                     variant="outline"
                     onClick={() => handleRequestRevisions(selectedArticle.id)}
-                    className="text-orange-600 border-orange-200 hover:bg-orange-50"
+                    className="text-orange-600 border-orange-200 hover:bg-orange-50 text-sm"
                   >
                     <AlertCircle className="h-4 w-4 mr-1" />
                     Request Revisions
                   </Button>
                   <Button
                     onClick={() => handleApprove(selectedArticle.id)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                    className="bg-blue-600 hover:bg-blue-700 text-white text-sm"
                   >
                     <CheckCircle className="h-4 w-4 mr-1" />
                     Approve
                   </Button>
                   <Button
                     onClick={() => handlePublish(selectedArticle.id)}
-                    className="bg-green-600 hover:bg-green-700 text-white"
+                    className="bg-green-600 hover:bg-green-700 text-white text-sm"
                   >
                     <CheckCircle className="h-4 w-4 mr-1" />
                     Publish
@@ -456,11 +463,11 @@ export default function ReviewQueue() {
 
       {/* Revision Notes Modal */}
       {revisionNotesModal.isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full mx-4">
-            <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
+            <div className="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
                   Send Revision Notes
                 </h3>
                 <Button
@@ -473,7 +480,7 @@ export default function ReviewQueue() {
                 </Button>
               </div>
             </div>
-            <div className="p-6">
+            <div className="p-4 sm:p-6 overflow-y-auto max-h-[60vh]">
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Revision Notes
@@ -482,21 +489,23 @@ export default function ReviewQueue() {
                   value={revisionNotesModal.notes}
                   onChange={(e) => setRevisionNotesModal(prev => ({ ...prev, notes: e.target.value }))}
                   placeholder="Enter detailed revision notes for the author..."
-                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm sm:text-base"
                   rows={6}
                 />
               </div>
-              <div className="flex justify-end space-x-3">
+            </div>
+            <div className="p-4 sm:p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
+              <div className="flex flex-col sm:flex-row justify-end gap-3">
                 <Button
                   variant="outline"
                   onClick={handleCloseRevisionNotes}
-                  className="text-gray-600 border-gray-300 hover:bg-gray-50 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700"
+                  className="text-gray-600 border-gray-300 hover:bg-gray-50 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 text-sm"
                 >
                   Cancel
                 </Button>
                 <Button
                   onClick={handleSubmitRevisionNotes}
-                  className="bg-purple-600 hover:bg-purple-700 text-white"
+                  className="bg-purple-600 hover:bg-purple-700 text-white text-sm"
                 >
                   Send Notes
                 </Button>
