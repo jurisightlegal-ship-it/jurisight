@@ -3,14 +3,14 @@
   padding: 1.5rem 0 !important;
   line-height: 1.7 !important;
   font-size: 16px !important;
-  color: #374151 !important;
+  color: #1f2937 !important;
 }
 
 .article-content p {
   margin-bottom: 1.25rem !important;
   line-height: 1.7 !important;
   font-size: 16px !important;
-  color: #374151 !important;
+  color: #1f2937 !important;
 }
 
 .article-content p:last-child {
@@ -77,7 +77,7 @@
 .article-content li {
   margin-bottom: 0.5rem !important;
   line-height: 1.6 !important;
-  color: #374151 !important;
+  color: #1f2937 !important;
 }
 
 .article-content li:last-child {
@@ -146,11 +146,11 @@
   font-size: 0.875rem !important;
   text-transform: uppercase !important;
   letter-spacing: 0.05em !important;
-  color: #374151 !important;
+  color: #1f2937 !important;
 }
 
 .article-content td {
-  color: #374151 !important;
+  color: #1f2937 !important;
 }
 
 .article-content hr {
@@ -231,6 +231,67 @@
 .article-content .link-preview a:hover {
   color: #1d4ed8 !important;
   text-decoration: underline !important;
+}
+
+/* Mobile optimizations for better text visibility */
+@media (max-width: 768px) {
+  .article-content {
+    font-size: 18px !important;
+    line-height: 1.8 !important;
+    color: #111827 !important;
+  }
+  
+  .article-content p {
+    font-size: 18px !important;
+    line-height: 1.8 !important;
+    color: #111827 !important;
+  }
+  
+  .article-content h1 {
+    font-size: 2rem !important;
+    color: #000000 !important;
+  }
+  
+  .article-content h2 {
+    font-size: 1.75rem !important;
+    color: #000000 !important;
+  }
+  
+  .article-content h3 {
+    font-size: 1.5rem !important;
+    color: #000000 !important;
+  }
+  
+  .article-content h4,
+  .article-content h5,
+  .article-content h6 {
+    color: #000000 !important;
+  }
+  
+  .article-content li {
+    color: #111827 !important;
+  }
+  
+  .article-content th,
+  .article-content td {
+    color: #111827 !important;
+  }
+  
+  .article-content th {
+    color: #000000 !important;
+  }
+  
+  .article-content strong {
+    color: #000000 !important;
+  }
+  
+  .article-content .link-preview h3 {
+    color: #000000 !important;
+  }
+  
+  .article-content .link-preview p {
+    color: #374151 !important;
+  }
 }
 
 /* Dark mode support */

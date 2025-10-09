@@ -5,12 +5,14 @@
   line-height: 1.7 !important;
   font-size: 16px !important;
   outline: none !important;
+  color: #1f2937 !important;
 }
 
 .ProseMirror p {
   margin-bottom: 1.25rem !important;
   line-height: 1.7 !important;
   font-size: 16px !important;
+  color: #1f2937 !important;
 }
 
 .ProseMirror p:last-child {
@@ -184,4 +186,54 @@
 
 .dark .ProseMirror hr {
   border-top-color: #4b5563 !important;
+}
+
+/* Mobile optimizations for better text visibility */
+@media (max-width: 768px) {
+  .ProseMirror {
+    font-size: 18px !important;
+    line-height: 1.8 !important;
+    color: #111827 !important;
+  }
+  
+  .ProseMirror p {
+    font-size: 18px !important;
+    line-height: 1.8 !important;
+    color: #111827 !important;
+  }
+  
+  .ProseMirror h1 {
+    color: #000000 !important;
+  }
+  
+  .ProseMirror h2 {
+    color: #000000 !important;
+  }
+  
+  .ProseMirror h3 {
+    color: #000000 !important;
+  }
+  
+  .ProseMirror h4,
+  .ProseMirror h5,
+  .ProseMirror h6 {
+    color: #000000 !important;
+  }
+  
+  .ProseMirror li {
+    color: #111827 !important;
+  }
+  
+  .ProseMirror th,
+  .ProseMirror td {
+    color: #111827 !important;
+  }
+  
+  .ProseMirror th {
+    color: #000000 !important;
+  }
+  
+  .ProseMirror strong {
+    color: #000000 !important;
+  }
 }
