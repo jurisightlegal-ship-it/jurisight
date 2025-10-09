@@ -103,6 +103,25 @@
   border-radius: 0 0.375rem 0.375rem 0 !important;
 }
 
+/* Force white text in all blockquote elements and their children */
+.ProseMirror blockquote,
+.ProseMirror blockquote *,
+.ProseMirror blockquote p,
+.ProseMirror blockquote div,
+.ProseMirror blockquote span,
+.ProseMirror blockquote strong,
+.ProseMirror blockquote em,
+.ProseMirror blockquote a,
+.ProseMirror blockquote h1,
+.ProseMirror blockquote h2,
+.ProseMirror blockquote h3,
+.ProseMirror blockquote h4,
+.ProseMirror blockquote h5,
+.ProseMirror blockquote h6 {
+  color: #ffffff !important;
+  opacity: 1 !important;
+}
+
 .ProseMirror code {
   background-color: #f3f4f6 !important;
   padding: 0.125rem 0.375rem !important;
@@ -171,6 +190,25 @@
   border-left-color: #22c55e !important;
   color: #ffffff !important;
   background-color: #166534 !important;
+}
+
+/* Force white text in all blockquote elements and their children in dark mode */
+.dark .ProseMirror blockquote,
+.dark .ProseMirror blockquote *,
+.dark .ProseMirror blockquote p,
+.dark .ProseMirror blockquote div,
+.dark .ProseMirror blockquote span,
+.dark .ProseMirror blockquote strong,
+.dark .ProseMirror blockquote em,
+.dark .ProseMirror blockquote a,
+.dark .ProseMirror blockquote h1,
+.dark .ProseMirror blockquote h2,
+.dark .ProseMirror blockquote h3,
+.dark .ProseMirror blockquote h4,
+.dark .ProseMirror blockquote h5,
+.dark .ProseMirror blockquote h6 {
+  color: #ffffff !important;
+  opacity: 1 !important;
 }
 
 .dark .ProseMirror code {

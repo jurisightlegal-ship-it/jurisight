@@ -130,7 +130,6 @@ div[class*="article-content"] a {
 .article-content strong,
 .article-content em,
 .article-content a,
-.article-content blockquote,
 .article-content code,
 .article-content pre {
   color: #000000 !important;
@@ -195,7 +194,6 @@ div[class*="CardContent"] div[class*="article-content"] a {
 .article-content strong,
 .article-content em,
 .article-content a,
-.article-content blockquote,
 .article-content code,
 .article-content pre,
 .article-content table,
@@ -316,6 +314,34 @@ div[class*="CardContent"] div[class*="article-content"] a {
   color: #ffffff !important;
   background-color: #dcfce7 !important;
   border-radius: 0 0.375rem 0.375rem 0 !important;
+  opacity: 1 !important;
+}
+
+/* Force white text in all blockquote elements and their children */
+.article-content blockquote,
+.article-content blockquote *,
+.article-content blockquote p,
+.article-content blockquote div,
+.article-content blockquote span,
+.article-content blockquote strong,
+.article-content blockquote em,
+.article-content blockquote a,
+.article-content blockquote h1,
+.article-content blockquote h2,
+.article-content blockquote h3,
+.article-content blockquote h4,
+.article-content blockquote h5,
+.article-content blockquote h6 {
+  color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+/* Override any potential parent container styles */
+div[class*="article-content"] blockquote,
+div[class*="article-content"] blockquote *,
+div[class*="CardContent"] blockquote,
+div[class*="CardContent"] blockquote * {
+  color: #ffffff !important;
   opacity: 1 !important;
 }
 
@@ -561,6 +587,34 @@ div[class*="CardContent"] div[class*="article-content"] a {
     border-left-color: #22c55e !important;
     color: #ffffff !important;
     background-color: #166534 !important;
+  }
+  
+  /* Force white text in all blockquote elements and their children in dark mode */
+  .article-content blockquote,
+  .article-content blockquote *,
+  .article-content blockquote p,
+  .article-content blockquote div,
+  .article-content blockquote span,
+  .article-content blockquote strong,
+  .article-content blockquote em,
+  .article-content blockquote a,
+  .article-content blockquote h1,
+  .article-content blockquote h2,
+  .article-content blockquote h3,
+  .article-content blockquote h4,
+  .article-content blockquote h5,
+  .article-content blockquote h6 {
+    color: #ffffff !important;
+    opacity: 1 !important;
+  }
+  
+  /* Override any potential parent container styles in dark mode */
+  div[class*="article-content"] blockquote,
+  div[class*="article-content"] blockquote *,
+  div[class*="CardContent"] blockquote,
+  div[class*="CardContent"] blockquote * {
+    color: #ffffff !important;
+    opacity: 1 !important;
   }
   
   .article-content code {
