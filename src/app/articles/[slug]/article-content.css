@@ -8,6 +8,19 @@
   font-weight: 400 !important;
 }
 
+/* Allow font size styles to work */
+.article-content span[style*="font-size"],
+.article-content p[style*="font-size"],
+.article-content div[style*="font-size"],
+.article-content h1[style*="font-size"],
+.article-content h2[style*="font-size"],
+.article-content h3[style*="font-size"],
+.article-content h4[style*="font-size"],
+.article-content h5[style*="font-size"],
+.article-content h6[style*="font-size"] {
+  font-size: inherit !important;
+}
+
 /* Override any parent container opacity issues */
 .article-content * {
   opacity: 1 !important;
@@ -227,6 +240,11 @@ div[class*="CardContent"] div[class*="article-content"] a {
   color: #000000 !important;
   opacity: 1 !important;
   font-weight: 400 !important;
+}
+
+/* Allow custom font sizes in paragraphs */
+.article-content p[style*="font-size"] {
+  font-size: inherit !important;
 }
 
 .article-content p:last-child {
@@ -501,6 +519,13 @@ div[class*="CardContent"] blockquote * {
     line-height: 1.7 !important;
     color: #000000 !important;
     opacity: 1 !important;
+  }
+  
+  /* Allow custom font sizes in mobile */
+  .article-content p[style*="font-size"],
+  .article-content span[style*="font-size"],
+  .article-content div[style*="font-size"] {
+    font-size: inherit !important;
   }
   
   .article-content h1 {
