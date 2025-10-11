@@ -54,13 +54,52 @@ import {
   Subscript as SubscriptIcon,
   Superscript as SuperscriptIcon,
   Hash,
-  BarChart3
+  BarChart3,
+  Plus,
+  Minus as MinusIcon,
+  Type as TypeIcon
 } from 'lucide-react';
 import { createLowlight } from 'lowlight';
 import './rich-text-editor.css';
 
 // Create lowlight instance for syntax highlighting
 const lowlight = createLowlight();
+
+// Custom FontSize extension
+const FontSize = TextStyle.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      fontSize: {
+        default: null,
+        parseHTML: element => element.style.fontSize?.replace(/['"]+/g, ''),
+        renderHTML: attributes => {
+          if (!attributes.fontSize) {
+            return {};
+          }
+          return {
+            style: `font-size: ${attributes.fontSize}`,
+          };
+        },
+      },
+    };
+  },
+  addCommands() {
+    return {
+      setFontSize: (fontSize) => ({ chain }) => {
+        return chain()
+          .setMark('textStyle', { fontSize })
+          .run();
+      },
+      unsetFontSize: () => ({ chain }) => {
+        return chain()
+          .setMark('textStyle', { fontSize: null })
+          .removeEmptyTextStyle()
+          .run();
+      },
+    };
+  },
+});
 
 // Custom Image extension that tracks uploaded images for deletion
 const CustomImage = Image.extend({
@@ -190,6 +229,7 @@ export const RichTextEditor = ({
         },
       }),
       TextStyle,
+      FontSize,
       Underline,
       Subscript,
       Superscript,
@@ -470,6 +510,24 @@ export const RichTextEditor = ({
     }
   };
 
+  const increaseFontSize = () => {
+    if (editor) {
+      const currentSize = editor.getAttributes('textStyle').fontSize;
+      const currentSizeNum = currentSize ? parseInt(currentSize.replace('px', '')) : 16;
+      const newSize = Math.min(currentSizeNum + 2, 48); // Max 48px
+      editor.chain().focus().setFontSize(`${newSize}px`).run();
+    }
+  };
+
+  const decreaseFontSize = () => {
+    if (editor) {
+      const currentSize = editor.getAttributes('textStyle').fontSize;
+      const currentSizeNum = currentSize ? parseInt(currentSize.replace('px', '')) : 16;
+      const newSize = Math.max(currentSizeNum - 2, 8); // Min 8px
+      editor.chain().focus().setFontSize(`${newSize}px`).run();
+    }
+  };
+
   if (!editor) {
     return null;
   }
@@ -571,6 +629,33 @@ export const RichTextEditor = ({
             className={editor.isActive('superscript') ? 'bg-gray-200 dark:bg-gray-600' : 'dark:text-gray-300 dark:hover:bg-gray-600'}
           >
             <SuperscriptIcon className="h-4 w-4" />
+          </Button>
+        </div>
+
+        <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
+
+        {/* Font Size Controls */}
+        <div className="flex gap-1">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={decreaseFontSize}
+            className="dark:text-gray-300 dark:hover:bg-gray-600"
+            title="Decrease font size"
+          >
+            <MinusIcon className="h-4 w-4" />
+          </Button>
+          
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={increaseFontSize}
+            className="dark:text-gray-300 dark:hover:bg-gray-600"
+            title="Increase font size"
+          >
+            <Plus className="h-4 w-4" />
           </Button>
         </div>
 
