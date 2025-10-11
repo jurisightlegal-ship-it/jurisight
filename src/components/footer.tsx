@@ -42,8 +42,9 @@ export function Footer() {
     { name: "Legal Analysis", href: "/articles" },
   ];
 
-  const resources = [
+  const resources: Array<{ name: string; href: string; external?: boolean }> = [
     { name: "Sign In", href: "/auth/signin" },
+    { name: "Sign in to mail", href: "https://www.spacemail.com/", external: true },
   ];
 
 
@@ -146,6 +147,8 @@ export function Footer() {
                 <li key={resource.name}>
                   <Link
                     href={resource.href}
+                    target={resource.external ? "_blank" : undefined}
+                    rel={resource.external ? "noopener noreferrer" : undefined}
                     className="text-slate-300 hover:text-white transition-colors duration-200 text-sm flex items-center gap-2 group"
                   >
                     <span>{resource.name}</span>
