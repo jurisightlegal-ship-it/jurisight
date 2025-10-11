@@ -110,9 +110,28 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       `Read "${article.title}" by ${authorName} on ${sectionName}. Published on ${new Date(publishedDate).toLocaleDateString()}.`;
 
     // Create Open Graph image URL
-    const ogImage = featuredImage ? 
-      `${process.env.NEXT_PUBLIC_SITE_URL || 'https://jurisight.in'}${featuredImage}` :
-      `${process.env.NEXT_PUBLIC_SITE_URL || 'https://jurisight.in'}/api/og?title=${encodeURIComponent(article.title)}&author=${encodeURIComponent(authorName)}`;
+    let ogImage: string;
+    if (featuredImage) {
+      if (featuredImage.startsWith('http')) {
+        // Already a full URL
+        ogImage = featuredImage;
+      } else {
+        // Supabase storage path - get signed URL
+        try {
+          const { data: urlData } = await supabase.storage
+            .from('article-media')
+            .getPublicUrl(featuredImage);
+          ogImage = urlData.publicUrl;
+        } catch (error) {
+          console.error('Error getting featured image URL:', error);
+          // Fallback to static OG image
+          ogImage = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://jurisight.in'}/Jurisight.png`;
+        }
+      }
+    } else {
+      // No featured image, use static OG image
+      ogImage = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://jurisight.in'}/Jurisight.png`;
+    }
 
     return {
       title: `${article.title} | Jurisight`,
