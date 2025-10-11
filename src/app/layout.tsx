@@ -7,6 +7,7 @@ import { MagazinePopupProvider } from "@/components/magazine-popup-provider";
 import { CookieProvider } from "@/components/providers/cookie-provider";
 import { CookieNotice } from "@/components/cookie-notice";
 import { SpeedInsights } from "@vercel/speed-insights/react";
+import Script from "next/script";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -126,6 +127,20 @@ export default function RootLayout({
           </DarkModeProvider>
         </Providers>
         <SpeedInsights />
+        
+        {/* Google Analytics */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-2399KEEWCS"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-2399KEEWCS');
+          `}
+        </Script>
       </body>
     </html>
   );

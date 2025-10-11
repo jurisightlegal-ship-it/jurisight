@@ -10,15 +10,6 @@
   font-weight: 400 !important;
 }
 
-/* Font Size Styles */
-.ProseMirror [style*="font-size"] {
-  font-size: inherit !important;
-}
-
-.ProseMirror span[style*="font-size"] {
-  font-size: inherit !important;
-}
-
 .ProseMirror p {
   margin-bottom: 1.25rem !important;
   line-height: 1.7 !important;
