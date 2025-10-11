@@ -6,6 +6,7 @@ import { DarkModeProvider } from "@/components/providers/dark-mode-provider";
 import { MagazinePopupProvider } from "@/components/magazine-popup-provider";
 import { CookieProvider } from "@/components/providers/cookie-provider";
 import { CookieNotice } from "@/components/cookie-notice";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -124,6 +125,7 @@ export default function RootLayout({
             </MagazinePopupProvider>
           </DarkModeProvider>
         </Providers>
+        <SpeedInsights />
       </body>
     </html>
   );
