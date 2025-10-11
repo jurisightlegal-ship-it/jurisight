@@ -10,6 +10,7 @@ import { SocialShareButton } from '@/components/social-share-button';
 import { RecentArticlesSection } from '@/components/recent-articles-section';
 import { Footer } from '@/components/footer';
 import { supabase } from '@/lib/supabase-db';
+import { getImageDisplayUrl } from '@/lib/storage-utils';
 import { 
   Calendar, 
   Clock, 
@@ -116,12 +117,15 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         // Already a full URL
         ogImage = featuredImage;
       } else {
-        // Supabase storage path - get signed URL
+        // Supabase storage path - get signed URL using storage utils
         try {
-          const { data: urlData } = await supabase.storage
-            .from('article-media')
-            .getPublicUrl(featuredImage);
-          ogImage = urlData.publicUrl;
+          const processedUrl = await getImageDisplayUrl(featuredImage);
+          if (processedUrl) {
+            ogImage = processedUrl;
+          } else {
+            // Fallback to static OG image if processing fails
+            ogImage = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://jurisight.in'}/Jurisight.png`;
+          }
         } catch (error) {
           console.error('Error getting featured image URL:', error);
           // Fallback to static OG image
