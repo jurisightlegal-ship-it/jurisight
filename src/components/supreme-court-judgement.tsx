@@ -38,7 +38,7 @@ export function SupremeCourtJudgement() {
   React.useEffect(() => {
     const fetchArticles = async () => {
       try {
-        const response = await fetch('/api/articles?section=constitutional&limit=6');
+        const response = await fetch('/api/articles?section=supreme-court-judgement&limit=6');
         if (response.ok) {
           const data = await response.json();
           const articles = data.articles || [];
@@ -101,7 +101,7 @@ export function SupremeCourtJudgement() {
             <h2 className="text-3xl font-bold text-black mb-2">Supreme Court Judgement</h2>
             <p className="text-black/60">Recent landmark decisions with concise takeaways</p>
           </div>
-          <Link href="/sections/constitutional">
+          <Link href="/supreme-court-judgements">
             <Button className="bg-white text-black hover:bg-gray-100 border border-black/20">
               View All
               <ArrowRight className="ml-2 h-4 w-4" />
