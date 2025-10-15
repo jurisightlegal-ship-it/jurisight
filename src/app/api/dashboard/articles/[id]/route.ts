@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { supabase } from '@/lib/supabase-db';
@@ -83,11 +84,11 @@ export async function GET(
       scheduledAt: article.scheduled_at,
       author: {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        id: (article as { id: string; name: string; slug: string; color: string; }).users?.id || (article as { id: string; name: string; slug: string; color: string; }).author_id,
+        id: (article as any).users?.id || (article as any).author_id,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        name: (article as { id: string; name: string; slug: string; color: string; }).users?.name || 'Unknown Author',
+        name: (article as any).users?.name || 'Unknown Author',
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        bio: (article as { id: string; name: string; slug: string; color: string; }).users?.bio || null,
+        bio: (article as any).users?.bio || null,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         avatar: (article as any).users?.image || null,
       },
@@ -331,6 +332,23 @@ export async function PUT(
         { error: 'Failed to update article' },
         { status: 500 }
       );
+    }
+
+    // Auto-revalidate paths when article is published or updated
+    try {
+      const becamePublished = (updateData.status === 'PUBLISHED' && article.status !== 'PUBLISHED') || updatedArticle.status === 'PUBLISHED';
+      if (becamePublished) {
+        // Revalidate sitemap, lists, and the specific article page
+        revalidatePath('/');
+        revalidatePath('/articles');
+        revalidatePath('/sitemap.xml');
+        if (updatedArticle.slug) {
+          revalidatePath(`/articles/${updatedArticle.slug}`);
+        }
+      }
+    } catch (revalError) {
+      console.error('Revalidation after publish failed:', revalError);
+      // Do not fail the request due to cache revalidation issues
     }
 
     // Delete revision notes when author updates their article content

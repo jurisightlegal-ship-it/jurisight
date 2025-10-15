@@ -1,6 +1,9 @@
 import { MetadataRoute } from 'next'
 import { supabase } from '@/lib/supabase-db'
 
+// Re-generate the sitemap periodically so newly published articles are included
+export const revalidate = 3600; // seconds
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://jurisight.in'
   
