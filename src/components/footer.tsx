@@ -44,7 +44,7 @@ export function Footer() {
 
   const resources: Array<{ name: string; href: string; external?: boolean }> = [
     { name: "Sign In", href: "/auth/signin" },
-    { name: "Sign in to mail", href: "https://www.spacemail.com/", external: true },
+    { name: "Sign in to mail", href: "https://www.spacemail.com/login/", external: true },
   ];
 
 
