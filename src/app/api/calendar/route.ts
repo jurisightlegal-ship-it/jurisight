@@ -25,9 +25,9 @@ export async function GET(request: NextRequest) {
     const targetMonth = month ? parseInt(month) : currentDate.getMonth() + 1;
     const targetYear = year ? parseInt(year) : currentDate.getFullYear();
 
-    // Calculate date range for the month
-    const startDate = new Date(targetYear, targetMonth - 1, 1);
-    const endDate = new Date(targetYear, targetMonth, 0, 23, 59, 59);
+    // Calculate date range for the month using UTC to avoid timezone cutoffs
+    const startDate = new Date(Date.UTC(targetYear, targetMonth - 1, 1, 0, 0, 0, 0));
+    const endDate = new Date(Date.UTC(targetYear, targetMonth, 0, 23, 59, 59, 999));
 
     // Build query based on user role - simplified version
     let query = supabase
@@ -44,6 +44,7 @@ export async function GET(request: NextRequest) {
         author_id,
         section_id
       `)
+      .eq('status', 'SCHEDULED')
       .not('scheduled_at', 'is', null)
       .gte('scheduled_at', startDate.toISOString())
       .lte('scheduled_at', endDate.toISOString())
@@ -64,8 +65,9 @@ export async function GET(request: NextRequest) {
     // Group articles by date
     const calendarData = articles?.reduce((acc, article) => {
       if (!article.scheduled_at) return acc;
-      
-      const date = new Date(article.scheduled_at).toISOString().split('T')[0];
+      // Use an ISO-like local date key (YYYY-MM-DD) to better align with client calendar grid
+      const d = new Date(article.scheduled_at);
+      const date = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
       
       if (!acc[date]) {
         acc[date] = [];
@@ -94,11 +96,21 @@ export async function GET(request: NextRequest) {
       
       return acc;
     }, {} as Record<string, Array<{
-      id: string;
+      id: number | string;
       title: string;
       slug: string;
-      published_at: string;
+      dek?: string;
+      status: string;
+      scheduledAt: string;
+      publishedAt: string | null;
+      createdAt: string;
+      author: {
+        id: string;
+        name: string | null;
+        email: string;
+      };
       section: {
+        id: number | string;
         name: string;
         color: string;
       };
