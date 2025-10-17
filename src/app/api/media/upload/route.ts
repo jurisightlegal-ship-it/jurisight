@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { createClient } from '@supabase/supabase-js';
@@ -18,7 +21,7 @@ export async function POST(request: NextRequest) {
     // Parse form data
     const formData = await request.formData();
     const file = formData.get('file') as File;
-    const type = formData.get('type') as string; // 'image' or 'video'
+    const type = formData.get('type') as string; // 'image' | 'video' | 'document'
 
     if (!file) {
       return NextResponse.json(
@@ -43,6 +46,17 @@ export async function POST(request: NextRequest) {
     // Validate file type
     const allowedImageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
     const allowedVideoTypes = ['video/mp4', 'video/webm', 'video/mov', 'video/avi'];
+    const allowedDocumentTypes = [
+      'application/pdf',
+      'application/x-pdf',
+      'application/acrobat',
+      'applications/vnd.pdf',
+      'text/pdf',
+      'text/x-pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/octet-stream'
+    ];
     const maxFileSize = 10 * 1024 * 1024; // 10MB
 
     if (file.size > maxFileSize) {
@@ -62,6 +76,9 @@ export async function POST(request: NextRequest) {
     } else if (type === 'video' || file.type.startsWith('video/')) {
       folder = 'videos';
       allowedTypes = allowedVideoTypes;
+    } else if (type === 'document' || allowedDocumentTypes.includes(file.type)) {
+      folder = 'documents';
+      allowedTypes = allowedDocumentTypes;
     } else {
       return NextResponse.json(
         { error: 'Invalid file type' },
@@ -69,11 +86,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!allowedTypes.includes(file.type)) {
+    // MIME-type fallback for documents: some browsers provide empty or generic types.
+    if (folder === 'documents') {
+      const ext = (file.name.split('.').pop() || '').toLowerCase();
+      const mimeOk = !!file.type && allowedTypes.includes(file.type);
+      const extOk = ['pdf', 'doc', 'docx'].includes(ext);
+      if (!mimeOk && !extOk) {
       return NextResponse.json(
-        { error: `Invalid file type. Allowed types: ${allowedTypes.join(', ')}` },
+        { error: `Invalid document type. Allowed: pdf, doc, docx`, received: { name: file.name, type: file.type, size: file.size } },
         { status: 400 }
       );
+      }
+    } else {
+      if (!allowedTypes.includes(file.type)) {
+        return NextResponse.json(
+          { error: `Invalid file type. Allowed types: ${allowedTypes.join(', ')}` },
+          { status: 400 }
+        );
+      }
     }
 
     // Generate unique filename
@@ -81,9 +111,12 @@ export async function POST(request: NextRequest) {
     const fileName = `${uuidv4()}.${fileExtension}`;
     const filePath = `${folder}/${session.user.id}/${fileName}`;
 
-    // Upload to Supabase storage
+    // Choose bucket per type (workaround: some buckets reject non-image mime types)
+    const bucket = folder === 'documents' ? 'jurisightlegal' : 'article-media';
+
+    // Upload to Supabase storage (omit explicit contentType to avoid mime restrictions)
     const { error: uploadError } = await supabase.storage
-      .from('article-media')
+      .from(bucket)
       .upload(filePath, file, {
         cacheControl: '3600',
         upsert: false
@@ -99,7 +132,7 @@ export async function POST(request: NextRequest) {
 
     // Get public URL
     const { data: urlData } = supabase.storage
-      .from('article-media')
+      .from(bucket)
       .getPublicUrl(filePath);
 
     const result = {

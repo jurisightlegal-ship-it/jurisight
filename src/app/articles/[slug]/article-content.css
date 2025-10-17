@@ -44,9 +44,7 @@
 .article-content strong,
 .article-content em,
 .article-content a {
-  color: #000000 !important;
   opacity: 1 !important;
-  font-weight: 400 !important;
 }
 
 /* Override any prose classes that might be interfering */
@@ -89,9 +87,7 @@ div[class*="article-content"] ol,
 div[class*="article-content"] strong,
 div[class*="article-content"] em,
 div[class*="article-content"] a {
-  color: #000000 !important;
   opacity: 1 !important;
-  font-weight: 400 !important;
 }
 
 /* Override any Tailwind text color classes */
@@ -145,9 +141,7 @@ div[class*="article-content"] a {
 .article-content a,
 .article-content code,
 .article-content pre {
-  color: #000000 !important;
   opacity: 1 !important;
-  font-weight: 400 !important;
 }
 
 /* Force override any CSS custom properties that might be affecting color */
@@ -212,9 +206,7 @@ div[class*="CardContent"] div[class*="article-content"] a {
 .article-content table,
 .article-content th,
 .article-content td {
-  color: #000000 !important;
   opacity: 1 !important;
-  font-weight: 400 !important;
   text-decoration-color: #000000 !important;
   border-color: #000000 !important;
 }
@@ -442,7 +434,7 @@ div[class*="CardContent"] blockquote * {
 }
 
 .article-content strong {
-  font-weight: 600 !important;
+  font-weight: 700 !important;
   color: #111827 !important;
 }
 

@@ -1,28 +1,9 @@
 'use client';
 
-import { useEditor, EditorContent } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
-import Image from '@tiptap/extension-image';
-import Link from '@tiptap/extension-link';
-import YouTube from '@tiptap/extension-youtube';
-import Heading from '@tiptap/extension-heading';
-import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
-import { Table } from '@tiptap/extension-table';
-import { TableRow } from '@tiptap/extension-table-row';
-import { TableCell } from '@tiptap/extension-table-cell';
-import { TableHeader } from '@tiptap/extension-table-header';
-import { TextAlign } from '@tiptap/extension-text-align';
-import { Color } from '@tiptap/extension-color';
-import { Highlight } from '@tiptap/extension-highlight';
-import { HorizontalRule } from '@tiptap/extension-horizontal-rule';
-import { TextStyle } from '@tiptap/extension-text-style';
-import { Underline } from '@tiptap/extension-underline';
-import { Subscript } from '@tiptap/extension-subscript';
-import { Superscript } from '@tiptap/extension-superscript';
-import { CharacterCount } from '@tiptap/extension-character-count';
-import { Node, mergeAttributes } from '@tiptap/core';
+// Defer importing Quill on the client to avoid SSR "document is not defined"
+import 'quill/dist/quill.snow.css';
 import { Button } from './button';
-import { useState, useCallback, useEffect } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { 
   Bold, 
   Italic, 
@@ -42,7 +23,6 @@ import {
   Heading2,
   Heading3,
   Code,
-  Table as TableIcon,
   AlignLeft,
   AlignCenter,
   AlignRight,
@@ -50,77 +30,12 @@ import {
   Palette,
   Highlighter,
   Minus,
-  Type,
-  Subscript as SubscriptIcon,
-  Superscript as SuperscriptIcon,
   Hash,
   BarChart3,
   Plus,
-  Minus as MinusIcon,
-  Type as TypeIcon
+  Minus as MinusIcon
 } from 'lucide-react';
-import { createLowlight } from 'lowlight';
 import './rich-text-editor.css';
-
-// Create lowlight instance for syntax highlighting
-const lowlight = createLowlight();
-
-// Custom FontSize extension
-const FontSize = TextStyle.extend({
-  addAttributes() {
-    return {
-      ...this.parent?.(),
-      fontSize: {
-        default: null,
-        parseHTML: element => element.style.fontSize?.replace(/['"]+/g, ''),
-        renderHTML: attributes => {
-          if (!attributes.fontSize) {
-            return {};
-          }
-          return {
-            style: `font-size: ${attributes.fontSize}`,
-          };
-        },
-      },
-    };
-  },
-  addCommands() {
-    return {
-      setFontSize: (fontSize) => ({ chain }) => {
-        return chain()
-          .setMark('textStyle', { fontSize })
-          .run();
-      },
-      unsetFontSize: () => ({ chain }) => {
-        return chain()
-          .setMark('textStyle', { fontSize: null })
-          .removeEmptyTextStyle()
-          .run();
-      },
-    };
-  },
-});
-
-// Custom Image extension that tracks uploaded images for deletion
-const CustomImage = Image.extend({
-  addAttributes() {
-    return {
-      ...this.parent?.(),
-      'data-file-path': {
-        default: null,
-        parseHTML: element => element.getAttribute('data-file-path'),
-        renderHTML: attributes => {
-          if (!attributes['data-file-path']) {
-            return {};
-          }
-          return {
-            'data-file-path': attributes['data-file-path'],
-          };
-        },
-      },
-    };
-  },
-});
 
 interface RichTextEditorProps {
   content: string;
@@ -142,17 +57,17 @@ export const RichTextEditor = ({
   const [isUploading, setIsUploading] = useState(false);
   const [isUploadingVideo, setIsUploadingVideo] = useState(false);
   const [isFetchingLink, setIsFetchingLink] = useState(false);
+  const editorRef = useRef<HTMLDivElement | null>(null);
+  const quillRef = useRef<any | null>(null);
+  const previousHtmlRef = useRef<string>(content || '');
 
-  // Store condition in variable
   const shouldShowImageUpload = !!(onImageUpload || userId);
 
-  // Function to delete file from storage
   const deleteFileFromStorage = async (filePath: string) => {
     try {
       const response = await fetch(`/api/media/upload?path=${encodeURIComponent(filePath)}`, {
         method: 'DELETE',
       });
-      
       if (!response.ok) {
         const errorData = await response.json();
         console.error('Failed to delete file:', errorData.error);
@@ -162,782 +77,298 @@ export const RichTextEditor = ({
     }
   };
 
-  const editor = useEditor({
-    extensions: [
-      StarterKit.configure({
-        codeBlock: false, // We'll use CodeBlockLowlight instead
-      }),
-      CustomImage.configure({
-        HTMLAttributes: {
-          class: 'rounded-lg max-w-full h-auto',
-        },
-      }),
-      Link.configure({
-        openOnClick: false,
-        HTMLAttributes: {
-          class: 'text-blue-600 underline cursor-pointer',
-        },
-      }),
-      YouTube.configure({
-        width: 640,
-        height: 480,
-        HTMLAttributes: {
-          class: 'rounded-lg',
-        },
-      }),
-      Heading.configure({
-        levels: [1, 2, 3, 4, 5, 6],
-      }),
-      CodeBlockLowlight.configure({
-        lowlight,
-        HTMLAttributes: {
-          class: 'bg-gray-100 dark:bg-gray-800 rounded-lg p-4 my-4',
-        },
-      }),
-      Table.configure({
-        resizable: true,
-        HTMLAttributes: {
-          class: 'border-collapse border border-gray-300 dark:border-gray-600 my-4',
-        },
-      }),
-      TableRow,
-      TableHeader.configure({
-        HTMLAttributes: {
-          class: 'border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 px-4 py-2 font-semibold',
-        },
-      }),
-      TableCell.configure({
-        HTMLAttributes: {
-          class: 'border border-gray-300 dark:border-gray-600 px-4 py-2',
-        },
-      }),
-      TextAlign.configure({
-        types: ['heading', 'paragraph'],
-      }),
-      Color.configure({
-        types: ['textStyle'],
-      }),
-      Highlight.configure({
-        multicolor: true,
-        HTMLAttributes: {
-          class: 'px-1 rounded',
-        },
-      }),
-      HorizontalRule.configure({
-        HTMLAttributes: {
-          class: 'my-8 border-t border-gray-300 dark:border-gray-600',
-        },
-      }),
-      TextStyle,
-      FontSize,
-      Underline,
-      Subscript,
-      Superscript,
-      CharacterCount,
-    ],
-    content,
-    immediatelyRender: false,
-    onUpdate: ({ editor }) => {
-      onChange(editor.getHTML());
-    },
-    editorProps: {
-      attributes: {
-        class: 'focus:outline-none min-h-[200px]',
-      },
-    },
-  });
-
-  // Handle deletion of images and videos when content changes
-  useEffect(() => {
-    if (!editor) return;
-
-    const handleDelete = () => {
-      const currentContent = editor.getHTML();
-      const currentImages = currentContent.match(/<img[^>]+data-file-path="([^"]+)"/g) || [];
-      const currentVideos = currentContent.match(/<video[^>]+data-file-path="([^"]+)"/g) || [];
-      
-      // Get all file paths from current content
-      const currentFilePaths = new Set([
-        ...currentImages.map(img => img.match(/data-file-path="([^"]+)"/)?.[1]).filter(Boolean),
-        ...currentVideos.map(video => video.match(/data-file-path="([^"]+)"/)?.[1]).filter(Boolean)
-      ]);
-
-      // Compare with previous content to find deleted files
-      const previousContent = content;
-      const previousImages = previousContent.match(/<img[^>]+data-file-path="([^"]+)"/g) || [];
-      const previousVideos = previousContent.match(/<video[^>]+data-file-path="([^"]+)"/g) || [];
-      
-      const previousFilePaths = new Set([
-        ...previousImages.map(img => img.match(/data-file-path="([^"]+)"/)?.[1]).filter(Boolean),
-        ...previousVideos.map(video => video.match(/data-file-path="([^"]+)"/)?.[1]).filter(Boolean)
-      ]);
-
-      // Find deleted files
-      const deletedFiles = [...previousFilePaths].filter(path => !currentFilePaths.has(path));
-      
-      // Delete files from storage
-      deletedFiles.forEach(filePath => {
-        if (filePath) {
-          deleteFileFromStorage(filePath);
-        }
-      });
-    };
-
-    // Listen for content changes
-    editor.on('update', handleDelete);
-    
-    return () => {
-      editor.off('update', handleDelete);
-    };
-  }, [editor, content, deleteFileFromStorage]);
-
-
-  const addImage = () => {
-    const url = window.prompt('Enter image URL:');
-    if (url && editor) {
-      editor.chain().focus().setImage({ src: url }).run();
+  const uploadFileToAPI = async (file: File, type: 'image' | 'video'): Promise<{ url: string; path: string } > => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('type', type);
+    const response = await fetch('/api/media/upload', {
+      method: 'POST',
+      body: formData,
+    });
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Upload failed');
     }
+    const { data } = await response.json();
+    return { url: data.url, path: data.path };
   };
 
-  const uploadImage = async () => {
+  const modules = useMemo(() => ({
+    toolbar: {
+      container: [
+        [{ header: [1, 2, 3, false] }],
+        ['bold', 'italic', 'underline', 'strike', 'code'],
+        [{ color: [] }, { background: [] }],
+        [{ list: 'ordered' }, { list: 'bullet' }],
+        [{ align: [] }],
+        ['blockquote', 'code-block'],
+        ['link', 'image', 'video'],
+        ['clean']
+      ],
+      handlers: {
+        image: async () => {
+          if (!quillRef.current) return;
     if (!onImageUpload && !userId) return;
-    
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
     input.onchange = async (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
-      if (file && editor) {
+            if (!file) return;
         setIsUploading(true);
         try {
           let imageUrl: string;
           let filePath: string;
           if (onImageUpload) {
             imageUrl = await onImageUpload(file);
-            // Extract file path from URL for tracking
-            filePath = imageUrl.split('/').slice(-3).join('/'); // Get the path part
+                filePath = imageUrl.split('/').slice(-3).join('/');
           } else {
-            // Fallback to direct API upload
             const result = await uploadFileToAPI(file, 'image');
             imageUrl = result.url;
             filePath = result.path;
           }
-          editor.chain().focus().insertContent(`
-            <img src="${imageUrl}" data-file-path="${filePath}" class="rounded-lg max-w-full h-auto" />
-          `).run();
-        } catch (error) {
-          console.error('Failed to upload image:', error);
+              const quill = quillRef.current;
+              const range = quill?.getSelection(true);
+              if (range) {
+                // Insert HTML so we can keep data-file-path attribute
+                quill?.clipboard.dangerouslyPasteHTML(range.index, `<img src="${imageUrl}" data-file-path="${filePath}" class="rounded-lg max-w-full h-auto" />`);
+                quill?.setSelection(range.index + 1, 0);
+              }
+            } catch (err) {
+              console.error('Failed to upload image:', err);
           alert('Failed to upload image. Please try again.');
         } finally {
           setIsUploading(false);
-        }
       }
     };
     input.click();
-  };
-
-  const uploadVideo = async () => {
+        },
+        video: async () => {
+          if (!quillRef.current) return;
     if (!onVideoUpload && !userId) return;
-    
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'video/*';
     input.onchange = async (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
-      if (file && editor) {
+            if (!file) return;
         setIsUploadingVideo(true);
         try {
           let videoUrl: string;
           let filePath: string;
           if (onVideoUpload) {
             videoUrl = await onVideoUpload(file);
-            // Extract file path from URL for tracking
-            filePath = videoUrl.split('/').slice(-3).join('/'); // Get the path part
+                filePath = videoUrl.split('/').slice(-3).join('/');
           } else {
-            // Fallback to direct API upload
             const result = await uploadFileToAPI(file, 'video');
             videoUrl = result.url;
             filePath = result.path;
           }
-          // Insert video as HTML with file path tracking
-          editor.chain().focus().insertContent(`
+              const quill = quillRef.current;
+              const range = quill?.getSelection(true);
+              if (range) {
+                quill?.clipboard.dangerouslyPasteHTML(range.index, `
             <video controls class="max-w-full h-auto rounded-lg" data-file-path="${filePath}">
               <source src="${videoUrl}" type="${file.type}">
-              Your browser does not support the video tag.
             </video>
-          `).run();
-        } catch (error) {
-          console.error('Failed to upload video:', error);
+                `);
+                quill?.setSelection(range.index + 1, 0);
+              }
+            } catch (err) {
+              console.error('Failed to upload video:', err);
           alert('Failed to upload video. Please try again.');
         } finally {
           setIsUploadingVideo(false);
+            }
+          };
+          input.click();
+        },
+        document: async () => {
+          if (!quillRef.current) return;
+          const input = document.createElement('input');
+          input.type = 'file';
+          input.accept = '.pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+          input.onchange = async (e) => {
+            const file = (e.target as HTMLInputElement).files?.[0];
+            if (!file) return;
+            setIsUploading(true);
+            try {
+              const result = await uploadFileToAPI(file, 'document' as any);
+              const url = result.url;
+              const fileName = file.name;
+              const quill = quillRef.current;
+              const range = quill?.getSelection(true);
+              const linkHtml = `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">${fileName}</a>`;
+              if (range) {
+                quill?.clipboard.dangerouslyPasteHTML(range.index, linkHtml);
+                quill?.setSelection(range.index + 1, 0);
+              }
+            } catch (err) {
+              console.error('Failed to upload document:', err);
+              alert('Failed to upload document. Please try again.');
+            } finally {
+              setIsUploading(false);
+            }
+          };
+          input.click();
         }
       }
-    };
-    input.click();
-  };
+    },
+    clipboard: {
+      matchVisual: false
+    }
+  }), [onImageUpload, onVideoUpload, userId]);
 
-  const uploadFileToAPI = async (file: File, type: 'image' | 'video'): Promise<{url: string, path: string}> => {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('type', type);
+  useEffect(() => {
+    if (!editorRef.current || quillRef.current) return;
+    let isMounted = true;
+    (async () => {
+      const { default: Quill } = await import('quill');
+      if (!isMounted) return;
+      const quill = new Quill(editorRef.current as HTMLElement, {
+        theme: 'snow',
+        placeholder,
+        modules
+      });
+    quillRef.current = quill;
 
-    const response = await fetch('/api/media/upload', {
-      method: 'POST',
-      body: formData,
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Upload failed');
+    // Initialize with existing HTML
+    if (content) {
+      quill.clipboard.dangerouslyPasteHTML(0, content);
     }
 
-    const { data } = await response.json();
-    return { url: data.url, path: data.path };
+    const handleTextChange = () => {
+      const html = quill.root.innerHTML;
+      onChange(html);
+
+      // deletion tracking for uploaded files
+      const currentImages = html.match(/<img[^>]+data-file-path="([^"]+)"/g) || [];
+      const currentVideos = html.match(/<video[^>]+data-file-path="([^"]+)"/g) || [];
+      const currentFilePaths = new Set([
+        ...currentImages.map(img => img.match(/data-file-path="([^"]+)"/)?.[1]).filter(Boolean),
+        ...currentVideos.map(video => video.match(/data-file-path="([^"]+)"/)?.[1]).filter(Boolean)
+      ]);
+      const previousHtml = previousHtmlRef.current || '';
+      const previousImages = previousHtml.match(/<img[^>]+data-file-path="([^"]+)"/g) || [];
+      const previousVideos = previousHtml.match(/<video[^>]+data-file-path="([^"]+)"/g) || [];
+      const previousFilePaths = new Set([
+        ...previousImages.map(img => img.match(/data-file-path="([^"]+)"/)?.[1]).filter(Boolean),
+        ...previousVideos.map(video => video.match(/data-file-path="([^"]+)"/)?.[1]).filter(Boolean)
+      ]);
+      const deletedFiles = [...previousFilePaths].filter(path => !currentFilePaths.has(path));
+      deletedFiles.forEach(fp => { if (fp) deleteFileFromStorage(fp); });
+      previousHtmlRef.current = html;
+    };
+
+      quill.on('text-change', handleTextChange);
+    })();
+    return () => {
+      isMounted = false;
+      const quill = quillRef.current;
+      if (quill) {
+        quill.off('text-change');
+      }
+    };
+  }, [content, modules, onChange, placeholder]);
+
+  // Keep external content prop in sync when it changes from outside (e.g. loading article)
+  useEffect(() => {
+    const quill = quillRef.current;
+    if (!quill) return;
+    const current = quill.root.innerHTML;
+    if (content && content !== current) {
+      quill.clipboard.dangerouslyPasteHTML(0, content);
+      previousHtmlRef.current = content;
+    }
+  }, [content]);
+
+  const addHorizontalRule = () => {
+    const quill = quillRef.current;
+    if (!quill) return;
+    const range = quill.getSelection(true) || { index: quill.getLength(), length: 0 };
+    quill.clipboard.dangerouslyPasteHTML(range.index, '<hr class="my-8 border-t border-gray-300 dark:border-gray-600" />');
+    quill.setSelection(range.index + 1, 0);
   };
 
   const addLink = async () => {
+    const quill = quillRef.current;
+    if (!quill) return;
     const url = window.prompt('Enter URL:');
-    if (url && editor) {
-      // Validate URL
+    if (!url) return;
       try {
         new URL(url);
       } catch {
         alert('Please enter a valid URL');
         return;
       }
-
-      // Check if it's a YouTube URL
-      if (url.includes('youtube.com') || url.includes('youtu.be')) {
-        editor.commands.setYoutubeVideo({ src: url });
-        return;
-      }
-
-      // For other URLs, try to fetch link preview
-      setIsFetchingLink(true);
-      try {
-        const linkPreview = await fetchLinkPreview(url);
-        if (linkPreview) {
-          // Insert rich link preview
-          editor.chain().focus().insertContent(`
-            <div class="link-preview border rounded-lg p-4 my-4 bg-gray-50">
-              <div class="flex gap-4">
-                ${linkPreview.image ? `<img src="${linkPreview.image}" alt="${linkPreview.title}" class="w-24 h-24 object-cover rounded" />` : ''}
-                <div class="flex-1">
-                  <h3 class="font-semibold text-lg mb-2">${linkPreview.title}</h3>
-                  <p class="text-gray-600 text-sm mb-2">${linkPreview.description}</p>
-                  <a href="${url}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline text-sm flex items-center gap-1">
-                    <ExternalLink className="h-3 w-3" />
-                    ${new URL(url).hostname}
-                  </a>
-                </div>
-              </div>
-            </div>
-          `).run();
+    // Simple: apply link format to current selection
+    const range = quill.getSelection(true);
+    if (range && range.length > 0) {
+      quill.format('link', url);
         } else {
-          // Fallback to simple link
-          editor.chain().focus().setLink({ href: url }).run();
-        }
-      } catch (error) {
-        console.error('Failed to fetch link preview:', error);
-        // Fallback to simple link
-        editor.chain().focus().setLink({ href: url }).run();
-      } finally {
-        setIsFetchingLink(false);
-      }
+      quill.clipboard.dangerouslyPasteHTML(range ? range.index : 0, `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`);
     }
   };
 
-  const fetchLinkPreview = async (url: string) => {
-    try {
-      // Use a CORS proxy or your own API endpoint
-      const response = await fetch(`/api/link-preview?url=${encodeURIComponent(url)}`);
-      if (response.ok) {
-        return await response.json();
-      }
-    } catch (error) {
-      console.error('Link preview fetch error:', error);
-    }
-    return null;
-  };
-
-  const addYouTubeVideo = () => {
-    const url = window.prompt('Enter YouTube URL:');
-    if (url && editor) {
-      editor.commands.setYoutubeVideo({
-        src: url,
-      });
-    }
-  };
-
-  const addTable = () => {
-    if (editor) {
-      editor.commands.insertTable({
-        rows: 3,
-        cols: 3,
-        withHeaderRow: true,
-      });
-    }
-  };
-
-  const addHorizontalRule = () => {
-    if (editor) {
-      editor.commands.setHorizontalRule();
-    }
-  };
-
-  const setTextColor = (color: string) => {
-    if (editor) {
-      editor.chain().focus().setColor(color).run();
-    }
-  };
-
-  const setHighlightColor = (color: string) => {
-    if (editor) {
-      editor.chain().focus().setHighlight({ color }).run();
-    }
-  };
-
-  const toggleCodeBlock = () => {
-    if (editor) {
-      editor.chain().focus().toggleCodeBlock().run();
-    }
-  };
-
-  const toggleInlineCode = () => {
-    if (editor) {
-      editor.chain().focus().toggleCode().run();
-    }
-  };
-
-  const increaseFontSize = () => {
-    if (editor) {
-      const currentSize = editor.getAttributes('textStyle').fontSize;
-      const currentSizeNum = currentSize ? parseInt(currentSize.replace('px', '')) : 16;
-      const newSize = Math.min(currentSizeNum + 2, 48); // Max 48px
-      editor.chain().focus().setFontSize(`${newSize}px`).run();
-    }
-  };
-
-  const decreaseFontSize = () => {
-    if (editor) {
-      const currentSize = editor.getAttributes('textStyle').fontSize;
-      const currentSizeNum = currentSize ? parseInt(currentSize.replace('px', '')) : 16;
-      const newSize = Math.max(currentSizeNum - 2, 8); // Min 8px
-      editor.chain().focus().setFontSize(`${newSize}px`).run();
-    }
-  };
-
-  if (!editor) {
+  if (!modules) {
     return null;
   }
 
   return (
     <div className="border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden dark:bg-gray-800">
-      {/* Toolbar */}
       <div className="border-b border-gray-200 dark:border-gray-600 p-2 flex flex-wrap gap-1 bg-gray-50 dark:bg-gray-700">
-        {/* Headings */}
         <div className="flex gap-1">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-            className={editor.isActive('heading', { level: 1 }) ? 'bg-gray-200 dark:bg-gray-600' : 'dark:text-gray-300 dark:hover:bg-gray-600'}
-          >
-            <Heading1 className="h-4 w-4" />
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-            className={editor.isActive('heading', { level: 2 }) ? 'bg-gray-200 dark:bg-gray-600' : 'dark:text-gray-300 dark:hover:bg-gray-600'}
-          >
-            <Heading2 className="h-4 w-4" />
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-            className={editor.isActive('heading', { level: 3 }) ? 'bg-gray-200 dark:bg-gray-600' : 'dark:text-gray-300 dark:hover:bg-gray-600'}
-          >
-            <Heading3 className="h-4 w-4" />
-          </Button>
+          <Button data-testid="btn-h1" type="button" variant="ghost" size="sm" onClick={() => quillRef.current?.format('header', 1)} className="dark:text-gray-300 dark:hover:bg-gray-600"><Heading1 className="h-4 w-4" /></Button>
+          <Button data-testid="btn-h2" type="button" variant="ghost" size="sm" onClick={() => quillRef.current?.format('header', 2)} className="dark:text-gray-300 dark:hover:bg-gray-600"><Heading2 className="h-4 w-4" /></Button>
+          <Button data-testid="btn-h3" type="button" variant="ghost" size="sm" onClick={() => quillRef.current?.format('header', 3)} className="dark:text-gray-300 dark:hover:bg-gray-600"><Heading3 className="h-4 w-4" /></Button>
         </div>
 
         <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
 
-        {/* Text Formatting */}
         <div className="flex gap-1">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => editor.chain().focus().toggleBold().run()}
-            className={editor.isActive('bold') ? 'bg-gray-200 dark:bg-gray-600' : 'dark:text-gray-300 dark:hover:bg-gray-600'}
-          >
-            <Bold className="h-4 w-4" />
-          </Button>
-          
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => editor.chain().focus().toggleItalic().run()}
-            className={editor.isActive('italic') ? 'bg-gray-200 dark:bg-gray-600' : 'dark:text-gray-300 dark:hover:bg-gray-600'}
-          >
-            <Italic className="h-4 w-4" />
-          </Button>
-
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => editor.chain().focus().toggleUnderline().run()}
-            className={editor.isActive('underline') ? 'bg-gray-200 dark:bg-gray-600' : 'dark:text-gray-300 dark:hover:bg-gray-600'}
-          >
-            <UnderlineIcon className="h-4 w-4" />
-          </Button>
-
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => editor.chain().focus().toggleStrike().run()}
-            className={editor.isActive('strike') ? 'bg-gray-200 dark:bg-gray-600' : 'dark:text-gray-300 dark:hover:bg-gray-600'}
-          >
-            <Type className="h-4 w-4" />
-          </Button>
-
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => editor.chain().focus().toggleSubscript().run()}
-            className={editor.isActive('subscript') ? 'bg-gray-200 dark:bg-gray-600' : 'dark:text-gray-300 dark:hover:bg-gray-600'}
-          >
-            <SubscriptIcon className="h-4 w-4" />
-          </Button>
-
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => editor.chain().focus().toggleSuperscript().run()}
-            className={editor.isActive('superscript') ? 'bg-gray-200 dark:bg-gray-600' : 'dark:text-gray-300 dark:hover:bg-gray-600'}
-          >
-            <SuperscriptIcon className="h-4 w-4" />
-          </Button>
+          <Button data-testid="btn-bold" type="button" variant="ghost" size="sm" onClick={() => quillRef.current?.format('bold', true)} className="dark:text-gray-300 dark:hover:bg-gray-600"><Bold className="h-4 w-4" /></Button>
+          <Button data-testid="btn-italic" type="button" variant="ghost" size="sm" onClick={() => quillRef.current?.format('italic', true)} className="dark:text-gray-300 dark:hover:bg-gray-600"><Italic className="h-4 w-4" /></Button>
+          <Button data-testid="btn-underline" type="button" variant="ghost" size="sm" onClick={() => quillRef.current?.format('underline', true)} className="dark:text-gray-300 dark:hover:bg-gray-600"><UnderlineIcon className="h-4 w-4" /></Button>
+          <Button type="button" variant="ghost" size="sm" onClick={() => quillRef.current?.format('strike', true)} className="dark:text-gray-300 dark:hover:bg-gray-600"><Hash className="h-4 w-4" /></Button>
         </div>
 
         <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
 
-        {/* Font Size Controls */}
         <div className="flex gap-1">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={decreaseFontSize}
-            className="dark:text-gray-300 dark:hover:bg-gray-600"
-            title="Decrease font size"
-          >
-            <MinusIcon className="h-4 w-4" />
-          </Button>
-          
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={increaseFontSize}
-            className="dark:text-gray-300 dark:hover:bg-gray-600"
-            title="Increase font size"
-          >
-            <Plus className="h-4 w-4" />
-          </Button>
+          <Button data-testid="btn-list-bullet" type="button" variant="ghost" size="sm" onClick={() => quillRef.current?.format('list', 'bullet')} className="dark:text-gray-300 dark:hover:bg-gray-600"><List className="h-4 w-4" /></Button>
+          <Button data-testid="btn-list-ordered" type="button" variant="ghost" size="sm" onClick={() => quillRef.current?.format('list', 'ordered')} className="dark:text-gray-300 dark:hover:bg-gray-600"><ListOrdered className="h-4 w-4" /></Button>
+          <Button type="button" variant="ghost" size="sm" onClick={() => quillRef.current?.format('blockquote', true)} className="dark:text-gray-300 dark:hover:bg-gray-600"><Quote className="h-4 w-4" /></Button>
+          <Button type="button" variant="ghost" size="sm" onClick={() => quillRef.current?.format('code-block', true)} className="dark:text-gray-300 dark:hover:bg-gray-600"><Code className="h-4 w-4" /></Button>
         </div>
 
         <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
 
-        {/* Lists and Structure */}
         <div className="flex gap-1">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => editor.chain().focus().toggleBulletList().run()}
-            className={editor.isActive('bulletList') ? 'bg-gray-200 dark:bg-gray-600' : 'dark:text-gray-300 dark:hover:bg-gray-600'}
-          >
-            <List className="h-4 w-4" />
-          </Button>
-
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => editor.chain().focus().toggleOrderedList().run()}
-            className={editor.isActive('orderedList') ? 'bg-gray-200 dark:bg-gray-600' : 'dark:text-gray-300 dark:hover:bg-gray-600'}
-          >
-            <ListOrdered className="h-4 w-4" />
-          </Button>
-
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => editor.chain().focus().toggleBlockquote().run()}
-            className={editor.isActive('blockquote') ? 'bg-gray-200 dark:bg-gray-600' : 'dark:text-gray-300 dark:hover:bg-gray-600'}
-          >
-            <Quote className="h-4 w-4" />
-          </Button>
-
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={toggleCodeBlock}
-            className={editor.isActive('codeBlock') ? 'bg-gray-200 dark:bg-gray-600' : 'dark:text-gray-300 dark:hover:bg-gray-600'}
-          >
-            <Code className="h-4 w-4" />
-          </Button>
-
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={toggleInlineCode}
-            className={editor.isActive('code') ? 'bg-gray-200 dark:bg-gray-600' : 'dark:text-gray-300 dark:hover:bg-gray-600'}
-          >
-            <Hash className="h-4 w-4" />
-          </Button>
-
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={addHorizontalRule}
-            className="dark:text-gray-300 dark:hover:bg-gray-600"
-          >
-            <Minus className="h-4 w-4" />
-          </Button>
+          <Button data-testid="btn-align-left" type="button" variant="ghost" size="sm" onClick={() => quillRef.current?.format('align', '')} className="dark:text-gray-300 dark:hover:bg-gray-600"><AlignLeft className="h-4 w-4" /></Button>
+          <Button data-testid="btn-align-center" type="button" variant="ghost" size="sm" onClick={() => quillRef.current?.format('align', 'center')} className="dark:text-gray-300 dark:hover:bg-gray-600"><AlignCenter className="h-4 w-4" /></Button>
+          <Button data-testid="btn-align-right" type="button" variant="ghost" size="sm" onClick={() => quillRef.current?.format('align', 'right')} className="dark:text-gray-300 dark:hover:bg-gray-600"><AlignRight className="h-4 w-4" /></Button>
+          <Button data-testid="btn-align-justify" type="button" variant="ghost" size="sm" onClick={() => quillRef.current?.format('align', 'justify')} className="dark:text-gray-300 dark:hover:bg-gray-600"><AlignJustify className="h-4 w-4" /></Button>
         </div>
 
         <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
 
-        {/* Text Alignment */}
         <div className="flex gap-1">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => editor.chain().focus().setTextAlign('left').run()}
-            className={editor.isActive({ textAlign: 'left' }) ? 'bg-gray-200 dark:bg-gray-600' : 'dark:text-gray-300 dark:hover:bg-gray-600'}
-          >
-            <AlignLeft className="h-4 w-4" />
-          </Button>
-
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => editor.chain().focus().setTextAlign('center').run()}
-            className={editor.isActive({ textAlign: 'center' }) ? 'bg-gray-200 dark:bg-gray-600' : 'dark:text-gray-300 dark:hover:bg-gray-600'}
-          >
-            <AlignCenter className="h-4 w-4" />
-          </Button>
-
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => editor.chain().focus().setTextAlign('right').run()}
-            className={editor.isActive({ textAlign: 'right' }) ? 'bg-gray-200 dark:bg-gray-600' : 'dark:text-gray-300 dark:hover:bg-gray-600'}
-          >
-            <AlignRight className="h-4 w-4" />
-          </Button>
-
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => editor.chain().focus().setTextAlign('justify').run()}
-            className={editor.isActive({ textAlign: 'justify' }) ? 'bg-gray-200 dark:bg-gray-600' : 'dark:text-gray-300 dark:hover:bg-gray-600'}
-          >
-            <AlignJustify className="h-4 w-4" />
-          </Button>
+          <Button data-testid="btn-hr" type="button" variant="ghost" size="sm" onClick={addHorizontalRule} className="dark:text-gray-300 dark:hover:bg-gray-600"><Minus className="h-4 w-4" /></Button>
+          <Button data-testid="btn-link" type="button" variant="ghost" size="sm" onClick={addLink} disabled={isFetchingLink} className="dark:text-gray-300 dark:hover:bg-gray-600"><LinkIcon className="h-4 w-4" /></Button>
+          <Button data-testid="btn-image-upload" type="button" variant="ghost" size="sm" onClick={() => (modules.toolbar.handlers as any).image?.()} disabled={isUploading} className="dark:text-gray-300 dark:hover:bg-gray-600">{isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}<span className="ml-1 text-xs dark:text-gray-300">Image</span></Button>
+          <Button data-testid="btn-video-upload" type="button" variant="ghost" size="sm" onClick={() => (modules.toolbar.handlers as any).video?.()} disabled={isUploadingVideo} className="dark:text-gray-300 dark:hover:bg-gray-600">{isUploadingVideo ? <Loader2 className="h-4 w-4 animate-spin" /> : <Video className="h-4 w-4" />}<span className="ml-1 text-xs dark:text-gray-300">Video</span></Button>
+          <Button data-testid="btn-document-upload" type="button" variant="ghost" size="sm" onClick={() => (modules.toolbar.handlers as any).document?.()} disabled={isUploading} className="dark:text-gray-300 dark:hover:bg-gray-600">{isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}<span className="ml-1 text-xs dark:text-gray-300">Document</span></Button>
         </div>
 
-        <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
-
-        {/* Colors */}
-        <div className="flex gap-1">
-          <div className="relative group">
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="dark:text-gray-300 dark:hover:bg-gray-600"
-            >
-              <Palette className="h-4 w-4" />
-            </Button>
-            <div className="absolute top-full left-0 mt-1 p-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-              <div className="grid grid-cols-4 gap-1">
-                {['#000000', '#ef4444', '#f97316', '#eab308', '#22c55e', '#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899', '#6b7280', '#ffffff', '#f3f4f6'].map((color) => (
-                  <button
-                    key={color}
-                    className="w-6 h-6 rounded border border-gray-300 dark:border-gray-600"
-                    style={{ backgroundColor: color }}
-                    onClick={() => setTextColor(color)}
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="relative group">
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="dark:text-gray-300 dark:hover:bg-gray-600"
-            >
-              <Highlighter className="h-4 w-4" />
-            </Button>
-            <div className="absolute top-full left-0 mt-1 p-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-              <div className="grid grid-cols-4 gap-1">
-                {['#fef3c7', '#fde68a', '#fcd34d', '#fbbf24', '#f59e0b', '#d97706', '#92400e', '#78350f', '#451a03', '#1f2937', '#111827', '#000000'].map((color) => (
-                  <button
-                    key={color}
-                    className="w-6 h-6 rounded border border-gray-300 dark:border-gray-600"
-                    style={{ backgroundColor: color }}
-                    onClick={() => setHighlightColor(color)}
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
-
-        {/* Media */}
-        <div className="flex gap-1">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={addImage}
-            className="dark:text-gray-300 dark:hover:bg-gray-600"
-          >
-            <ImageIcon className="h-4 w-4" />
-          </Button>
-
-          {shouldShowImageUpload && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={uploadImage}
-              disabled={isUploading}
-              className="dark:text-gray-300 dark:hover:bg-gray-600"
-            >
-              {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-              <span className="ml-1 text-xs dark:text-gray-300">Image</span>
-            </Button>
-          )}
-
-          {(onVideoUpload || userId) && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={uploadVideo}
-              disabled={isUploadingVideo}
-              className="dark:text-gray-300 dark:hover:bg-gray-600"
-            >
-              {isUploadingVideo ? <Loader2 className="h-4 w-4 animate-spin" /> : <Video className="h-4 w-4" />}
-              <span className="ml-1 text-xs dark:text-gray-300">Video</span>
-            </Button>
-          )}
-
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={addLink}
-            disabled={isFetchingLink}
-            className="dark:text-gray-300 dark:hover:bg-gray-600"
-          >
-            {isFetchingLink ? <Loader2 className="h-4 w-4 animate-spin" /> : <LinkIcon className="h-4 w-4" />}
-            <span className="ml-1 text-xs dark:text-gray-300">Link</span>
-          </Button>
-
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={addYouTubeVideo}
-            className="dark:text-gray-300 dark:hover:bg-gray-600"
-          >
-            <Video className="h-4 w-4" />
-            <span className="ml-1 text-xs dark:text-gray-300">YouTube</span>
-          </Button>
-
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={addTable}
-            className="dark:text-gray-300 dark:hover:bg-gray-600"
-          >
-            <TableIcon className="h-4 w-4" />
-            <span className="ml-1 text-xs dark:text-gray-300">Table</span>
-          </Button>
-        </div>
-
-        <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
-
-        {/* History */}
-        <div className="flex gap-1">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => editor.chain().focus().undo().run()}
-            disabled={!editor.can().undo()}
-            className="dark:text-gray-300 dark:hover:bg-gray-600"
-          >
-            <Undo className="h-4 w-4" />
-          </Button>
-
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => editor.chain().focus().redo().run()}
-            disabled={!editor.can().redo()}
-            className="dark:text-gray-300 dark:hover:bg-gray-600"
-          >
-            <Redo className="h-4 w-4" />
-          </Button>
-        </div>
-
-        {/* Character Count */}
         <div className="ml-auto flex items-center text-xs text-gray-500 dark:text-gray-400">
           <BarChart3 className="h-3 w-3 mr-1" />
-          {editor.storage.characterCount?.characters() || 0} characters
+          {/* Quill does not expose char count by default; compute from HTML text */}
+          {(quillRef.current?.getText().length ?? 0)} characters
         </div>
       </div>
 
-      {/* Editor Content */}
-      <div className="min-h-[300px] max-h-[600px] overflow-y-auto dark:bg-gray-800">
-        <EditorContent 
-          editor={editor} 
-          className="focus:outline-none"
-          placeholder={placeholder}
-        />
+      <div className="min-h-[300px] max-h:[600px] overflow-y-auto dark:bg-gray-800">
+        <div ref={editorRef} className="focus:outline-none min-h-[200px]" />
       </div>
     </div>
   );
