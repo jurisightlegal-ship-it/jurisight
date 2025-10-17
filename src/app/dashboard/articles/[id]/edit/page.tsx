@@ -480,13 +480,13 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
         title: formData.title,
         dek: formData.dek,
         body: formData.body,
-        sectionId: formData.sectionId,
+        sectionId: parseInt(formData.sectionId, 10), // Convert to number
         featuredImage: formData.featuredImage,
         status: articleStatus,
         readingTime,
         isFeatured: formData.isFeatured,
         isTopNews: formData.isTopNews,
-        scheduledAt: formData.scheduledAt
+        scheduledAt: formData.scheduledAt || null
       };
 
       // Set timestamps for featured and top news
@@ -502,6 +502,8 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
         updateData.tags = formData.tags;
         updateData.slug = formData.slug;
       }
+
+      console.log('Sending update data:', updateData);
 
       const response = await fetch(`/api/dashboard/articles/${articleId}`, {
         method: 'PUT',
@@ -531,6 +533,7 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
         router.push('/dashboard/articles');
       } else {
         const errorData = await response.json();
+        console.error('API error response:', errorData);
         alert(errorData.error || 'Failed to save article');
       }
     } catch (error) {

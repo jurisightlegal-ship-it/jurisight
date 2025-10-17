@@ -269,7 +269,7 @@ export const RichTextEditor = ({
         quill.off('text-change');
       }
     };
-  }, [content, modules, onChange, placeholder]);
+  }, [content, modules, onChange, placeholder, deleteFileFromStorage]);
 
   // Keep external content prop in sync when it changes from outside (e.g. loading article)
   useEffect(() => {

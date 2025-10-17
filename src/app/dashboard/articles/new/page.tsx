@@ -252,7 +252,7 @@ export default function NewArticlePage() {
       if (!confirm('Are you sure you want to publish this article? It will be visible to all users immediately.')) {
         return;
       }
-    } else if (status === 'SCHEDULED') {
+    } else if (status === 'SCHEDULED' && formData.scheduledAt) {
       const scheduledDate = new Date(formData.scheduledAt).toLocaleString();
       if (!confirm(`Are you sure you want to schedule this article for ${scheduledDate}?`)) {
         return;
@@ -267,43 +267,38 @@ export default function NewArticlePage() {
         articleStatus = 'SCHEDULED';
       } else if (status === 'PUBLISHED') {
         articleStatus = 'PUBLISHED';
+      } else if (status === 'SCHEDULED' && !formData.scheduledAt) {
+        // If scheduling is requested but no date is set, save as draft instead
+        articleStatus = 'DRAFT';
       }
 
-      // Prepare data based on user role
-      const updateData: any = {
+      // Prepare data for the API call with correct parameter names
+      const articleData = {
         title: formData.title,
         dek: formData.dek,
-        body: formData.body,
-        sectionId: formData.sectionId,
+        bodyContent: formData.body,
+        sectionId: Number(formData.sectionId),
         featuredImage: formData.featuredImage,
         status: articleStatus,
-        readingTime
+        readingTime: readingTime,
+        tags: formData.tags,
+        authorId: session.user.id,
+        slug: formData.slug,
+        scheduledAt: formData.scheduledAt || undefined,
+        publishedAt: status === 'PUBLISHED' ? new Date().toISOString() : undefined
       };
 
-      // Only include tags and slug for non-contributors
-      if (session?.user?.role !== 'CONTRIBUTOR') {
-        updateData.tags = formData.tags;
-        updateData.slug = formData.slug;
-      }
-
-      // Add scheduling data if provided
-      if (formData.scheduledAt) {
-        updateData.scheduledAt = formData.scheduledAt;
-      }
-
-      // For published articles, set published_at timestamp
-      if (status === 'PUBLISHED') {
-        updateData.published_at = new Date().toISOString();
-      }
+      console.log('Sending article data:', articleData);
 
       const response = await fetch('/api/articles', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...updateData,
-          authorId: session.user.id
-        })
+        body: JSON.stringify(articleData)
       });
+
+      console.log('API response status:', response.status);
+      const responseData = await response.json();
+      console.log('API response data:', responseData);
 
       if (response.ok) {
         let successMessage = '';
@@ -326,8 +321,8 @@ export default function NewArticlePage() {
         alert(successMessage);
         router.push('/dashboard/articles');
       } else {
-        const errorData = await response.json();
-        alert(errorData.error || 'Failed to save article');
+        console.error('API error response:', responseData);
+        alert(responseData.error || `Failed to save article: ${response.status}`);
       }
     } catch (error) {
       console.error('Error saving article:', error);
@@ -801,13 +796,12 @@ export default function NewArticlePage() {
                 {(session?.user?.role === 'ADMIN' || session?.user?.role === 'EDITOR') && (
                   <Button
                     onClick={() => handleSave('SCHEDULED')}
-                    disabled={saving || !formData.title || !formData.body || !formData.sectionId || !formData.scheduledAt}
+                    disabled={saving || !formData.title || !formData.body || !formData.sectionId}
                     variant="outline"
                     className="w-full border-purple-200 text-purple-700 hover:bg-purple-50 dark:border-purple-600 dark:text-purple-300 dark:hover:bg-purple-700"
-                    title={!formData.scheduledAt ? 'Please set a scheduled date and time first' : ''}
                   >
                     <Calendar className="h-4 w-4 mr-2" />
-                    {saving ? 'Scheduling...' : !formData.scheduledAt ? 'Schedule (Set Date First)' : 'Schedule Publication'}
+                    {saving ? 'Scheduling...' : formData.scheduledAt ? `Schedule for ${new Date(formData.scheduledAt).toLocaleString()}` : 'Schedule Publication'}
                   </Button>
                 )}
               </CardContent>

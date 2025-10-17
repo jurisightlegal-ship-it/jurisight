@@ -206,7 +206,16 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { title, dek, body: bodyContent, sectionId, authorId, featuredImage, status, readingTime, tags, slug: customSlug, scheduledAt } = body;
+    console.log('Received article creation request:', body);
+    const { title, dek, body: bodyContent, sectionId, authorId, featuredImage, status, readingTime, tags, slug: customSlug, scheduledAt, publishedAt } = body;
+
+    if (!title || !bodyContent || !sectionId || !authorId) {
+      console.error('Missing required fields:', { title, bodyContent: !!bodyContent, sectionId, authorId });
+      return NextResponse.json(
+        { error: 'Missing required fields: title, body, sectionId, or authorId' },
+        { status: 400 }
+      );
+    }
 
     // Use custom slug or generate from title
     const slug = customSlug || title
@@ -243,6 +252,8 @@ export async function POST(request: NextRequest) {
 
           if (!tagError && newTag) {
             tagIds.push(newTag.id);
+          } else {
+            console.error('Error creating tag:', tagError);
           }
         } else {
           tagIds.push(existingTag.id);
@@ -256,29 +267,38 @@ export async function POST(request: NextRequest) {
       articleStatus = 'SCHEDULED';
     }
 
+    // Ensure sectionId is a number
+    const sectionIdNumber = typeof sectionId === 'string' ? parseInt(sectionId, 10) : sectionId;
+    
+    // Prepare article data
+    const articleData = {
+      title,
+      slug,
+      dek,
+      body: bodyContent,
+      featured_image: featuredImage,
+      section_id: sectionIdNumber,
+      author_id: authorId,
+      reading_time: finalReadingTime,
+      status: articleStatus,
+      scheduled_at: scheduledAt || null,
+      published_at: publishedAt || (articleStatus === 'PUBLISHED' ? new Date().toISOString() : null),
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+    
+    console.log('Inserting article with data:', articleData);
+
     const { data: newArticle, error } = await supabase
       .from('articles')
-      .insert({
-        title,
-        slug,
-        dek,
-        body: bodyContent,
-        featured_image: featuredImage,
-        section_id: sectionId,
-        author_id: authorId,
-        reading_time: finalReadingTime,
-        status: articleStatus,
-        scheduled_at: scheduledAt || null,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      })
+      .insert(articleData)
       .select()
       .single();
 
     if (error) {
       console.error('Error creating article:', error);
       return NextResponse.json(
-        { error: 'Failed to create article' },
+        { error: `Failed to create article: ${error.message}` },
         { status: 500 }
       );
     }
