@@ -155,12 +155,59 @@ export default function NewArticlePage() {
     }
   }, [formData.body]);
 
+  // Debug logging for form state
+  useEffect(() => {
+    console.log('=== FORM DATA DEBUG ===');
+    console.log('Title:', {
+      raw: formData.title,
+      trimmed: formData.title.trim(),
+      length: formData.title.trim().length,
+      hasValue: !!formData.title.trim()
+    });
+    
+    console.log('Body:', {
+      raw: formData.body,
+      trimmed: formData.body.trim(),
+      length: formData.body.trim().length,
+      hasValue: !!formData.body.trim()
+    });
+    
+    console.log('Section ID:', {
+      raw: formData.sectionId,
+      length: formData.sectionId.length,
+      hasValue: !!formData.sectionId
+    });
+    
+    console.log('Button Conditions:', {
+      saving: saving,
+      hasTitle: !!formData.title.trim(),
+      hasBody: !!formData.body.trim(),
+      hasSection: !!formData.sectionId,
+      overall: !saving && !!formData.title.trim() && !!formData.body.trim() && !!formData.sectionId
+    });
+    
+    console.log('Session Info:', {
+      status: status,
+      user: session?.user,
+      userRole: session?.user?.role
+    });
+    console.log('========================');
+  }, [formData, saving, session, status]);
+
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    console.log(`=== FIELD UPDATE ===`);
+    console.log(`Field: ${field}`);
+    console.log(`Value: ${value}`);
+    console.log(`Type: ${typeof value}`);
+    console.log(`====================`);
   };
 
   const handleBodyChange = (content: string) => {
-    setFormData(prev => ({ ...prev, body: content }));
+    // Handle empty content properly
+    const cleanContent = content === '<p><br></p>' ? '' : content;
+    setFormData(prev => ({ ...prev, body: cleanContent }));
+    console.log('Body content updated:', cleanContent);
   };
 
   const handleFeaturedImageUpload = (result: any) => {
@@ -239,96 +286,125 @@ export default function NewArticlePage() {
   };
 
   const handleSave = async (status: string = 'DRAFT') => {
-    if (!session?.user?.id) return;
+    if (!session?.user?.id) {
+        alert('You must be logged in to save an article.');
+        return;
+    }
 
     // For SCHEDULED status, ensure scheduledAt is provided
     if (status === 'SCHEDULED' && !formData.scheduledAt) {
-      alert('Please set a scheduled date and time before scheduling the article.');
-      return;
+        alert('Please set a scheduled date and time before scheduling the article.');
+        return;
     }
 
     // Add confirmation dialogs for important actions
     if (status === 'PUBLISHED') {
-      if (!confirm('Are you sure you want to publish this article? It will be visible to all users immediately.')) {
-        return;
-      }
+        if (!confirm('Are you sure you want to publish this article? It will be visible to all users immediately.')) {
+            return;
+        }
     } else if (status === 'SCHEDULED' && formData.scheduledAt) {
-      const scheduledDate = new Date(formData.scheduledAt).toLocaleString();
-      if (!confirm(`Are you sure you want to schedule this article for ${scheduledDate}?`)) {
-        return;
-      }
+        const scheduledDate = new Date(formData.scheduledAt).toLocaleString();
+        if (!confirm(`Are you sure you want to schedule this article for ${scheduledDate}?`)) {
+            return;
+        }
+    }
+
+    // Validate required fields before saving (except for drafts which can be saved incomplete)
+    if (status !== 'DRAFT') {
+        if (!formData.title.trim()) {
+            alert('Please enter a title for the article.');
+            return;
+        }
+
+        if (!formData.body.trim()) {
+            alert('Please enter content for the article.');
+            return;
+        }
+
+        if (!formData.sectionId) {
+            alert('Please select a section for the article.');
+            return;
+        }
     }
 
     setSaving(true);
+    setError(null);
     try {
-      // Determine the correct status based on scheduling
-      let articleStatus = status;
-      if (status === 'SCHEDULED' && formData.scheduledAt) {
-        articleStatus = 'SCHEDULED';
-      } else if (status === 'PUBLISHED') {
-        articleStatus = 'PUBLISHED';
-      } else if (status === 'SCHEDULED' && !formData.scheduledAt) {
-        // If scheduling is requested but no date is set, save as draft instead
-        articleStatus = 'DRAFT';
-      }
-
-      // Prepare data for the API call with correct parameter names
-      const articleData = {
-        title: formData.title,
-        dek: formData.dek,
-        bodyContent: formData.body,
-        sectionId: Number(formData.sectionId),
-        featuredImage: formData.featuredImage,
-        status: articleStatus,
-        readingTime: readingTime,
-        tags: formData.tags,
-        authorId: session.user.id,
-        slug: formData.slug,
-        scheduledAt: formData.scheduledAt || undefined,
-        publishedAt: status === 'PUBLISHED' ? new Date().toISOString() : undefined
-      };
-
-      console.log('Sending article data:', articleData);
-
-      const response = await fetch('/api/articles', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(articleData)
-      });
-
-      console.log('API response status:', response.status);
-      const responseData = await response.json();
-      console.log('API response data:', responseData);
-
-      if (response.ok) {
-        let successMessage = '';
-        switch (articleStatus) {
-          case 'DRAFT':
-            successMessage = 'Article saved as draft!';
-            break;
-          case 'IN_REVIEW':
-            successMessage = 'Article submitted for review!';
-            break;
-          case 'PUBLISHED':
-            successMessage = 'Article published successfully!';
-            break;
-          case 'SCHEDULED':
-            successMessage = `Article scheduled for ${new Date(formData.scheduledAt).toLocaleString()}!`;
-            break;
-          default:
-            successMessage = 'Article saved successfully!';
+        // Determine the correct status based on scheduling
+        let articleStatus = status;
+        if (status === 'SCHEDULED' && formData.scheduledAt) {
+            articleStatus = 'SCHEDULED';
+        } else if (status === 'PUBLISHED') {
+            articleStatus = 'PUBLISHED';
+        } else if (status === 'SCHEDULED' && !formData.scheduledAt) {
+            // If scheduling is requested but no date is set, save as draft instead
+            articleStatus = 'DRAFT';
+            alert('No scheduled date set. Saving as draft instead.');
         }
-        alert(successMessage);
-        router.push('/dashboard/articles');
-      } else {
-        console.error('API error response:', responseData);
-        alert(responseData.error || `Failed to save article: ${response.status}`);
-      }
+
+        // Prepare data for the API call with correct parameter names
+        const articleData = {
+            title: formData.title.trim() || 'Untitled',
+            dek: formData.dek,
+            body: formData.body || '<p></p>',
+            sectionId: formData.sectionId ? Number(formData.sectionId) : 1, // Default to first section if none selected
+            featuredImage: formData.featuredImage,
+            status: articleStatus,
+            readingTime: readingTime,
+            tags: formData.tags,
+            authorId: session.user.id,
+            slug: formData.slug || 'untitled',
+            scheduledAt: formData.scheduledAt || undefined,
+            publishedAt: status === 'PUBLISHED' ? new Date().toISOString() : undefined
+        };
+
+        console.log('Sending article data:', articleData);
+
+        const response = await fetch('/api/articles', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(articleData)
+        });
+
+        console.log('API response status:', response.status);
+        
+        if (response.ok) {
+            const responseData = await response.json();
+            console.log('API response data:', responseData);
+            
+            let successMessage = '';
+            switch (articleStatus) {
+                case 'DRAFT':
+                    successMessage = 'Article saved as draft!';
+                    break;
+                case 'IN_REVIEW':
+                    successMessage = 'Article submitted for review!';
+                    break;
+                case 'PUBLISHED':
+                    successMessage = 'Article published successfully!';
+                    break;
+                case 'SCHEDULED':
+                    successMessage = `Article scheduled for ${new Date(formData.scheduledAt).toLocaleString()}!`;
+                    break;
+                default:
+                    successMessage = 'Article saved successfully!';
+            }
+            alert(successMessage);
+            router.push('/dashboard/articles');
+        } else {
+            const errorData = await response.json();
+            console.error('API error response:', errorData);
+            const errorMessage = errorData.error || `Failed to save article: ${response.status} ${response.statusText}`;
+            setError(errorMessage);
+            alert(errorMessage);
+        }
     } catch (error) {
-      console.error('Error saving article:', error);
-      alert('Failed to save article');
+        console.error('Error saving article:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Failed to save article. Please try again.';
+        setError(errorMessage);
+        alert(errorMessage);
     } finally {
-      setSaving(false);
+        setSaving(false);
     }
   };
 
@@ -600,7 +676,7 @@ export default function NewArticlePage() {
                     >
                       <option value="">Select a section</option>
                       {Array.isArray(sections) && sections.map((section) => (
-                        <option key={section.id} value={section.id}>
+                        <option key={section.id} value={String(section.id)}>
                           {section.name}
                         </option>
                       ))}
@@ -663,7 +739,7 @@ export default function NewArticlePage() {
                     >
                       <option value="">Select a section</option>
                       {Array.isArray(sections) && sections.map((section) => (
-                        <option key={section.id} value={section.id}>
+                        <option key={section.id} value={String(section.id)}>
                           {section.name}
                         </option>
                       ))}
@@ -761,18 +837,24 @@ export default function NewArticlePage() {
                 <CardTitle className="dark:text-white">Actions</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
+                {error && (
+                  <div className="p-3 bg-red-100 text-red-700 rounded-md text-sm">
+                    Error: {error}
+                  </div>
+                )}
                 <Button
                   onClick={() => handleSave('DRAFT')}
-                  disabled={saving || !formData.title || !formData.body || !formData.sectionId}
+                  disabled={saving}
                   className="w-full dark:bg-blue-600 dark:hover:bg-blue-700"
                 >
                   <Save className="h-4 w-4 mr-2" />
                   {saving ? 'Saving...' : 'Save Draft'}
                 </Button>
+
                 
                 <Button
                   onClick={() => handleSave('IN_REVIEW')}
-                  disabled={saving || !formData.title || !formData.body || !formData.sectionId}
+                  disabled={saving}
                   variant="outline"
                   className="w-full dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
                 >
@@ -780,29 +862,36 @@ export default function NewArticlePage() {
                   {saving ? 'Submitting...' : 'Submit for Review'}
                 </Button>
 
+
                 {/* Publish button - only visible to admins and editors */}
                 {(session?.user?.role === 'ADMIN' || session?.user?.role === 'EDITOR') && (
-                  <Button
-                    onClick={() => handleSave('PUBLISHED')}
-                    disabled={saving || !formData.title || !formData.body || !formData.sectionId}
-                    className="w-full bg-green-600 hover:bg-green-700 text-white dark:bg-green-600 dark:hover:bg-green-700"
-                  >
-                    <CheckCircle className="h-4 w-4 mr-2" />
-                    {saving ? 'Publishing...' : 'Publish Now'}
-                  </Button>
+                  <>
+                    <Button
+                      onClick={() => handleSave('PUBLISHED')}
+                      disabled={saving}
+                      className="w-full bg-green-600 hover:bg-green-700 text-white dark:bg-green-600 dark:hover:bg-green-700"
+                    >
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      {saving ? 'Publishing...' : 'Publish Now'}
+                    </Button>
+
+                  </>
                 )}
 
                 {/* Schedule button - only visible to admins and editors */}
                 {(session?.user?.role === 'ADMIN' || session?.user?.role === 'EDITOR') && (
-                  <Button
-                    onClick={() => handleSave('SCHEDULED')}
-                    disabled={saving || !formData.title || !formData.body || !formData.sectionId}
-                    variant="outline"
-                    className="w-full border-purple-200 text-purple-700 hover:bg-purple-50 dark:border-purple-600 dark:text-purple-300 dark:hover:bg-purple-700"
-                  >
-                    <Calendar className="h-4 w-4 mr-2" />
-                    {saving ? 'Scheduling...' : formData.scheduledAt ? `Schedule for ${new Date(formData.scheduledAt).toLocaleString()}` : 'Schedule Publication'}
-                  </Button>
+                  <>
+                    <Button
+                      onClick={() => handleSave('SCHEDULED')}
+                      disabled={saving}
+                      variant="outline"
+                      className="w-full border-purple-200 text-purple-700 hover:bg-purple-50 dark:border-purple-600 dark:text-purple-300 dark:hover:bg-purple-700"
+                    >
+                      <Calendar className="h-4 w-4 mr-2" />
+                      {saving ? 'Scheduling...' : formData.scheduledAt ? `Schedule for ${new Date(formData.scheduledAt).toLocaleString()}` : 'Schedule Publication'}
+                    </Button>
+
+                  </>
                 )}
               </CardContent>
             </Card>
