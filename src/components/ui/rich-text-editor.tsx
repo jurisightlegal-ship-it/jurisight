@@ -3,7 +3,7 @@
 // Defer importing Quill on the client to avoid SSR "document is not defined"
 import 'quill/dist/quill.snow.css';
 import { Button } from './button';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { 
   Bold, 
   Italic, 
@@ -63,7 +63,7 @@ export const RichTextEditor = ({
 
   const shouldShowImageUpload = !!(onImageUpload || userId);
 
-  const deleteFileFromStorage = async (filePath: string) => {
+  const deleteFileFromStorage = useCallback(async (filePath: string) => {
     try {
       const response = await fetch(`/api/media/upload?path=${encodeURIComponent(filePath)}`, {
         method: 'DELETE',
@@ -75,7 +75,7 @@ export const RichTextEditor = ({
     } catch (error) {
       console.error('Error deleting file:', error);
     }
-  };
+  }, []);
 
   const uploadFileToAPI = async (file: File, type: 'image' | 'video'): Promise<{ url: string; path: string } > => {
     const formData = new FormData();
@@ -108,25 +108,30 @@ export const RichTextEditor = ({
       handlers: {
         image: async () => {
           if (!quillRef.current) return;
-    if (!onImageUpload && !userId) return;
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.onchange = async (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-            if (!file) return;
-        setIsUploading(true);
-        try {
-          let imageUrl: string;
-          let filePath: string;
-          if (onImageUpload) {
-            imageUrl = await onImageUpload(file);
-                filePath = imageUrl.split('/').slice(-3).join('/');
-          } else {
-            const result = await uploadFileToAPI(file, 'image');
-            imageUrl = result.url;
-            filePath = result.path;
+          if (!onImageUpload && !userId) {
+            alert('Image upload not configured properly');
+            return;
           }
+          const input = document.createElement('input');
+          input.type = 'file';
+          input.accept = 'image/*';
+          input.onchange = async (e) => {
+            const file = (e.target as HTMLInputElement).files?.[0];
+            if (!file) return;
+            setIsUploading(true);
+            try {
+              let imageUrl: string;
+              let filePath: string;
+              if (onImageUpload) {
+                imageUrl = await onImageUpload(file);
+                // Extract path from URL (last 3 parts)
+                const urlParts = imageUrl.split('/');
+                filePath = urlParts.slice(-3).join('/');
+              } else {
+                const result = await uploadFileToAPI(file, 'image');
+                imageUrl = result.url;
+                filePath = result.path;
+              }
               const quill = quillRef.current;
               const range = quill?.getSelection(true);
               if (range) {
@@ -136,12 +141,12 @@ export const RichTextEditor = ({
               }
             } catch (err) {
               console.error('Failed to upload image:', err);
-          alert('Failed to upload image. Please try again.');
-        } finally {
-          setIsUploading(false);
-      }
-    };
-    input.click();
+              alert('Failed to upload image. Please try again.');
+            } finally {
+              setIsUploading(false);
+            }
+          };
+          input.click();
         },
         video: async () => {
           if (!quillRef.current) return;
@@ -230,57 +235,101 @@ export const RichTextEditor = ({
         placeholder,
         modules
       });
-    quillRef.current = quill;
+      quillRef.current = quill;
 
-    // Initialize with existing HTML
-    if (content) {
-      quill.clipboard.dangerouslyPasteHTML(0, content);
-    }
+      // Initialize with existing HTML
+      if (content) {
+        quill.clipboard.dangerouslyPasteHTML(0, content);
+        previousHtmlRef.current = content;
+      } else {
+        previousHtmlRef.current = quill.root.innerHTML;
+      }
 
-    const handleTextChange = () => {
-      const html = quill.root.innerHTML;
-      onChange(html);
-
-      // deletion tracking for uploaded files
-      const currentImages = html.match(/<img[^>]+data-file-path="([^"]+)"/g) || [];
-      const currentVideos = html.match(/<video[^>]+data-file-path="([^"]+)"/g) || [];
-      const currentFilePaths = new Set([
-        ...currentImages.map(img => img.match(/data-file-path="([^"]+)"/)?.[1]).filter(Boolean),
-        ...currentVideos.map(video => video.match(/data-file-path="([^"]+)"/)?.[1]).filter(Boolean)
-      ]);
-      const previousHtml = previousHtmlRef.current || '';
-      const previousImages = previousHtml.match(/<img[^>]+data-file-path="([^"]+)"/g) || [];
-      const previousVideos = previousHtml.match(/<video[^>]+data-file-path="([^"]+)"/g) || [];
-      const previousFilePaths = new Set([
-        ...previousImages.map(img => img.match(/data-file-path="([^"]+)"/)?.[1]).filter(Boolean),
-        ...previousVideos.map(video => video.match(/data-file-path="([^"]+)"/)?.[1]).filter(Boolean)
-      ]);
-      const deletedFiles = [...previousFilePaths].filter(path => !currentFilePaths.has(path));
-      deletedFiles.forEach(fp => { if (fp) deleteFileFromStorage(fp); });
-      previousHtmlRef.current = html;
-    };
+      const handleTextChange = () => {
+        const html = quill.root.innerHTML;
+        const isEmpty = !html ||
+          html.trim() === '' ||
+          html === '<p><br></p>' ||
+          html === '<p></p>' ||
+          html === '<p> </p>' ||
+          html === '<p>&nbsp;</p>' ||
+          html === '<p><br></p>\n' ||
+          html === '<p><br></p>\r\n' ||
+          html === '<p></p>\n' ||
+          html === '<p></p>\r\n' ||
+          html === '<p><br></p>\n<p><br></p>' ||
+          html === '<p></p>\n<p></p>';
+        const cleanContent = isEmpty ? '' : html;
+        onChange(cleanContent);
+        previousHtmlRef.current = cleanContent;
+      };
 
       quill.on('text-change', handleTextChange);
+
+      // Set initial content reference
+      const initialContent = content || '';
+      const isEmpty = !initialContent ||
+        initialContent.trim() === '' ||
+        initialContent === '<p><br></p>' ||
+        initialContent === '<p></p>' ||
+        initialContent === '<p> </p>' ||
+        initialContent === '<p>&nbsp;</p>' ||
+        initialContent === '<p><br></p>\n' ||
+        initialContent === '<p><br></p>\r\n' ||
+        initialContent === '<p></p>\n' ||
+        initialContent === '<p></p>\r\n';
+      previousHtmlRef.current = isEmpty ? '' : initialContent;
+
+      // Store handler on ref for proper cleanup
+      (quill as any).__rt_handleTextChange = handleTextChange;
     })();
     return () => {
       isMounted = false;
-      const quill = quillRef.current;
-      if (quill) {
-        quill.off('text-change');
+      const quill = quillRef.current as any;
+      if (quill && quill.__rt_handleTextChange) {
+        quill.off('text-change', quill.__rt_handleTextChange);
+        delete quill.__rt_handleTextChange;
       }
     };
-  }, [content, modules, onChange, placeholder, deleteFileFromStorage]);
+  }, []);
 
   // Keep external content prop in sync when it changes from outside (e.g. loading article)
   useEffect(() => {
     const quill = quillRef.current;
     if (!quill) return;
+    
+    // More comprehensive empty content detection for the content prop
+    const isEmpty = !content || 
+      content.trim() === '' || 
+      content === '<p><br></p>' || 
+      content === '<p></p>' ||
+      content === '<p> </p>' ||
+      content === '<p>&nbsp;</p>' ||
+      content === '<p><br></p>\n' ||
+      content === '<p><br></p>\r\n' ||
+      content === '<p></p>\n' ||
+      content === '<p></p>\r\n' ||
+      content === '<p><br></p>\n<p><br></p>' ||
+      content === '<p></p>\n<p></p>';
+    
+    const cleanContent = isEmpty ? '' : content;
     const current = quill.root.innerHTML;
-    if (content && content !== current) {
-      quill.clipboard.dangerouslyPasteHTML(0, content);
-      previousHtmlRef.current = content;
+    
+    console.log('RichTextEditor: Syncing external content', {
+      externalContent: content,
+      cleanContent,
+      currentEditorContent: current,
+      isEmpty,
+      needsUpdate: cleanContent !== undefined && cleanContent !== current
+    });
+    
+    // Only update if content has actually changed to prevent infinite loops
+    if (cleanContent !== undefined && cleanContent !== current) {
+      // Update the editor content
+      quill.clipboard.dangerouslyPasteHTML(0, cleanContent || '');
+      previousHtmlRef.current = cleanContent || '';
     }
-  }, [content]);
+  }, [content]); // Remove onChange from dependencies to prevent loop
 
   const addHorizontalRule = () => {
     const quill = quillRef.current;
