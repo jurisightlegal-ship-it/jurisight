@@ -39,12 +39,7 @@ export function ArticlePageClient({ children, articleId, articleTitle, articleSe
       }
       
       // Track article view event
-      trackEvent('article_view', {
-        articleId: articleId.toString(),
-        articleTitle: articleTitle || 'Unknown',
-        articleSection: articleSection || 'Unknown',
-        timestamp: new Date().toISOString(),
-      });
+      trackEvent('article_view');
 
       console.log('Clarity: Article view tracked', { articleId, articleTitle, articleSection });
     }

@@ -50,17 +50,12 @@ function MyComponent() {
   const { trackEvent, setCustomTag, setUserId } = useClarity();
 
   const handleButtonClick = () => {
-    trackEvent('button_click', {
-      buttonName: 'subscribe',
-      location: 'header'
-    });
+    trackEvent('button_click');
   };
 
   const handleUserAction = () => {
     setCustomTag('userType', 'premium');
-    trackEvent('premium_feature_used', {
-      feature: 'advanced_search'
-    });
+    trackEvent('premium_feature_used');
   };
 
   return (
@@ -73,8 +68,8 @@ function MyComponent() {
 
 ## Available Methods
 
-### `trackEvent(eventName, data?)`
-Track custom events with optional data.
+### `trackEvent(eventName)`
+Track custom events (Clarity doesn't support custom data in events).
 
 ### `setCustomTag(key, value)`
 Set custom tags that persist across the session.
@@ -88,8 +83,8 @@ Identify a user with additional context.
 ### `consent(consent)`
 Set user consent for data collection.
 
-### `upgrade(sessionId, sequenceNumber)`
-Upgrade a session (for advanced use cases).
+### `upgrade(reason)`
+Upgrade a session with a reason string (for advanced use cases).
 
 ## Events Being Tracked
 

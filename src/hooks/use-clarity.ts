@@ -6,7 +6,7 @@ import clarity from '@microsoft/clarity';
 export function useClarity() {
   const setUserId = useCallback((userId: string) => {
     try {
-      clarity.set('userId', userId);
+      clarity.setTag('userId', userId);
     } catch (error) {
       console.error('Failed to set Clarity user ID:', error);
     }
@@ -14,15 +14,15 @@ export function useClarity() {
 
   const setCustomTag = useCallback((key: string, value: string) => {
     try {
-      clarity.set(key, value);
+      clarity.setTag(key, value);
     } catch (error) {
       console.error('Failed to set Clarity custom tag:', error);
     }
   }, []);
 
-  const trackEvent = useCallback((eventName: string, data?: Record<string, any>) => {
+  const trackEvent = useCallback((eventName: string) => {
     try {
-      clarity.event(eventName, data);
+      clarity.event(eventName);
     } catch (error) {
       console.error('Failed to track Clarity event:', error);
     }
@@ -44,9 +44,9 @@ export function useClarity() {
     }
   }, []);
 
-  const upgrade = useCallback((sessionId: string, sequenceNumber: number) => {
+  const upgrade = useCallback((reason: string) => {
     try {
-      clarity.upgrade(sessionId, sequenceNumber);
+      clarity.upgrade(reason);
     } catch (error) {
       console.error('Failed to upgrade Clarity session:', error);
     }

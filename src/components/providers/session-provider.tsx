@@ -26,11 +26,7 @@ function ClaritySessionTracker() {
       );
 
       // Track login event
-      trackEvent('user_login', {
-        userId: session.user.id,
-        userRole: session.user.role || 'USER',
-        userEmail: session.user.email,
-      });
+      trackEvent('user_login');
 
       console.log('Clarity: User session tracked');
     } else if (status === 'unauthenticated') {
