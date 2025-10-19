@@ -72,7 +72,7 @@ export default function HighCourtJudgementsPage() {
       const params = new URLSearchParams({
         limit: ARTICLES_PER_PAGE.toString(),
         offset: offset.toString(),
-        section: 'civil' // Filter for High Court judgements
+        section: 'high-court-judgements' // Filter for High Court judgements
       });
       if (searchTerm) params.append('search', searchTerm);
 
