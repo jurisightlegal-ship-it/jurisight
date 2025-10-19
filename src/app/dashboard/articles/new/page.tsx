@@ -204,10 +204,27 @@ export default function NewArticlePage() {
   };
 
   const handleBodyChange = (content: string) => {
-    // Handle empty content properly
-    const cleanContent = content === '<p><br></p>' ? '' : content;
+    // Improved empty content detection
+    const isEmpty = !content || 
+      content.trim() === '' || 
+      content === '<p><br></p>' || 
+      content === '<p></p>' ||
+      content === '<p> </p>' ||
+      content === '<p>&nbsp;</p>' ||
+      content === '<p><br></p>\n' ||
+      content === '<p><br></p>\r\n' ||
+      content === '<p></p>\n' ||
+      content === '<p></p>\r\n';
+      
+    const cleanContent = isEmpty ? '' : content;
     setFormData(prev => ({ ...prev, body: cleanContent }));
-    console.log('Body content updated:', cleanContent);
+    console.log('ArticlePage: Body content updated:', { 
+      original: content, 
+      clean: cleanContent, 
+      isEmpty,
+      formDataTitle: formData.title,
+      formDataSection: formData.sectionId
+    });
   };
 
   const handleFeaturedImageUpload = (result: any) => {
@@ -309,14 +326,40 @@ export default function NewArticlePage() {
         }
     }
 
-    // Validate required fields before saving (except for drafts which can be saved incomplete)
+    // Improved content validation function
+    const isContentEmpty = (content: string) => {
+      if (!content) return true;
+      
+      // Remove whitespace and check if empty
+      const trimmed = content.trim();
+      if (!trimmed) return true;
+      
+      // Check for various empty HTML patterns that the editor might produce
+      const emptyPatterns = [
+        '',
+        '<p><br></p>',
+        '<p></p>',
+        '<p> </p>',
+        '<p>&nbsp;</p>',
+        '<p><br></p>\n',
+        '<p><br></p>\r\n',
+        '<p></p>\n',
+        '<p></p>\r\n'
+      ];
+      
+      return emptyPatterns.includes(trimmed) || emptyPatterns.includes(content);
+    };
+
+    // Validate required fields before saving
+    // For DRAFT status, only title is required
+    // For IN_REVIEW and PUBLISHED status, both title and content are required
     if (status !== 'DRAFT') {
         if (!formData.title.trim()) {
             alert('Please enter a title for the article.');
             return;
         }
 
-        if (!formData.body.trim()) {
+        if (isContentEmpty(formData.body)) {
             alert('Please enter content for the article.');
             return;
         }
@@ -346,7 +389,7 @@ export default function NewArticlePage() {
         const articleData = {
             title: formData.title.trim() || 'Untitled',
             dek: formData.dek,
-            body: formData.body || '<p></p>',
+            body: formData.body || '', // Send empty string instead of <p></p>
             sectionId: formData.sectionId ? Number(formData.sectionId) : 1, // Default to first section if none selected
             featuredImage: formData.featuredImage,
             status: articleStatus,
@@ -358,7 +401,7 @@ export default function NewArticlePage() {
             publishedAt: status === 'PUBLISHED' ? new Date().toISOString() : undefined
         };
 
-        console.log('Sending article data:', articleData);
+        console.log('ArticlePage: Sending article data to API:', articleData);
 
         const response = await fetch('/api/articles', {
             method: 'POST',
@@ -366,11 +409,11 @@ export default function NewArticlePage() {
             body: JSON.stringify(articleData)
         });
 
-        console.log('API response status:', response.status);
+        console.log('ArticlePage: API response status:', response.status);
         
         if (response.ok) {
             const responseData = await response.json();
-            console.log('API response data:', responseData);
+            console.log('ArticlePage: API response data:', responseData);
             
             let successMessage = '';
             switch (articleStatus) {
@@ -393,16 +436,27 @@ export default function NewArticlePage() {
             router.push('/dashboard/articles');
         } else {
             const errorData = await response.json();
-            console.error('API error response:', errorData);
+            console.error('ArticlePage: API error response:', errorData);
             const errorMessage = errorData.error || `Failed to save article: ${response.status} ${response.statusText}`;
+            
+            // Provide more specific error messages
+            if (errorMessage.includes('author ID')) {
+                alert('Authentication error: Please make sure you are logged in with a valid account.');
+            } else if (errorMessage.includes('section ID')) {
+                alert('Invalid section: Please select a valid section for your article.');
+            } else if (errorMessage.includes('Body content is required')) {
+                alert('Content required: Please add content to your article before submitting for review or publishing.');
+            } else {
+                alert(errorMessage);
+            }
+            
             setError(errorMessage);
-            alert(errorMessage);
         }
     } catch (error) {
-        console.error('Error saving article:', error);
+        console.error('ArticlePage: Error saving article:', error);
         const errorMessage = error instanceof Error ? error.message : 'Failed to save article. Please try again.';
         setError(errorMessage);
-        alert(errorMessage);
+        alert('Network error: ' + errorMessage);
     } finally {
         setSaving(false);
     }

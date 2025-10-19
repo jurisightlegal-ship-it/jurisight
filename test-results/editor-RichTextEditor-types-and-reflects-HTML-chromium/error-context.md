@@ -1,0 +1,168 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - heading "Editor Test Page" [level=1] [ref=e3]
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]:
+          - button [ref=e7]:
+            - img
+          - button [ref=e8]:
+            - img
+          - button [ref=e9]:
+            - img
+        - generic [ref=e11]:
+          - button [ref=e12]:
+            - img
+          - button [ref=e13]:
+            - img
+          - button [ref=e14]:
+            - img
+          - button [ref=e15]:
+            - img
+        - generic [ref=e17]:
+          - button [ref=e18]:
+            - img
+          - button [ref=e19]:
+            - img
+          - button [ref=e20]:
+            - img
+          - button [ref=e21]:
+            - img
+        - generic [ref=e23]:
+          - button [ref=e24]:
+            - img
+          - button [ref=e25]:
+            - img
+          - button [ref=e26]:
+            - img
+          - button [ref=e27]:
+            - img
+        - generic [ref=e29]:
+          - button [ref=e30]:
+            - img
+          - button [ref=e31]:
+            - img
+          - button "Image" [ref=e32]:
+            - img
+            - generic [ref=e33]: Image
+          - button "Video" [ref=e34]:
+            - img
+            - generic [ref=e35]: Video
+          - button "Document" [ref=e36]:
+            - img
+            - generic [ref=e37]: Document
+        - generic [ref=e38]:
+          - img [ref=e39]
+          - text: 2 characters
+      - generic [ref=e41]:
+        - toolbar [ref=e42]:
+          - generic [ref=e44]:
+            - button "Normal" [ref=e45] [cursor=pointer]:
+              - text: Normal
+              - img [ref=e46]
+            - text: Heading 1 Heading 2 Heading 3 Normal
+          - generic [ref=e49]:
+            - button "bold" [ref=e50] [cursor=pointer]:
+              - img [ref=e51]
+            - button "italic" [ref=e54] [cursor=pointer]:
+              - img [ref=e55]
+            - button "underline" [ref=e57] [cursor=pointer]:
+              - img [ref=e58]
+            - button "strike" [ref=e61] [cursor=pointer]:
+              - img [ref=e62]
+            - button "code" [ref=e66] [cursor=pointer]:
+              - img [ref=e67]
+          - generic [ref=e71]:
+            - button [ref=e73] [cursor=pointer]:
+              - img [ref=e74]
+            - button [ref=e77] [cursor=pointer]:
+              - img [ref=e78]
+          - generic [ref=e127]:
+            - 'button "list: ordered" [ref=e128] [cursor=pointer]':
+              - img [ref=e129]
+            - 'button "list: bullet" [ref=e133] [cursor=pointer]':
+              - img [ref=e134]
+          - button [ref=e137] [cursor=pointer]:
+            - img [ref=e138]
+          - generic [ref=e139]:
+            - button "blockquote" [ref=e140] [cursor=pointer]:
+              - img [ref=e141]
+            - button "code-block" [ref=e146] [cursor=pointer]:
+              - img [ref=e147]
+          - generic [ref=e151]:
+            - button "link" [ref=e152] [cursor=pointer]:
+              - img [ref=e153]
+            - button "image" [ref=e157] [cursor=pointer]:
+              - img [ref=e158]
+            - button "video" [ref=e162] [cursor=pointer]:
+              - img [ref=e163]
+          - button "clean" [ref=e177] [cursor=pointer]:
+            - img [ref=e178]
+        - generic [ref=e183]:
+          - paragraph [ref=e185]: Hello Quill!
+          - text: "Visit URL: EditRemove"
+    - generic [ref=e186]: <p>H</p>
+  - button "Open Next.js Dev Tools" [ref=e192] [cursor=pointer]:
+    - img [ref=e193]
+  - alert [ref=e196]
+  - generic [ref=e200]:
+    - generic [ref=e201]:
+      - img [ref=e203]
+      - generic [ref=e205]:
+        - heading "We use cookies to enhance your experience" [level=3] [ref=e206]
+        - paragraph [ref=e207]:
+          - text: We use essential cookies for platform functionality and optional analytics cookies to improve our services. You can customize your preferences or learn more in our
+          - link "Cookie Policy" [ref=e208] [cursor=pointer]:
+            - /url: /cookies
+          - text: .
+    - generic [ref=e209]:
+      - button "Customize" [ref=e210]:
+        - img
+        - text: Customize
+      - button "Reject All" [ref=e211]
+      - button "Accept All" [ref=e212]
+  - generic [ref=e217]:
+    - generic [ref=e218]:
+      - button [ref=e219]:
+        - img
+      - generic [ref=e220]:
+        - img "Jurisight Legal Magazine Cover" [ref=e222]
+        - generic [ref=e224]: FREE
+      - generic [ref=e225]:
+        - heading "Jurisight Legal Magazine" [level=3] [ref=e226]
+        - paragraph [ref=e227]: Expert insights, case studies & legal updates
+        - generic [ref=e228]:
+          - generic [ref=e229]:
+            - img [ref=e230]
+            - generic [ref=e232]: Quarterly
+          - generic [ref=e233]:
+            - img [ref=e234]
+            - generic [ref=e236]: Expert Articles
+    - generic [ref=e238]:
+      - generic [ref=e239]:
+        - generic [ref=e241]:
+          - img [ref=e242]
+          - text: Don't Miss Out
+        - heading "Get Our Free Magazine" [level=2] [ref=e245]
+        - paragraph [ref=e246]: Subscribe to our newsletter and be the first to know when our legal magazine launches. Get exclusive access to expert legal insights, case studies, and practical guides.
+      - generic [ref=e247]:
+        - generic [ref=e249]:
+          - img [ref=e250]
+          - textbox "Enter your email address" [ref=e253]
+        - button "Subscribe" [disabled]:
+          - img
+          - generic: Subscribe
+      - generic [ref=e254]:
+        - generic [ref=e255]:
+          - img [ref=e256]
+          - generic [ref=e259]: No spam, ever
+        - generic [ref=e260]:
+          - img [ref=e261]
+          - generic [ref=e264]: Unsubscribe anytime
+        - generic [ref=e265]:
+          - img [ref=e266]
+          - generic [ref=e269]: Early access to magazine
+```

@@ -206,31 +206,147 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    console.log('Received article creation request:', body);
+    console.log('ArticleAPI: Received article creation request:', JSON.stringify(body, null, 2));
     const { title, dek, body: bodyContent, sectionId, authorId, featuredImage, status, readingTime, tags, slug: customSlug, scheduledAt, publishedAt } = body;
 
-    if (!title || !bodyContent || !sectionId || !authorId) {
-      console.error('Missing required fields:', { title, bodyContent: !!bodyContent, sectionId, authorId });
+    // Validate required fields
+    if (!title || typeof title !== 'string' || title.trim().length === 0) {
       return NextResponse.json(
-        { error: 'Missing required fields: title, body, sectionId, or authorId' },
+        { error: 'Title is required and must be a non-empty string' },
+        { status: 400 }
+      );
+    }
+
+    // Validate author ID
+    if (!authorId || typeof authorId !== 'string' || authorId.trim().length === 0) {
+      return NextResponse.json(
+        { error: 'Author ID is required and must be a non-empty string' },
+        { status: 400 }
+      );
+    }
+
+    // Check if author exists in the database
+    try {
+      const { data: author, error: authorError } = await supabase
+        .from('users')
+        .select('id')
+        .eq('id', authorId)
+        .single();
+      
+      if (authorError || !author) {
+        return NextResponse.json(
+          { error: 'Invalid author ID. The specified author does not exist in the database.' },
+          { status: 400 }
+        );
+      }
+    } catch (error) {
+      console.error('ArticleAPI: Error validating author:', error);
+      return NextResponse.json(
+        { error: 'Failed to validate author information' },
+        { status: 500 }
+      );
+    }
+
+    // Validate section ID
+    if (!sectionId) {
+      return NextResponse.json(
+        { error: 'Section ID is required' },
+        { status: 400 }
+      );
+    }
+
+    const sectionIdNumber = typeof sectionId === 'string' ? parseInt(sectionId, 10) : sectionId;
+    if (isNaN(sectionIdNumber)) {
+      return NextResponse.json(
+        { error: 'Section ID must be a valid number' },
+        { status: 400 }
+      );
+    }
+
+    // Check if section exists in the database
+    try {
+      const { data: section, error: sectionError } = await supabase
+        .from('legal_sections')
+        .select('id')
+        .eq('id', sectionIdNumber)
+        .single();
+      
+      if (sectionError || !section) {
+        return NextResponse.json(
+          { error: 'Invalid section ID. The specified section does not exist in the database.' },
+          { status: 400 }
+        );
+      }
+    } catch (error) {
+      console.error('ArticleAPI: Error validating section:', error);
+      return NextResponse.json(
+        { error: 'Failed to validate section information' },
+        { status: 500 }
+      );
+    }
+
+    // Improved content validation
+    const isContentEmpty = (content: string) => {
+      if (!content) return true;
+      
+      // Remove whitespace and check if empty
+      const trimmed = content.trim();
+      if (!trimmed) return true;
+      
+      // Check for various empty HTML patterns
+      const emptyPatterns = [
+        '',
+        '<p><br></p>',
+        '<p></p>',
+        '<p> </p>',
+        '<p>&nbsp;</p>',
+        '<p><br></p>\n',
+        '<p><br></p>\r\n',
+        '<p></p>\n',
+        '<p></p>\r\n'
+      ];
+      
+      return emptyPatterns.includes(trimmed) || emptyPatterns.includes(content);
+    };
+
+    console.log('ArticleAPI: Content validation check:', {
+      rawContent: bodyContent,
+      isContentEmpty: isContentEmpty(bodyContent),
+      status: status
+    });
+
+    // For IN_REVIEW and PUBLISHED statuses, body content is required
+    // For DRAFT status, body can be empty
+    if ((status === 'IN_REVIEW' || status === 'PUBLISHED') && isContentEmpty(bodyContent)) {
+      return NextResponse.json(
+        { error: 'Body content is required for review and published articles' },
         { status: 400 }
       );
     }
 
     // Use custom slug or generate from title
-    const slug = customSlug || title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '');
+    const slug = customSlug && typeof customSlug === 'string' && customSlug.trim().length > 0 
+      ? customSlug.trim()
+      : title
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/(^-|-$)/g, '');
 
     // Use provided reading time or calculate (rough estimate: 200 words per minute)
-    const finalReadingTime = readingTime || Math.ceil(bodyContent.split(/\s+/).length / 200);
+    const finalReadingTime = readingTime && typeof readingTime === 'number' && readingTime > 0 
+      ? readingTime 
+      : Math.ceil((bodyContent || '').split(/\s+/).filter((word: string) => word.length > 0).length / 200);
 
     // Handle tags - create tags if they don't exist and get tag IDs
     const tagIds: number[] = [];
-    if (tags && tags.length > 0) {
+    if (tags && Array.isArray(tags) && tags.length > 0) {
       for (const tagName of tags) {
-        const tagSlug = tagName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+        if (typeof tagName !== 'string' || tagName.trim().length === 0) {
+          continue; // Skip invalid tags
+        }
+        
+        const cleanTagName = tagName.trim();
+        const tagSlug = cleanTagName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
         
         // Try to get existing tag or create new one
         const { data: existingTag } = await supabase
@@ -243,7 +359,7 @@ export async function POST(request: NextRequest) {
           const { data: newTag, error: tagError } = await supabase
             .from('tags')
             .insert({
-              name: tagName,
+              name: cleanTagName,
               slug: tagSlug,
               created_at: new Date().toISOString()
             })
@@ -253,7 +369,7 @@ export async function POST(request: NextRequest) {
           if (!tagError && newTag) {
             tagIds.push(newTag.id);
           } else {
-            console.error('Error creating tag:', tagError);
+            console.error('ArticleAPI: Error creating tag:', tagError);
           }
         } else {
           tagIds.push(existingTag.id);
@@ -262,32 +378,38 @@ export async function POST(request: NextRequest) {
     }
 
     // Determine the correct status
-    let articleStatus = status || 'DRAFT';
-    if (scheduledAt) {
+    let articleStatus = status && typeof status === 'string' ? status.toUpperCase() : 'DRAFT';
+    
+    // Validate status
+    const validStatuses = ['DRAFT', 'IN_REVIEW', 'NEEDS_REVISIONS', 'APPROVED', 'PUBLISHED', 'SCHEDULED'];
+    if (!validStatuses.includes(articleStatus)) {
+      articleStatus = 'DRAFT'; // Default to draft if invalid status
+    }
+    
+    // If scheduledAt is provided, status should be SCHEDULED
+    if (scheduledAt && new Date(scheduledAt) > new Date()) {
       articleStatus = 'SCHEDULED';
     }
 
-    // Ensure sectionId is a number
-    const sectionIdNumber = typeof sectionId === 'string' ? parseInt(sectionId, 10) : sectionId;
-    
-    // Prepare article data
+    // Prepare article data with consistent empty content handling
+    const isEmptyContent = isContentEmpty(bodyContent);
     const articleData = {
-      title,
+      title: title.trim(),
       slug,
-      dek,
-      body: bodyContent,
-      featured_image: featuredImage,
+      dek: dek && typeof dek === 'string' ? dek.trim() : null,
+      body: isEmptyContent ? '' : (bodyContent || ''), // Consistently handle empty content
+      featured_image: featuredImage && typeof featuredImage === 'string' ? featuredImage : null,
       section_id: sectionIdNumber,
       author_id: authorId,
       reading_time: finalReadingTime,
       status: articleStatus,
-      scheduled_at: scheduledAt || null,
-      published_at: publishedAt || (articleStatus === 'PUBLISHED' ? new Date().toISOString() : null),
+      scheduled_at: scheduledAt && typeof scheduledAt === 'string' ? scheduledAt : null,
+      published_at: publishedAt && typeof publishedAt === 'string' ? publishedAt : (articleStatus === 'PUBLISHED' ? new Date().toISOString() : null),
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     };
     
-    console.log('Inserting article with data:', articleData);
+    console.log('ArticleAPI: Inserting article with data:', JSON.stringify(articleData, null, 2));
 
     const { data: newArticle, error } = await supabase
       .from('articles')
@@ -296,12 +418,30 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Error creating article:', error);
+      console.error('ArticleAPI: Error creating article:', error);
+      
+      // Provide more specific error messages for common issues
+      if (error.message.includes('foreign key constraint')) {
+        if (error.message.includes('author_id')) {
+          return NextResponse.json(
+            { error: 'Failed to create article: The author ID does not exist in the users table. Please ensure you are logged in with a valid account.' },
+            { status: 400 }
+          );
+        } else if (error.message.includes('section_id')) {
+          return NextResponse.json(
+            { error: 'Failed to create article: The section ID does not exist in the legal_sections table.' },
+            { status: 400 }
+          );
+        }
+      }
+      
       return NextResponse.json(
         { error: `Failed to create article: ${error.message}` },
         { status: 500 }
       );
     }
+
+    console.log('ArticleAPI: Successfully created article:', newArticle);
 
     // Create article-tag relationships
     if (tagIds.length > 0 && newArticle) {
@@ -315,16 +455,16 @@ export async function POST(request: NextRequest) {
         .insert(articleTagRelations);
 
       if (tagsError) {
-        console.error('Error creating article-tag relationships:', tagsError);
+        console.error('ArticleAPI: Error creating article-tag relationships:', tagsError);
         // Don't fail the article creation, just log the error
       }
     }
 
     return NextResponse.json({ article: newArticle }, { status: 201 });
   } catch (error) {
-    console.error('Error creating article:', error);
+    console.error('ArticleAPI: Error creating article:', error);
     return NextResponse.json(
-      { error: 'Failed to create article' },
+      { error: 'Failed to create article. Please check the server logs for more details.' },
       { status: 500 }
     );
   }

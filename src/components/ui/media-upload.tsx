@@ -91,12 +91,14 @@ export const MediaUpload = ({
       });
     }
 
-    setFiles(prev => [...prev, ...newFiles]);
-    
-    // Auto-upload files immediately
-    newFiles.forEach(file => {
-      uploadFile(file);
-    });
+    if (newFiles.length > 0) {
+      setFiles(prev => [...prev, ...newFiles]);
+      
+      // Auto-upload files immediately
+      newFiles.forEach(file => {
+        uploadFile(file);
+      });
+    }
   }, [files.length, maxFiles, accept, onError]);
 
   const uploadFile = async (fileItem: PreviewFile) => {

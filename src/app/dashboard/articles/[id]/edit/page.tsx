@@ -102,6 +102,12 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
     scheduledAt: ''
   });
 
+  // Debug form data changes
+  useEffect(() => {
+    console.log('=== FORM DATA CHANGED ===');
+    console.log('Form Data:', JSON.stringify(formData, null, 2));
+  }, [formData]);
+
   const [readingTime, setReadingTime] = useState(0);
   const [newTag, setNewTag] = useState('');
   const [featuredImageUrl, setFeaturedImageUrl] = useState<string | null>(null);
@@ -345,7 +351,21 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
   };
 
   const handleBodyChange = (content: string) => {
-    setFormData(prev => ({ ...prev, body: content }));
+    // Improved empty content detection
+    const isEmpty = !content || 
+      content.trim() === '' || 
+      content === '<p><br></p>' || 
+      content === '<p></p>' ||
+      content === '<p> </p>' ||
+      content === '<p>&nbsp;</p>' ||
+      content === '<p><br></p>\n' ||
+      content === '<p><br></p>\r\n' ||
+      content === '<p></p>\n' ||
+      content === '<p></p>\r\n';
+      
+    const cleanContent = isEmpty ? '' : content;
+    setFormData(prev => ({ ...prev, body: cleanContent }));
+    console.log('Edit page: Body content updated:', { original: content, clean: cleanContent, isEmpty });
   };
 
   const handleContentImageUpload = async (file: File): Promise<string> => {
@@ -465,6 +485,50 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
       }
     }
 
+    // Improved content validation function
+    const isContentEmpty = (content: string) => {
+      if (!content) return true;
+      
+      // Remove whitespace and check if empty
+      const trimmed = content.trim();
+      if (!trimmed) return true;
+      
+      // Check for various empty HTML patterns that the editor might produce
+      const emptyPatterns = [
+        '',
+        '<p><br></p>',
+        '<p></p>',
+        '<p> </p>',
+        '<p>&nbsp;</p>',
+        '<p><br></p>\n',
+        '<p><br></p>\r\n',
+        '<p></p>\n',
+        '<p></p>\r\n'
+      ];
+      
+      return emptyPatterns.includes(trimmed) || emptyPatterns.includes(content);
+    };
+
+    // Validate required fields before saving
+    // For DRAFT status, only title is required
+    // For IN_REVIEW and PUBLISHED status, both title and content are required
+    if (status !== 'DRAFT') {
+        if (!formData.title.trim()) {
+            alert('Please enter a title for the article.');
+            return;
+        }
+
+        if (isContentEmpty(formData.body)) {
+            alert('Please enter content for the article.');
+            return;
+        }
+
+        if (!formData.sectionId) {
+            alert('Please select a section for the article.');
+            return;
+        }
+    }
+
     setSaving(true);
     try {
       // Determine the correct status based on scheduling
@@ -477,9 +541,9 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
 
       // Prepare data based on user role
       const updateData: any = {
-        title: formData.title,
+        title: formData.title.trim() || 'Untitled',
         dek: formData.dek,
-        body: formData.body,
+        body: formData.body || '', // Send empty string instead of <p></p>
         sectionId: parseInt(formData.sectionId, 10), // Convert to number
         featuredImage: formData.featuredImage,
         status: articleStatus,
@@ -503,7 +567,12 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
         updateData.slug = formData.slug;
       }
 
-      console.log('Sending update data:', updateData);
+      console.log('=== EDIT PAGE DEBUG ===');
+      console.log('Article ID:', articleId);
+      console.log('Session User ID:', session?.user?.id);
+      console.log('Session User Role:', session?.user?.role);
+      console.log('Form Data Body:', JSON.stringify(formData.body));
+      console.log('Update Data:', JSON.stringify(updateData, null, 2));
 
       const response = await fetch(`/api/dashboard/articles/${articleId}`, {
         method: 'PUT',
@@ -511,6 +580,8 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
         body: JSON.stringify(updateData)
       });
 
+      console.log('API Response Status:', response.status);
+      
       if (response.ok) {
         let successMessage = '';
         switch (articleStatus) {
@@ -533,12 +604,25 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
         router.push('/dashboard/articles');
       } else {
         const errorData = await response.json();
-        console.error('API error response:', errorData);
-        alert(errorData.error || 'Failed to save article');
+        console.error('Edit page: API error response:', errorData);
+        const errorMessage = errorData.error || 'Failed to save article';
+        
+        // Provide more specific error messages
+        if (errorMessage.includes('Body content is required')) {
+          alert('Content required: Please add content to your article before submitting for review or publishing.');
+        } else if (errorMessage.includes('Title is required')) {
+          alert('Title required: Please enter a title for your article.');
+        } else if (errorMessage.includes('Section is required')) {
+          alert('Section required: Please select a section for your article.');
+        } else {
+          alert(errorMessage);
+        }
+        
+        setError(errorMessage);
       }
     } catch (error) {
-      console.error('Error saving article:', error);
-      alert('Failed to save article');
+      console.error('Edit page: Error saving article:', error);
+      alert('Failed to save article. Please check your connection and try again.');
     } finally {
       setSaving(false);
     }

@@ -5,6 +5,7 @@ import { Providers } from "@/components/providers/session-provider";
 import { DarkModeProvider } from "@/components/providers/dark-mode-provider";
 import { MagazinePopupProvider } from "@/components/magazine-popup-provider";
 import { CookieProvider } from "@/components/providers/cookie-provider";
+import { ClarityProvider } from "@/components/providers/clarity-provider";
 import { CookieNotice } from "@/components/cookie-notice";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import Script from "next/script";
@@ -120,8 +121,10 @@ export default function RootLayout({
           <DarkModeProvider>
             <MagazinePopupProvider>
               <CookieProvider>
-                {children}
-                <CookieNotice />
+                <ClarityProvider>
+                  {children}
+                  <CookieNotice />
+                </ClarityProvider>
               </CookieProvider>
             </MagazinePopupProvider>
           </DarkModeProvider>

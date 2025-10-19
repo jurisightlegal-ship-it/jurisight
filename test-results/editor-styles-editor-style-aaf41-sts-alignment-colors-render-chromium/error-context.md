@@ -1,0 +1,86 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - button "Open Next.js Dev Tools" [ref=e7] [cursor=pointer]:
+    - img [ref=e8]
+  - alert [ref=e11]: Your trusted source for legal insights, court judgments, and comprehensive analysis of the Indian legal landscape.
+  - generic [ref=e13]:
+    - heading "Your trusted source for legal insights, court judgments, and comprehensive analysis of the Indian legal landscape." [level=1] [ref=e26]
+    - generic [ref=e27]:
+      - generic [ref=e28]:
+        - img [ref=e30]
+        - heading "Welcome Back" [level=2] [ref=e36]
+        - paragraph [ref=e37]: Sign in to access your legal insights dashboard
+      - generic [ref=e38]:
+        - generic [ref=e39]:
+          - generic [ref=e40]: Your email
+          - textbox "Your email" [ref=e41]:
+            - /placeholder: your-email@example.com
+        - generic [ref=e42]:
+          - generic [ref=e43]: Password
+          - textbox "Password" [ref=e44]:
+            - /placeholder: Enter your password
+        - button "Sign In" [disabled] [ref=e48]:
+          - text: Sign In
+          - img [ref=e49]
+        - button "Use Magic Link Instead" [ref=e52]
+        - generic [ref=e53]: Don't have an account? Contact an administrator to get started.
+  - generic [ref=e57]:
+    - generic [ref=e58]:
+      - img [ref=e60]
+      - generic [ref=e62]:
+        - heading "We use cookies to enhance your experience" [level=3] [ref=e63]
+        - paragraph [ref=e64]:
+          - text: We use essential cookies for platform functionality and optional analytics cookies to improve our services. You can customize your preferences or learn more in our
+          - link "Cookie Policy" [ref=e65] [cursor=pointer]:
+            - /url: /cookies
+          - text: .
+    - generic [ref=e66]:
+      - button "Customize" [ref=e67]:
+        - img
+        - text: Customize
+      - button "Reject All" [ref=e68]
+      - button "Accept All" [ref=e69]
+  - generic [ref=e74]:
+    - generic [ref=e75]:
+      - button [ref=e76]:
+        - img
+      - generic [ref=e77]:
+        - img "Jurisight Legal Magazine Cover" [ref=e79]
+        - generic [ref=e81]: FREE
+      - generic [ref=e82]:
+        - heading "Jurisight Legal Magazine" [level=3] [ref=e83]
+        - paragraph [ref=e84]: Expert insights, case studies & legal updates
+        - generic [ref=e85]:
+          - generic [ref=e86]:
+            - img [ref=e87]
+            - generic [ref=e89]: Quarterly
+          - generic [ref=e90]:
+            - img [ref=e91]
+            - generic [ref=e93]: Expert Articles
+    - generic [ref=e95]:
+      - generic [ref=e96]:
+        - generic [ref=e98]:
+          - img [ref=e99]
+          - text: Don't Miss Out
+        - heading "Get Our Free Magazine" [level=2] [ref=e102]
+        - paragraph [ref=e103]: Subscribe to our newsletter and be the first to know when our legal magazine launches. Get exclusive access to expert legal insights, case studies, and practical guides.
+      - generic [ref=e104]:
+        - generic [ref=e106]:
+          - img [ref=e107]
+          - textbox "Enter your email address" [ref=e110]
+        - button "Subscribe" [disabled]:
+          - img
+          - generic: Subscribe
+      - generic [ref=e111]:
+        - generic [ref=e112]:
+          - img [ref=e113]
+          - generic [ref=e116]: No spam, ever
+        - generic [ref=e117]:
+          - img [ref=e118]
+          - generic [ref=e121]: Unsubscribe anytime
+        - generic [ref=e122]:
+          - img [ref=e123]
+          - generic [ref=e126]: Early access to magazine
+```

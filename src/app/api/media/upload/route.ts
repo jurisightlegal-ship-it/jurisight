@@ -92,10 +92,18 @@ export async function POST(request: NextRequest) {
       const mimeOk = !!file.type && allowedTypes.includes(file.type);
       const extOk = ['pdf', 'doc', 'docx'].includes(ext);
       if (!mimeOk && !extOk) {
-      return NextResponse.json(
-        { error: `Invalid document type. Allowed: pdf, doc, docx`, received: { name: file.name, type: file.type, size: file.size } },
-        { status: 400 }
-      );
+        return NextResponse.json(
+          { error: `Invalid document type. Allowed: pdf, doc, docx`, received: { name: file.name, type: file.type, size: file.size } },
+          { status: 400 }
+        );
+      }
+      // Set correct content type for documents
+      if (!file.type && ext === 'pdf') {
+        Object.defineProperty(file, 'type', { value: 'application/pdf', writable: false });
+      } else if (!file.type && ext === 'doc') {
+        Object.defineProperty(file, 'type', { value: 'application/msword', writable: false });
+      } else if (!file.type && ext === 'docx') {
+        Object.defineProperty(file, 'type', { value: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', writable: false });
       }
     } else {
       if (!allowedTypes.includes(file.type)) {

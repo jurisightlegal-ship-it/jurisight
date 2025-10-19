@@ -135,6 +135,13 @@ export async function PUT(
 
     const { id } = await params;
     const body = await request.json();
+    
+    console.log('=== DASHBOARD API DEBUG ===');
+    console.log('Article ID:', id);
+    console.log('Session User ID:', session.user.id);
+    console.log('Session User Role:', session.user.role);
+    console.log('Request Body:', JSON.stringify(body, null, 2));
+    
     const { 
       title, 
       dek, 
@@ -156,6 +163,8 @@ export async function PUT(
     // Check if this is a status-only update or full update
     const isStatusOnlyUpdate = Object.keys(body).length === 1 && 'status' in body;
     
+    console.log('Is Status Only Update:', isStatusOnlyUpdate);
+    
     if (isStatusOnlyUpdate) {
       // Handle status-only update (existing logic)
       const validStatuses = ['DRAFT', 'IN_REVIEW', 'NEEDS_REVISIONS', 'APPROVED', 'PUBLISHED'];
@@ -167,9 +176,59 @@ export async function PUT(
       }
     } else {
       // Handle full article update
-      if (!title || !bodyContent || !sectionId) {
+      console.log('=== FULL UPDATE VALIDATION ===');
+      console.log('Title:', title);
+      console.log('Body Content:', JSON.stringify(bodyContent));
+      console.log('Section ID:', sectionId);
+      
+      if (!title) {
+        console.log('❌ Title validation failed');
         return NextResponse.json(
-          { error: 'Title, body, and section are required' },
+          { error: 'Title is required' },
+          { status: 400 }
+        );
+      }
+      
+      // For IN_REVIEW and PUBLISHED statuses, body content is required
+      // For DRAFT status, body can be empty
+      const isContentEmpty = (content: string) => {
+        if (!content) return true;
+        
+        // Remove whitespace and check if empty
+        const trimmed = content.trim();
+        if (!trimmed) return true;
+        
+        // Check for various empty HTML patterns
+        const emptyPatterns = [
+          '',
+          '<p><br></p>',
+          '<p></p>',
+          '<p> </p>',
+          '<p>&nbsp;</p>',
+          '<p><br></p>\n',
+          '<p><br></p>\r\n',
+          '<p></p>\n',
+          '<p></p>\r\n'
+        ];
+        
+        return emptyPatterns.includes(trimmed) || emptyPatterns.includes(content);
+      };
+      
+      console.log('Body Content Empty Check:', isContentEmpty(bodyContent));
+      
+      // Only require body content for IN_REVIEW and PUBLISHED statuses
+      if ((status === 'IN_REVIEW' || status === 'PUBLISHED') && isContentEmpty(bodyContent)) {
+        console.log('❌ Body content validation failed for IN_REVIEW/PUBLISHED status');
+        return NextResponse.json(
+          { error: 'Body content is required for review and published articles' },
+          { status: 400 }
+        );
+      }
+      
+      if (!sectionId) {
+        console.log('❌ Section validation failed');
+        return NextResponse.json(
+          { error: 'Section is required' },
           { status: 400 }
         );
       }
@@ -183,6 +242,7 @@ export async function PUT(
       .single();
 
     if (fetchError || !article) {
+      console.log('❌ Article not found or fetch error:', fetchError);
       return NextResponse.json(
         { error: 'Article not found' },
         { status: 404 }
@@ -194,6 +254,14 @@ export async function PUT(
     const isAdmin = session.user.role === 'ADMIN';
     const isEditor = session.user.role === 'EDITOR';
     const isContributor = session.user.role === 'CONTRIBUTOR';
+
+    console.log('=== PERMISSION CHECK ===');
+    console.log('Is Author:', isAuthor);
+    console.log('Is Admin:', isAdmin);
+    console.log('Is Editor:', isEditor);
+    console.log('Is Contributor:', isContributor);
+    console.log('Article Author ID:', article.author_id);
+    console.log('Session User ID:', session.user.id);
 
     if (isStatusOnlyUpdate) {
       // Status-only update permissions
@@ -226,6 +294,7 @@ export async function PUT(
       // Full article update permissions
       // Only authors, editors, and admins can update articles
       if (!isAuthor && !isAdmin && !isEditor) {
+        console.log('❌ Insufficient permissions for full update');
         return NextResponse.json(
           { error: 'Insufficient permissions to edit this article' },
           { status: 403 }
@@ -234,6 +303,7 @@ export async function PUT(
 
       // Contributors can only edit their own articles
       if (isContributor && !isAuthor) {
+        console.log('❌ Contributors can only edit their own articles');
         return NextResponse.json(
           { error: 'You can only edit your own articles' },
           { status: 403 }
@@ -264,12 +334,42 @@ export async function PUT(
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/(^-|-$)/g, '');
       
-      const finalReadingTime = readingTime || Math.ceil(bodyContent.split(/\s+/).length / 200);
+      const finalReadingTime = readingTime || Math.ceil((bodyContent || '').split(/\s+/).filter((word: string) => word.length > 0).length / 200);
+      
+      // Handle empty content properly
+      const isContentEmpty = (content: string) => {
+        if (!content) return true;
+        
+        // Remove whitespace and check if empty
+        const trimmed = content.trim();
+        if (!trimmed) return true;
+        
+        // Check for various empty HTML patterns
+        const emptyPatterns = [
+          '',
+          '<p><br></p>',
+          '<p></p>',
+          '<p> </p>',
+          '<p>&nbsp;</p>',
+          '<p><br></p>\n',
+          '<p><br></p>\r\n',
+          '<p></p>\n',
+          '<p></p>\r\n'
+        ];
+        
+        return emptyPatterns.includes(trimmed) || emptyPatterns.includes(content);
+      };
+      
+      const cleanBodyContent = isContentEmpty(bodyContent) ? '' : bodyContent;
+      
+      console.log('=== UPDATE DATA PREPARATION ===');
+      console.log('Clean Body Content:', JSON.stringify(cleanBodyContent));
+      console.log('Final Reading Time:', finalReadingTime);
       
       updateData.title = title;
       updateData.slug = finalSlug;
       updateData.dek = dek;
-      updateData.body = bodyContent;
+      updateData.body = cleanBodyContent;
       updateData.section_id = sectionId;
       updateData.featured_image = featuredImage;
       updateData.reading_time = finalReadingTime;
@@ -301,6 +401,9 @@ export async function PUT(
       }
     }
 
+    console.log('=== FINAL UPDATE DATA ===');
+    console.log('Update Data:', JSON.stringify(updateData, null, 2));
+
     // Update article
     const { data: updatedArticle, error } = await supabase
       .from('articles')
@@ -327,12 +430,15 @@ export async function PUT(
       .single();
 
     if (error) {
-      console.error('Error updating article:', error);
+      console.error('❌ Error updating article:', error);
       return NextResponse.json(
-        { error: 'Failed to update article' },
+        { error: 'Failed to update article: ' + error.message },
         { status: 500 }
       );
     }
+
+    console.log('✅ Article updated successfully');
+    console.log('Updated Article Body:', updatedArticle.body);
 
     // Auto-revalidate paths when article is published or updated
     try {
