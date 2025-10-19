@@ -144,6 +144,26 @@ export default function RootLayout({
             gtag('config', 'G-2399KEEWCS');
           `}
         </Script>
+        
+        {/* Google News Subscription */}
+        <Script 
+          async 
+          type="application/javascript" 
+          src="https://news.google.com/swg/js/v1/swg-basic.js" 
+          strategy="afterInteractive"
+        />
+        <Script id="google-news-subscription" strategy="afterInteractive">
+          {`
+            (self.SWG_BASIC = self.SWG_BASIC || []).push(basicSubscriptions => {
+              basicSubscriptions.init({
+                type: "NewsArticle",
+                isPartOfType: ["Product"],
+                isPartOfProductId: "CAowsePBDA:openaccess",
+                clientOptions: { theme: "light", lang: "en" },
+              });
+            });
+          `}
+        </Script>
       </body>
     </html>
   );
