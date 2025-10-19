@@ -38,7 +38,7 @@ export function KnowTheLawBlogs() {
   React.useEffect(() => {
     const fetchArticles = async () => {
       try {
-        const response = await fetch('/api/articles?section=academic&limit=6');
+        const response = await fetch('/api/articles?section=know-your-law&limit=6');
         if (response.ok) {
           const data = await response.json();
           const articles = data.articles || [];
@@ -101,7 +101,7 @@ export function KnowTheLawBlogs() {
             <h2 className="text-3xl font-bold text-black mb-2">Know the Law</h2>
             <p className="text-black/60">Educational content to help you understand your legal rights and obligations</p>
           </div>
-          <Link href="/categories/know-the-law">
+          <Link href="/know-your-law">
             <Button className="bg-white text-black hover:bg-gray-100 border border-black/20">
               View All
               <ArrowRight className="ml-2 h-4 w-4" />
