@@ -10,11 +10,11 @@ export function BackButton() {
   return (
     <Button
       variant="ghost"
-      onClick={() => router.back()}
+      onClick={() => router.push('/articles')}
       className="flex items-center"
     >
       <ArrowLeft className="h-4 w-4 mr-2" />
-      Back
+      Back to Articles
     </Button>
   );
 }

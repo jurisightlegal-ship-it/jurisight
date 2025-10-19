@@ -14,7 +14,7 @@ export default function Home() {
   return (
     <>
       <HomepageStructuredData />
-      <div className="relative min-h-[650px] w-full overflow-hidden">
+      <div className="relative min-h-[400px] w-full overflow-hidden">
         {/* Animated Background */}
         <div className="absolute inset-0 z-0">
           <AnimatedBackgroundWrapper />
@@ -23,7 +23,7 @@ export default function Home() {
         {/* Content */}
         <div className="relative z-10">
           <Navbar />
-          <div className="relative flex min-h-[650px] items-center justify-center py-20 sm:py-24">
+          <div className="relative flex min-h-[400px] items-center justify-center py-8 sm:py-12">
             <HeroHeader />
           </div>
         </div>

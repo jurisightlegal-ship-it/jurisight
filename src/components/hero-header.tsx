@@ -19,7 +19,7 @@ export default function HeroHeader() {
 
   return (
     <header className="relative z-10 mx-auto max-w-3xl px-4 text-center">
-      <h1 className="text-4xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white via-jurisight-lime to-jurisight-teal drop-shadow">
+      <h1 className="text-4xl md:text-6xl font-bold text-white">
         Explore Legal Knowledge with Jurisight
       </h1>
       <p className="mt-4 text-lg text-white/85 drop-shadow">

@@ -171,7 +171,7 @@ export default function HighCourtJudgementsPage() {
       </div>
       
       {/* Hero Section */}
-      <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden">
+      <section className="relative min-h-[50vh] flex items-center justify-center overflow-hidden">
         {/* Content */}
         <div className="relative z-20 max-w-7xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm text-white text-sm font-medium mb-6">

@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect } from 'react';
-import clarity from '@microsoft/clarity';
 
 interface ClarityProviderProps {
   children: React.ReactNode;
@@ -14,7 +13,17 @@ export function ClarityProvider({ children }: ClarityProviderProps) {
     // Only initialize Clarity if we have a valid project ID
     if (projectId && projectId !== 'your-clarity-project-id-here') {
       try {
-        clarity.init(projectId);
+        // Load Microsoft Clarity script dynamically
+        const script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.innerHTML = `
+          (function(c,l,a,r,i,t,y){
+            c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+            t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+            y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+          })(window, document, "clarity", "script", "${projectId}");
+        `;
+        document.head.appendChild(script);
         console.log('Microsoft Clarity initialized successfully');
       } catch (error) {
         console.error('Failed to initialize Microsoft Clarity:', error);
