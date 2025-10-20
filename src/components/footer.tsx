@@ -191,7 +191,7 @@ export function Footer() {
           <div className="flex flex-col gap-4">
             {/* Copyright */}
             <div className="text-sm text-slate-400 text-center md:text-left">
-              © 2025 Jurisight. All rights reserved. | Empowering legal knowledge since 2024.
+              © 2025 Jurisight. All rights reserved.
             </div>
             
             {/* Legal Links */}
