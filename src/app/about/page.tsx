@@ -136,71 +136,6 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Main Content */}
-      <section className="relative py-16 px-4 sm:px-6 lg:px-8 bg-white/95 backdrop-blur-sm z-20">
-        <div className="max-w-4xl mx-auto">
-          
-          {/* Simple Mission */}
-          <div className="text-center mb-16">
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6">
-              We make legal knowledge simple
-            </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
-              No jargon, no complexity. Just clear explanations that help you understand your rights and make better decisions.
-            </p>
-          </div>
-
-          {/* Three Core Values */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-            <div className="text-center">
-              <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Lightbulb className="h-6 w-6 text-gray-900" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Clear</h3>
-              <p className="text-gray-600 text-sm">
-                We explain complex legal concepts in plain language.
-              </p>
-            </div>
-
-            <div className="text-center">
-              <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Shield className="h-6 w-6 text-gray-900" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Trusted</h3>
-              <p className="text-gray-600 text-sm">
-                Our content is created and verified by legal experts.
-              </p>
-            </div>
-
-            <div className="text-center">
-              <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Globe className="h-6 w-6 text-gray-900" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Accessible</h3>
-              <p className="text-gray-600 text-sm">
-                Legal knowledge for everyone, everywhere.
-              </p>
-            </div>
-          </div>
-
-          {/* Simple CTA */}
-          <div className="text-center">
-            <p className="text-gray-600 mb-6">
-              Ready to understand your rights?
-            </p>
-            <Link href="/articles">
-              <Button 
-                size="lg"
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3"
-              >
-                Start Learning
-                <BookOpen className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
-
       {/* Team Section */}
       <section className="relative py-16 px-4 sm:px-6 lg:px-8 bg-gray-50 z-20">
         <div className="max-w-4xl mx-auto">
@@ -318,6 +253,71 @@ export default function AboutPage() {
               ))}
             </div>
           )}
+        </div>
+      </section>
+
+      {/* Main Content */}
+      <section className="relative py-16 px-4 sm:px-6 lg:px-8 bg-white/95 backdrop-blur-sm z-20">
+        <div className="max-w-4xl mx-auto">
+          
+          {/* Simple Mission */}
+          <div className="text-center mb-16">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6">
+              We make legal knowledge simple
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
+              No jargon, no complexity. Just clear explanations that help you understand your rights and make better decisions.
+            </p>
+          </div>
+
+          {/* Three Core Values */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+            <div className="text-center">
+              <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Lightbulb className="h-6 w-6 text-gray-900" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Clear</h3>
+              <p className="text-gray-600 text-sm">
+                We explain complex legal concepts in plain language.
+              </p>
+            </div>
+
+            <div className="text-center">
+              <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Shield className="h-6 w-6 text-gray-900" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Trusted</h3>
+              <p className="text-gray-600 text-sm">
+                Our content is created and verified by legal experts.
+              </p>
+            </div>
+
+            <div className="text-center">
+              <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Globe className="h-6 w-6 text-gray-900" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Accessible</h3>
+              <p className="text-gray-600 text-sm">
+                Legal knowledge for everyone, everywhere.
+              </p>
+            </div>
+          </div>
+
+          {/* Simple CTA */}
+          <div className="text-center">
+            <p className="text-gray-600 mb-6">
+              Ready to understand your rights?
+            </p>
+            <Link href="/articles">
+              <Button 
+                size="lg"
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3"
+              >
+                Start Learning
+                <BookOpen className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
         </div>
       </section>
 
