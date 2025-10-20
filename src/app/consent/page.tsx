@@ -31,7 +31,7 @@ export const metadata: Metadata = {
 
 export default function ConsentManagementPage() {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-900">
       <Navbar />
       <main className="py-12">
         <ConsentRevocation />

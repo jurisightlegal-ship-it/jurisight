@@ -21,7 +21,7 @@ import Link from 'next/link';
 declare global {
   interface Window {
     gtag: (command: string, ...args: any[]) => void;
-    clarity: (command: string, ...args: any[]) => void;
+    clarity: any;
   }
 }
 
@@ -176,7 +176,7 @@ export function CookieNotice() {
       <Card className="max-w-5xl mx-auto">
         <CardContent className="p-6">
           {!showSettings ? (
-            // Main cookie notice - Google AdSense compliant
+            // Main cookie notice
             <div className="space-y-4">
               <div className="flex items-start gap-3">
                 <div className="flex-shrink-0">
@@ -234,7 +234,7 @@ export function CookieNotice() {
               </div>
             </div>
           ) : (
-            // Cookie preferences settings - Google AdSense compliant
+            // Cookie preferences settings
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
