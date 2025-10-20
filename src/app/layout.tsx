@@ -131,7 +131,7 @@ export default function RootLayout({
         </Providers>
         <SpeedInsights />
         
-        {/* Google Analytics */}
+        {/* Google Analytics with Consent Mode */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-2399KEEWCS"
           strategy="afterInteractive"
@@ -140,8 +140,24 @@ export default function RootLayout({
           {`
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
+            
+            // Set default consent state (denied until user consents)
+            gtag('consent', 'default', {
+              analytics_storage: 'denied',
+              ad_storage: 'denied',
+              ad_user_data: 'denied',
+              ad_personalization: 'denied',
+              functionality_storage: 'denied',
+              personalization_storage: 'denied',
+              security_storage: 'granted'
+            });
+            
             gtag('js', new Date());
-            gtag('config', 'G-2399KEEWCS');
+            gtag('config', 'G-2399KEEWCS', {
+              anonymize_ip: true,
+              allow_google_signals: false,
+              allow_ad_personalization_signals: false
+            });
           `}
         </Script>
         

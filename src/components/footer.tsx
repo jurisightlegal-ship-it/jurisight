@@ -202,6 +202,9 @@ export function Footer() {
               <Link href="/cookies" className="text-slate-400 hover:text-white transition-colors text-center sm:text-left">
                 Cookie Policy
               </Link>
+              <Link href="/consent" className="text-slate-400 hover:text-white transition-colors text-center sm:text-left">
+                Cookie Consent
+              </Link>
               <Link href="/disclaimer" className="text-slate-400 hover:text-white transition-colors text-center sm:text-left">
                 Legal Disclaimer
               </Link>

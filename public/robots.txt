@@ -16,6 +16,9 @@ Allow: /supreme-court-judgements
 Allow: /high-court-judgements
 Allow: /know-your-law
 
+# Allow ads.txt for AdSense verification
+Allow: /ads.txt
+
 # Sitemap location
 Sitemap: https://jurisight.in/sitemap.xml
 
