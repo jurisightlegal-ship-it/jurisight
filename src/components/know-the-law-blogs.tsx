@@ -174,7 +174,6 @@ export function KnowTheLawBlogs() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-medium text-gray-900 truncate">{article.author.name}</p>
-                      <p className="text-xs text-gray-500">{article.views} views</p>
                     </div>
                   </div>
 

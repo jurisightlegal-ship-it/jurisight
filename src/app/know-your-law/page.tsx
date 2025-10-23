@@ -286,110 +286,74 @@ export default function KnowYourLawPage() {
               </CardContent>
             </Card>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {articles.map((article) => (
-                <Card key={article.id} className="group overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                  {/* Featured Image */}
-                  {article.featuredImage ? (
-                    <div className="relative h-48 overflow-hidden">
-                      <Image
-                        src={article.featuredImage}
-                        alt={article.title}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                      <div className="absolute top-4 left-4">
-                        <Badge 
-                          className="text-xs px-3 py-1 backdrop-blur-sm"
-                          style={{ 
-                            backgroundColor: `${article.section.color}20`,
-                            color: article.section.color,
-                            border: `1px solid ${article.section.color}40`
-                          }}
-                        >
-                          Know Your Law
-                        </Badge>
+                <Link key={article.id} href={`/articles/${article.slug}`}>
+                  <Card className="group overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 cursor-pointer">
+                    {/* Featured Image */}
+                    {article.featuredImage ? (
+                      <div className="relative aspect-video overflow-hidden">
+                        <Image
+                          src={article.featuredImage}
+                          alt={article.title}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                        <div className="absolute top-4 left-4">
+                          <Badge className="text-xs px-3 py-1 bg-white text-jurisight-navy">
+                            Know Your Law
+                          </Badge>
+                        </div>
                       </div>
-                      <div className="absolute bottom-4 left-4 right-4 flex items-center gap-2 text-white/90 text-xs">
-                        <span className="inline-flex items-center gap-1.5 bg-white/10 px-2.5 py-1 rounded-full backdrop-blur">
-                          <Calendar className="h-3.5 w-3.5" />
-                          {formatDate(article.publishedAt)}
-                        </span>
+                    ) : (
+                      <div className="relative aspect-video bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-600 flex items-center justify-center">
+                        <BookOpen className="h-12 w-12 text-white" />
+                        <div className="absolute top-4 left-4">
+                          <Badge className="text-xs px-3 py-1 bg-white text-jurisight-navy">
+                            Know Your Law
+                          </Badge>
+                        </div>
                       </div>
-                    </div>
-                  ) : (
-                    <div className="relative h-48 bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-600 flex items-center justify-center">
-                      <BookOpen className="h-12 w-12 text-white" />
-                      <div className="absolute top-4 left-4">
-                        <Badge 
-                          className="text-xs px-3 py-1 backdrop-blur-sm bg-white/20 text-white border-white/40"
-                        >
-                          Know Your Law
-                        </Badge>
-                      </div>
-                      <div className="absolute bottom-4 left-4 right-4 flex items-center gap-2 text-white/90 text-xs">
-                        <span className="inline-flex items-center gap-1.5 bg-white/10 px-2.5 py-1 rounded-full backdrop-blur">
-                          <Calendar className="h-3.5 w-3.5" />
-                          {formatDate(article.publishedAt)}
-                        </span>
-                      </div>
-                    </div>
-                  )}
-
-                  <CardContent className="p-6">
-                    <h3 className="text-xl font-semibold text-gray-900 mb-3 line-clamp-2 group-hover:text-purple-600 transition-colors">
-                      {article.title}
-                    </h3>
-                    
-                    {article.dek && (
-                      <p className="text-gray-600 mb-4 line-clamp-3">{article.dek}</p>
                     )}
 
-                    {/* Author Info */}
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
-                        {avatarUrls[article.author.id] ? (
-                          <Image
-                            src={avatarUrls[article.author.id]!}
-                            alt={article.author.name}
-                            width={32}
-                            height={32}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <User className="h-4 w-4 text-gray-500" />
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">{article.author.name}</p>
-                        <p className="text-xs text-gray-500">{formatDate(article.publishedAt)}</p>
-                      </div>
-                    </div>
+                    <CardContent className="p-6">
+                      <h3 className="text-xl font-bold text-black mb-3 line-clamp-2 group-hover:text-jurisight-navy transition-colors">
+                        {article.title}
+                      </h3>
+                      
+                      {article.dek && (
+                        <p className="text-black/70 mb-4 line-clamp-3">{article.dek}</p>
+                      )}
 
-                    {/* Article Meta */}
-                    <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-1">
+                      {/* Reading Time and Author */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1 text-sm text-black/60">
                           <Clock className="h-4 w-4" />
-                          {article.readingTime} min
+                          {article.readingTime} min read
                         </div>
-                        <div className="flex items-center gap-1">
-                          <Eye className="h-4 w-4" />
-                          {article.views}
+                        
+                        <div className="flex items-center gap-2">
+                          <div className="w-5 h-5 rounded-full overflow-hidden bg-jurisight-navy flex items-center justify-center">
+                            {avatarUrls[article.author.id] ? (
+                              <Image
+                                src={avatarUrls[article.author.id]!}
+                                alt={article.author.name}
+                                width={20}
+                                height={20}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <span className="text-xs text-white font-medium">
+                                {article.author.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                              </span>
+                            )}
+                          </div>
+                          <span className="text-sm text-black/60">{article.author.name}</span>
                         </div>
                       </div>
-                    </div>
-
-                    <Button
-                      variant="outline"
-                      className="w-full group-hover:bg-purple-600 group-hover:text-white group-hover:border-purple-600 transition-all duration-300"
-                      onClick={() => router.push(`/articles/${article.slug}`)}
-                    >
-                      Learn More
-                      <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                    </Button>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
+                </Link>
               ))}
             </div>
           )}

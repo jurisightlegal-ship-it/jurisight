@@ -190,10 +190,6 @@ export function TopNews() {
                           <span>{article.readingTime} min read</span>
                         </div>
                       )}
-                      <div className="flex items-center gap-1">
-                        <Eye className="h-3 w-3" />
-                        <span>{article.views} views</span>
-                      </div>
                     </div>
                   </div>
                 </CardContent>

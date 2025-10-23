@@ -7,6 +7,7 @@ import { BackButton } from '@/components/back-button';
 import { ArticlePageClient } from '@/components/article-page-client';
 import { AsyncAvatar } from '@/components/async-avatar';
 import { SocialShareButton } from '@/components/social-share-button';
+import { MagazineBanner } from '@/components/magazine-banner';
 import { RecentArticlesSection } from '@/components/recent-articles-section';
 import { Footer } from '@/components/footer';
 import { supabase } from '@/lib/supabase-db';
@@ -338,6 +339,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
 
   return (
     <ArticlePageClient>
+      <MagazineBanner />
       <div className="min-h-screen bg-gray-50">
         
         {/* Header */}
@@ -347,10 +349,6 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
               <BackButton />
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-4 text-sm text-gray-500">
-                  <div className="flex items-center gap-1">
-                    <Eye className="h-4 w-4" />
-                    {article.views} views
-                  </div>
                   <div className="flex items-center gap-1">
                     <Clock className="h-4 w-4" />
                     {article.readingTime} min read

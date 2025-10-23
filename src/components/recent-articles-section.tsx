@@ -216,20 +216,14 @@ export function RecentArticlesSection({
                 )}
 
                 {/* Article Meta */}
-                <div className="flex items-center justify-between text-xs text-gray-500">
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-1">
-                      <Calendar className="h-3 w-3" />
-                      {formatDate(article.publishedAt)}
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      {article.readingTime} min
-                    </div>
+                <div className="flex items-center gap-3 text-xs text-gray-500">
+                  <div className="flex items-center gap-1">
+                    <Calendar className="h-3 w-3" />
+                    {formatDate(article.publishedAt)}
                   </div>
                   <div className="flex items-center gap-1">
-                    <Eye className="h-3 w-3" />
-                    {article.views}
+                    <Clock className="h-3 w-3" />
+                    {article.readingTime} min
                   </div>
                 </div>
 

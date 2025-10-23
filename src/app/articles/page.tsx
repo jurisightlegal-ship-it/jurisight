@@ -13,6 +13,7 @@ import { Navbar } from '@/components/navbar';
 import { Footer } from '@/components/footer';
 import { ShaderAnimation } from '@/components/ui/shader-animation';
 import { NewsletterCTA } from '@/components/newsletter-signup';
+import { MagazineBanner } from '@/components/magazine-banner';
 import { 
   Search, 
   BookOpen,
@@ -162,6 +163,11 @@ export default function ArticlesPage() {
       {/* Overlay */}
       <div className="fixed inset-0 bg-black/40 z-10"></div>
       
+      {/* Magazine Banner */}
+      <div className="relative z-20">
+        <MagazineBanner />
+      </div>
+      
       {/* Navbar */}
       <div className="relative z-20">
         <Navbar />
@@ -283,91 +289,81 @@ export default function ArticlesPage() {
               </CardContent>
             </Card>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {articles.map((article) => (
-                <Card key={article.id} className="group overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                  {/* Featured Image */}
-                  {article.featuredImage && (
-                    <div className="relative h-48 overflow-hidden">
-                      <Image
-                        src={article.featuredImage}
-                        alt={article.title}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                      <div className="absolute top-4 left-4">
-                        <Badge 
-                          className="text-xs px-3 py-1 backdrop-blur-sm"
-                          style={{ 
-                            backgroundColor: `${article.section.color}20`,
-                            color: article.section.color,
-                            border: `1px solid ${article.section.color}40`
-                          }}
-                        >
-                          {article.section.name}
-                        </Badge>
-                      </div>
+                <Link key={article.id} href={`/articles/${article.slug}`}>
+                  <Card className="group overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+                    <div className="relative aspect-video overflow-hidden">
+                      {article.featuredImage ? (
+                        <Image
+                          src={article.featuredImage}
+                          alt={article.title}
+                          fill
+                          className="object-cover transition-transform duration-300 group-hover:scale-105"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-jurisight-navy via-jurisight-royal to-jurisight-teal flex items-center justify-center">
+                          <div className="text-white text-lg font-semibold">
+                            {article.title.charAt(0).toUpperCase()}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {article.section && (
+                        <div className="absolute top-4 left-4">
+                          <span
+                            className="px-3 py-1 text-xs font-medium text-white rounded-full"
+                            style={{ backgroundColor: article.section.color }}
+                          >
+                            {article.section.name}
+                          </span>
+                        </div>
+                      )}
                     </div>
-                  )}
 
-                  <CardContent className="p-6">
-                    <h3 className="text-xl font-semibold text-gray-900 mb-3 line-clamp-2 group-hover:text-blue-600 transition-colors">
-                      {article.title}
-                    </h3>
-                    
-                    {article.dek && (
-                      <p className="text-gray-600 mb-4 line-clamp-3">{article.dek}</p>
-                    )}
+                    <CardContent className="p-6">
+                      <h3 className="text-xl font-bold text-black mb-3 line-clamp-2 group-hover:text-jurisight-navy transition-colors">
+                        {article.title}
+                      </h3>
+                      
+                      {article.dek && (
+                        <p className="text-black/70 text-sm mb-4 line-clamp-3">
+                          {article.dek}
+                        </p>
+                      )}
 
-                    {/* Author Info */}
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
-                        {avatarUrls[article.author.id] ? (
-                          <Image
-                            src={avatarUrls[article.author.id]!}
-                            alt={article.author.name}
-                            width={32}
-                            height={32}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <User className="h-4 w-4 text-gray-500" />
+                      <div className="flex items-center justify-between text-xs text-black/50">
+                        <div className="flex items-center gap-4">
+                          {article.readingTime && (
+                            <div className="flex items-center gap-1">
+                              <Clock className="h-3 w-3" />
+                              <span>{article.readingTime} min read</span>
+                            </div>
+                          )}
+                        </div>
+                        
+                        {article.author?.name && (
+                          <div className="flex items-center gap-2">
+                            {avatarUrls[article.author.id] ? (
+                              <Image
+                                src={avatarUrls[article.author.id]!}
+                                alt={article.author.name}
+                                width={20}
+                                height={20}
+                                className="rounded-full"
+                              />
+                            ) : (
+                              <div className="w-5 h-5 bg-jurisight-navy rounded-full flex items-center justify-center text-white text-xs">
+                                {article.author.name.charAt(0).toUpperCase()}
+                              </div>
+                            )}
+                            <span className="font-medium">{article.author.name}</span>
+                          </div>
                         )}
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">{article.author.name}</p>
-                        <p className="text-xs text-gray-500">{formatDate(article.publishedAt)}</p>
-                      </div>
-                    </div>
-
-                    {/* Article Meta */}
-                    <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-1">
-                          <Clock className="h-4 w-4" />
-                          {article.readingTime} min
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Eye className="h-4 w-4" />
-                          {article.views}
-                        </div>
-                      </div>
-                    </div>
-
-                    <Button
-                      variant="outline"
-                      className="w-full group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition-all duration-300"
-                      onClick={() => {
-                        // Prefetch the article page for faster navigation
-                        router.prefetch(`/articles/${article.slug}`);
-                        router.push(`/articles/${article.slug}`);
-                      }}
-                    >
-                      Read Article
-                      <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                    </Button>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
+                </Link>
               ))}
             </div>
           )}

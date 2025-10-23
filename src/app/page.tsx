@@ -9,11 +9,13 @@ import { KnowTheLawBlogs } from '@/components/know-the-law-blogs';
 import { WhatsAppCommunityBadge } from '@/components/whatsapp-community-badge';
 import { Footer } from '@/components/footer';
 import { HomepageStructuredData } from '@/components/structured-data';
+import { MagazineBanner } from '@/components/magazine-banner';
 
 export default function Home() {
   return (
     <>
       <HomepageStructuredData />
+      <MagazineBanner />
       <div className="relative min-h-[400px] w-full overflow-hidden">
         {/* Animated Background */}
         <div className="absolute inset-0 z-0">
