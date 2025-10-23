@@ -276,15 +276,11 @@ export function useMagazinePopup() {
     setHasShown(true);
   };
 
-  // Auto-show popup after 3 seconds on first visit
+  // DISABLED: Auto-show popup after 3 seconds on first visit
+  // The magazine popup has been disabled as requested
   useEffect(() => {
-    const hasShownBefore = localStorage.getItem('magazine-popup-shown');
-    if (!hasShownBefore) {
-      const timer = setTimeout(() => {
-        setIsOpen(true);
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
+    // Mark as shown to prevent any future auto-showing
+    localStorage.setItem('magazine-popup-shown', 'true');
   }, []);
 
   // Save to localStorage when popup is shown

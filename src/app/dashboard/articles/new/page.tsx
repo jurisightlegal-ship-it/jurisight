@@ -54,6 +54,8 @@ interface ArticleData {
   status: string;
   readingTime: number;
   scheduledAt?: string;
+  isFeatured: boolean;
+  isTopNews: boolean;
 }
 
 export default function NewArticlePage() {
@@ -76,7 +78,9 @@ export default function NewArticlePage() {
     featuredImage: '',
     tags: [] as string[],
     status: 'DRAFT',
-    scheduledAt: ''
+    scheduledAt: '',
+    isFeatured: false,
+    isTopNews: false
   });
 
   const [readingTime, setReadingTime] = useState(0);
@@ -194,12 +198,18 @@ export default function NewArticlePage() {
     console.log('========================');
   }, [formData, saving, session, status]);
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+  const handleInputChange = (field: string, value: string | boolean) => {
+    // Convert string 'true'/'false' to boolean for prominence fields
+    let processedValue = value;
+    if (field === 'isFeatured' || field === 'isTopNews') {
+      processedValue = value === 'true' || value === true;
+    }
+    
+    setFormData(prev => ({ ...prev, [field]: processedValue }));
     console.log(`=== FIELD UPDATE ===`);
     console.log(`Field: ${field}`);
-    console.log(`Value: ${value}`);
-    console.log(`Type: ${typeof value}`);
+    console.log(`Value: ${processedValue}`);
+    console.log(`Type: ${typeof processedValue}`);
     console.log(`====================`);
   };
 
@@ -398,7 +408,9 @@ export default function NewArticlePage() {
             authorId: session.user.id,
             slug: formData.slug || 'untitled',
             scheduledAt: formData.scheduledAt || undefined,
-            publishedAt: status === 'PUBLISHED' ? new Date().toISOString() : undefined
+            publishedAt: status === 'PUBLISHED' ? new Date().toISOString() : undefined,
+            isFeatured: formData.isFeatured || false,
+            isTopNews: formData.isTopNews || false
         };
 
         console.log('ArticlePage: Sending article data to API:', articleData);
@@ -749,6 +761,45 @@ export default function NewArticlePage() {
                       placeholder="article-url-slug"
                       className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-jurisight-royal dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
                     />
+                  </div>
+
+                  {/* Prominence Options */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                      Article Prominence
+                    </label>
+                    <div className="space-y-3">
+                      {/* Featured Article */}
+                      <div className="flex items-center">
+                        <input
+                          type="checkbox"
+                          id="isFeatured"
+                          checked={formData.isFeatured}
+                          onChange={(e) => handleInputChange('isFeatured', e.target.checked ? 'true' : 'false')}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        />
+                        <label htmlFor="isFeatured" className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                          Featured Article
+                        </label>
+                      </div>
+
+                      {/* Top News */}
+                      <div className="flex items-center">
+                        <input
+                          type="checkbox"
+                          id="isTopNews"
+                          checked={formData.isTopNews}
+                          onChange={(e) => handleInputChange('isTopNews', e.target.checked ? 'true' : 'false')}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        />
+                        <label htmlFor="isTopNews" className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                          Top News
+                        </label>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                      Featured articles appear prominently on the homepage. Top news articles are highlighted in the news section.
+                    </p>
                   </div>
 
                   {/* Reading Time & Word Count */}

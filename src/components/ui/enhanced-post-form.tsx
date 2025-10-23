@@ -50,6 +50,8 @@ interface ArticleData {
   readingTime: number;
   tags: string[];
   slug: string;
+  isFeatured: boolean;
+  isTopNews: boolean;
 }
 
 interface EnhancedPostFormProps {
@@ -90,7 +92,9 @@ export const EnhancedPostForm = ({
     sectionId: initialData?.sectionId || '',
     featuredImage: initialData?.featuredImage || '',
     tags: initialData?.tags || [],
-    status: initialData?.status || 'DRAFT'
+    status: initialData?.status || 'DRAFT',
+    isFeatured: initialData?.isFeatured || false,
+    isTopNews: initialData?.isTopNews || false
   });
 
   const [newTag, setNewTag] = useState('');
@@ -162,7 +166,9 @@ export const EnhancedPostForm = ({
               sectionId: article.section?.id?.toString() || '',
               featuredImage: article.featuredImage || '',
               tags: article.tags || [],
-              status: article.status || 'DRAFT'
+              status: article.status || 'DRAFT',
+              isFeatured: article.isFeatured || false,
+              isTopNews: article.isTopNews || false
             });
             
             // Set reading time
@@ -204,7 +210,7 @@ export const EnhancedPostForm = ({
     }
   }, [formData.title, initialData?.slug]);
 
-  const handleInputChange = (field: string, value: string | string[]) => {
+  const handleInputChange = (field: string, value: string | string[] | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -776,6 +782,45 @@ export const EnhancedPostForm = ({
         )}
                       </select>
                     </div>
+                  </div>
+
+                  {/* Prominence Options */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-medium text-gray-900">Article Prominence</h3>
+                    
+                    <div className="space-y-3">
+                      {/* Featured Article */}
+                      <div className="flex items-center">
+                        <input
+                          type="checkbox"
+                          id="isFeatured"
+                          checked={formData.isFeatured}
+                          onChange={(e) => handleInputChange('isFeatured', e.target.checked)}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        />
+                        <label htmlFor="isFeatured" className="ml-2 text-sm font-medium text-gray-700">
+                          Featured Article
+                        </label>
+                      </div>
+
+                      {/* Top News */}
+                      <div className="flex items-center">
+                        <input
+                          type="checkbox"
+                          id="isTopNews"
+                          checked={formData.isTopNews}
+                          onChange={(e) => handleInputChange('isTopNews', e.target.checked)}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        />
+                        <label htmlFor="isTopNews" className="ml-2 text-sm font-medium text-gray-700">
+                          Top News
+                        </label>
+                      </div>
+                    </div>
+
+                    <p className="text-xs text-gray-500">
+                      Featured articles appear prominently on the homepage. Top news articles are highlighted in the news section.
+                    </p>
                   </div>
                 </TabsContent>
               )}
