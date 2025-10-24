@@ -40,7 +40,7 @@ export function TopNews() {
     const fetchTopNews = async () => {
       try {
         setLoading(true);
-        const response = await fetch('/api/top-news?limit=5');
+        const response = await fetch('/api/top-news?limit=6');
         
         if (response.ok) {
           const data = await response.json();
