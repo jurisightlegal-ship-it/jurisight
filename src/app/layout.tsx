@@ -10,6 +10,9 @@ import { CookieNotice } from "@/components/cookie-notice";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import Script from "next/script";
 
+// fixed search/replace block to match actual import path
+
+
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
@@ -122,8 +125,8 @@ export default function RootLayout({
             <MagazinePopupProvider>
               <CookieProvider>
                 <ClarityProvider>
-                  {children}
-                  <CookieNotice />
+                    {children}
+                    <CookieNotice />
                 </ClarityProvider>
               </CookieProvider>
             </MagazinePopupProvider>

@@ -14,6 +14,7 @@ import { Footer } from '@/components/footer';
 import { ShaderAnimation } from '@/components/ui/shader-animation';
 import { NewsletterCTA } from '@/components/newsletter-signup';
 import { MagazineBanner } from '@/components/magazine-banner';
+
 import { 
   Search, 
   BookOpen,
@@ -242,6 +243,8 @@ export default function ArticlesPage() {
                   </button>
                 ))}
               </div>
+              
+
             </form>
 
         </div>

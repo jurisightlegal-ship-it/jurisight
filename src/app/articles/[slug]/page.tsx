@@ -10,6 +10,7 @@ import { SocialShareButton } from '@/components/social-share-button';
 import { MagazineBanner } from '@/components/magazine-banner';
 import { RecentArticlesSection } from '@/components/recent-articles-section';
 import { Footer } from '@/components/footer';
+import { LanguageSelector } from '@/components/language-selector';
 import { supabase } from '@/lib/supabase-db';
 import { getImageDisplayUrl } from '@/lib/storage-utils';
 import { 
@@ -353,6 +354,10 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
                     <Clock className="h-4 w-4" />
                     {article.readingTime} min read
                   </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-500 hidden sm:inline">Language:</span>
+                  <LanguageSelector variant="compact" />
                 </div>
                 <SocialShareButton
                   title={article.title}
