@@ -9,7 +9,6 @@ import { useSession } from "next-auth/react";
 import { Menu, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { LanguageSelector } from "@/components/language-selector";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -68,10 +67,6 @@ export function Navbar() {
         </div>
 
         <div className="hidden items-center gap-3 md:flex">
-          <LanguageSelector 
-            variant="compact" 
-            className="text-white border-white/20 hover:bg-white/10" 
-          />
           {status === "loading" ? (
             <div className="h-9 w-24 animate-pulse rounded-md bg-white/20" />
           ) : session ? (
@@ -129,13 +124,6 @@ export function Navbar() {
             );
           })}
           <div className="pt-2 space-y-2">
-            <div className="flex items-center justify-between px-3 py-2">
-              <span className="text-sm text-white/80">Language:</span>
-              <LanguageSelector 
-                variant="compact" 
-                className="text-white border-white/20 hover:bg-white/10" 
-              />
-            </div>
             {status === "loading" ? (
               <div className="h-9 w-full animate-pulse rounded-md bg-white/20" />
             ) : session ? (

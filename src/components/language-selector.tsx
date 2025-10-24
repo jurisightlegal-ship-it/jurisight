@@ -80,43 +80,12 @@ export function LanguageSelector({
     const calculatePosition = () => {
       if (triggerRef.current && typeof window !== 'undefined') {
         const rect = triggerRef.current.getBoundingClientRect();
-        const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
-        const dropdownWidth = 320; // 20rem in pixels
         const dropdownHeight = 384; // 24rem in pixels (max-h-96)
         const margin = 16; // 1rem margin from viewport edges
 
-        // Horizontal positioning with viewport boundary detection
-        let horizontal: 'left' | 'right' | 'center' = 'left';
-        
-        // For mobile screens (< 640px), prefer centering or full width
-        if (viewportWidth < 640) {
-          // Check if there's enough space to center with margins
-          const spaceOnLeft = rect.left;
-          const spaceOnRight = viewportWidth - rect.right;
-          const totalSpace = spaceOnLeft + spaceOnRight + rect.width;
-          
-          if (totalSpace >= dropdownWidth + (margin * 2)) {
-            horizontal = 'center';
-          } else {
-            // Use full width approach by defaulting to left with boundary check
-            const wouldOverflowRight = rect.left + dropdownWidth > viewportWidth - margin;
-            horizontal = wouldOverflowRight ? 'right' : 'left';
-          }
-        } else {
-          // Desktop logic with boundary detection
-          const spaceOnRight = viewportWidth - rect.left - margin;
-          const spaceOnLeft = rect.right - margin;
-          
-          if (spaceOnRight >= dropdownWidth) {
-            horizontal = 'left';
-          } else if (spaceOnLeft >= dropdownWidth) {
-            horizontal = 'right';
-          } else {
-            // Center if neither side has enough space
-            horizontal = 'center';
-          }
-        }
+        // Always center horizontally over the trigger button
+        const horizontal: 'left' | 'right' | 'center' = 'center';
 
         // Vertical positioning with viewport boundary detection
         let vertical: 'bottom' | 'top' = 'bottom';
@@ -292,9 +261,7 @@ export function LanguageSelector({
             transition-all duration-300 ease-out
             animate-in fade-in-0 zoom-in-95
             ${dropdownPosition.vertical === 'bottom' ? 'top-full mt-2' : 'bottom-full mb-2'}
-            ${dropdownPosition.horizontal === 'left' ? 'left-0' : 
-              dropdownPosition.horizontal === 'right' ? 'right-0' : 
-              'left-1/2 -translate-x-1/2'}
+            right-0
             ${typeof window !== 'undefined' && window.innerWidth < 768 
               ? 'w-[calc(100vw-2rem)] min-w-[280px]' 
               : 'w-80 max-w-[calc(100vw-2rem)]'}
