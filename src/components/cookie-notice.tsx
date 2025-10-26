@@ -13,7 +13,8 @@ import {
   Info,
   Shield,
   Eye,
-  Database
+  Database,
+  ChevronRight
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -172,79 +173,74 @@ export function CookieNotice() {
   if (!isVisible) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-white/95 backdrop-blur-sm border-t border-gray-200 shadow-lg">
-      <Card className="max-w-5xl mx-auto">
-        <CardContent className="p-6">
+    <div className="fixed bottom-0 left-0 right-0 z-50">
+      <div className="bg-white border-t border-gray-200 shadow-2xl">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {!showSettings ? (
-            // Main cookie notice
-            <div className="space-y-4">
-              <div className="flex items-start gap-3">
-                <div className="flex-shrink-0">
-                  <Cookie className="h-8 w-8 text-orange-500" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900 mb-2">
-                    Cookie Consent & Data Protection
-                  </h3>
-                  <p className="text-sm text-gray-600 mb-3">
-                    We use cookies and similar technologies to provide, protect, and improve our services. 
-                    Some cookies are essential for the platform to function, while others help us understand 
-                    how you use our platform to improve your experience. You can manage your preferences below.
-                  </p>
-                  <div className="flex items-center gap-4 text-xs text-gray-500">
-                    <Link href="/privacy" className="text-blue-600 hover:underline">
-                      Privacy Policy
-                    </Link>
-                    <Link href="/cookies" className="text-blue-600 hover:underline">
-                      Cookie Policy
-                    </Link>
-                    <Link href="/consent" className="text-blue-600 hover:underline">
-                      Manage Consent
-                    </Link>
-                    <span>GDPR Compliant</span>
+            // Modern cookie alert banner
+            <div className="py-4">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex items-start gap-3 flex-1">
+                  <div className="flex-shrink-0 mt-0.5">
+                    <div className="w-8 h-8 bg-blue-50 rounded-full flex items-center justify-center">
+                      <Cookie className="h-4 w-4 text-blue-600" />
+                    </div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-gray-700 leading-relaxed">
+                      We use cookies to enhance your experience and analyze site usage. 
+                      <Link href="/privacy" className="text-blue-600 hover:text-blue-700 underline mx-1">
+                        Learn more
+                      </Link>
+                      about our privacy practices.
+                    </p>
                   </div>
                 </div>
-              </div>
-              
-              <div className="flex flex-col sm:flex-row gap-2 justify-end">
-                <Button
-                  onClick={handleCustomize}
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center gap-2"
-                >
-                  <Settings className="h-4 w-4" />
-                  Manage Options
-                </Button>
-                <Button
-                  onClick={handleRejectAll}
-                  variant="outline"
-                  size="sm"
-                  className="text-red-600 border-red-200 hover:bg-red-50"
-                >
-                  Do Not Consent
-                </Button>
-                <Button
-                  onClick={handleAcceptAll}
-                  size="sm"
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
-                >
-                  Consent
-                </Button>
+                
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <Button
+                    onClick={handleCustomize}
+                    variant="ghost"
+                    size="sm"
+                    className="text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-3 py-1.5 h-auto text-sm font-medium"
+                  >
+                    Customize
+                  </Button>
+                  <Button
+                    onClick={handleRejectAll}
+                    variant="outline"
+                    size="sm"
+                    className="border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-1.5 h-auto text-sm font-medium"
+                  >
+                    Decline
+                  </Button>
+                  <Button
+                    onClick={handleAcceptAll}
+                    size="sm"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 h-auto text-sm font-medium shadow-sm"
+                  >
+                    Accept All
+                  </Button>
+                </div>
               </div>
             </div>
           ) : (
-            // Cookie preferences settings
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                  <Settings className="h-5 w-5" />
-                  Cookie Preferences
-                </h3>
+            // Modern cookie preferences modal
+            <div className="py-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-blue-50 rounded-full flex items-center justify-center">
+                    <Settings className="h-4 w-4 text-blue-600" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Cookie Preferences
+                  </h3>
+                </div>
                 <Button
                   onClick={() => setShowSettings(false)}
                   variant="ghost"
                   size="sm"
+                  className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full w-8 h-8 p-0"
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -252,164 +248,184 @@ export function CookieNotice() {
               
               <div className="space-y-4">
                 {/* Essential Cookies */}
-                <div className="flex items-start gap-3 p-4 bg-green-50 border border-green-200 rounded-lg">
-                  <div className="flex-shrink-0">
-                    <Shield className="h-5 w-5 text-green-600 mt-0.5" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <h4 className="font-semibold text-gray-900">Essential Cookies</h4>
-                      <Badge className="bg-green-100 text-green-800 border-green-200">
-                        Required
-                      </Badge>
+                <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+                  <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0">
+                      <div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center">
+                        <Shield className="h-5 w-5 text-green-600" />
+                      </div>
                     </div>
-                    <p className="text-sm text-gray-600 mb-3">
-                      These cookies are necessary for the platform to function properly. They enable 
-                      authentication, security, session management, and basic functionality.
-                    </p>
-                    <div className="flex items-center gap-2 text-sm text-green-700">
-                      <CheckCircle className="h-4 w-4" />
-                      <span>Always active - cannot be disabled</span>
-                    </div>
-                    <div className="mt-2 text-xs text-gray-500">
-                      <strong>Examples:</strong> Authentication tokens, CSRF protection, session management
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h4 className="font-semibold text-gray-900">Essential Cookies</h4>
+                        <Badge className="bg-green-100 text-green-700 border-0 text-xs px-2 py-1">
+                          Required
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-gray-600 mb-3 leading-relaxed">
+                        These cookies are necessary for the platform to function properly. They enable 
+                        authentication, security, session management, and basic functionality.
+                      </p>
+                      <div className="flex items-center gap-2 text-sm text-green-700 mb-2">
+                        <CheckCircle className="h-4 w-4" />
+                        <span>Always active - cannot be disabled</span>
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        <strong>Examples:</strong> Authentication tokens, CSRF protection, session management
+                      </div>
                     </div>
                   </div>
                 </div>
                 
                 {/* Analytics Cookies */}
-                <div className="flex items-start gap-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                  <div className="flex-shrink-0">
-                    <Eye className="h-5 w-5 text-blue-600 mt-0.5" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <h4 className="font-semibold text-gray-900">Analytics Cookies</h4>
-                      <Badge className="bg-blue-100 text-blue-800 border-blue-200">
-                        Optional
-                      </Badge>
+                <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+                  <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0">
+                      <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
+                        <Eye className="h-5 w-5 text-blue-600" />
+                      </div>
                     </div>
-                    <p className="text-sm text-gray-600 mb-3">
-                      These cookies help us understand how our platform is used so we can improve 
-                      the user experience and content quality. We use Google Analytics and Microsoft Clarity.
-                    </p>
-                    <div className="flex items-center gap-2 mb-2">
-                      <input
-                        type="checkbox"
-                        id="analytics"
-                        checked={preferences.analytics}
-                        onChange={(e) => setPreferences(prev => ({ ...prev, analytics: e.target.checked }))}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                      />
-                      <label htmlFor="analytics" className="text-sm text-gray-700">
-                        Allow analytics cookies
-                      </label>
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      <strong>Examples:</strong> Page views, user interactions, performance metrics
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-3">
+                          <h4 className="font-semibold text-gray-900">Analytics Cookies</h4>
+                          <Badge className="bg-blue-100 text-blue-700 border-0 text-xs px-2 py-1">
+                            Optional
+                          </Badge>
+                        </div>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input
+                            type="checkbox"
+                            id="analytics"
+                            checked={preferences.analytics}
+                            onChange={(e) => setPreferences(prev => ({ ...prev, analytics: e.target.checked }))}
+                            className="sr-only peer"
+                          />
+                          <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                        </label>
+                      </div>
+                      <p className="text-sm text-gray-600 mb-3 leading-relaxed">
+                        These cookies help us understand how our platform is used so we can improve 
+                        the user experience and content quality. We use Google Analytics and Microsoft Clarity.
+                      </p>
+                      <div className="text-xs text-gray-500">
+                        <strong>Examples:</strong> Page views, user interactions, performance metrics
+                      </div>
                     </div>
                   </div>
                 </div>
                 
                 {/* Functional Cookies */}
-                <div className="flex items-start gap-3 p-4 bg-purple-50 border border-purple-200 rounded-lg">
-                  <div className="flex-shrink-0">
-                    <Settings className="h-5 w-5 text-purple-600 mt-0.5" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <h4 className="font-semibold text-gray-900">Functional Cookies</h4>
-                      <Badge className="bg-purple-100 text-purple-800 border-purple-200">
-                        Optional
-                      </Badge>
+                <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+                  <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0">
+                      <div className="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center">
+                        <Settings className="h-5 w-5 text-purple-600" />
+                      </div>
                     </div>
-                    <p className="text-sm text-gray-600 mb-3">
-                      These cookies remember your preferences and settings to provide a personalized 
-                      experience across visits.
-                    </p>
-                    <div className="flex items-center gap-2 mb-2">
-                      <input
-                        type="checkbox"
-                        id="functional"
-                        checked={preferences.functional}
-                        onChange={(e) => setPreferences(prev => ({ ...prev, functional: e.target.checked }))}
-                        className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
-                      />
-                      <label htmlFor="functional" className="text-sm text-gray-700">
-                        Allow functional cookies
-                      </label>
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      <strong>Examples:</strong> Theme preferences, language settings, display options
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-3">
+                          <h4 className="font-semibold text-gray-900">Functional Cookies</h4>
+                          <Badge className="bg-purple-100 text-purple-700 border-0 text-xs px-2 py-1">
+                            Optional
+                          </Badge>
+                        </div>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input
+                            type="checkbox"
+                            id="functional"
+                            checked={preferences.functional}
+                            onChange={(e) => setPreferences(prev => ({ ...prev, functional: e.target.checked }))}
+                            className="sr-only peer"
+                          />
+                          <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                        </label>
+                      </div>
+                      <p className="text-sm text-gray-600 mb-3 leading-relaxed">
+                        These cookies remember your preferences and settings to provide a personalized 
+                        experience across visits.
+                      </p>
+                      <div className="text-xs text-gray-500">
+                        <strong>Examples:</strong> Theme preferences, language settings, display options
+                      </div>
                     </div>
                   </div>
                 </div>
                 
                 {/* Marketing Cookies */}
-                <div className="flex items-start gap-3 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                  <div className="flex-shrink-0">
-                    <Database className="h-5 w-5 text-gray-600 mt-0.5" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <h4 className="font-semibold text-gray-900">Marketing Cookies</h4>
-                      <Badge className="bg-gray-100 text-gray-800 border-gray-200">
-                        Not Used
-                      </Badge>
+                <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm opacity-75">
+                  <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0">
+                      <div className="w-10 h-10 bg-gray-50 rounded-lg flex items-center justify-center">
+                        <Database className="h-5 w-5 text-gray-500" />
+                      </div>
                     </div>
-                    <p className="text-sm text-gray-600 mb-3">
-                      We currently do not use marketing cookies or third-party advertising tracking.
-                    </p>
-                    <div className="flex items-center gap-2 mb-2">
-                      <input
-                        type="checkbox"
-                        id="marketing"
-                        checked={preferences.marketing}
-                        onChange={(e) => setPreferences(prev => ({ ...prev, marketing: e.target.checked }))}
-                        disabled
-                        className="h-4 w-4 text-gray-400 focus:ring-gray-300 border-gray-300 rounded"
-                      />
-                      <label htmlFor="marketing" className="text-sm text-gray-500">
-                        Allow marketing cookies (disabled)
-                      </label>
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      <strong>Note:</strong> We do not use third-party advertising or marketing tracking
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-3">
+                          <h4 className="font-semibold text-gray-900">Marketing Cookies</h4>
+                          <Badge className="bg-gray-100 text-gray-600 border-0 text-xs px-2 py-1">
+                            Not Used
+                          </Badge>
+                        </div>
+                        <label className="relative inline-flex items-center cursor-not-allowed">
+                          <input
+                            type="checkbox"
+                            id="marketing"
+                            checked={preferences.marketing}
+                            onChange={(e) => setPreferences(prev => ({ ...prev, marketing: e.target.checked }))}
+                            disabled
+                            className="sr-only peer"
+                          />
+                          <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-disabled:opacity-50"></div>
+                        </label>
+                      </div>
+                      <p className="text-sm text-gray-600 mb-3 leading-relaxed">
+                        We currently do not use marketing cookies or third-party advertising tracking.
+                      </p>
+                      <div className="text-xs text-gray-500">
+                        <strong>Note:</strong> We do not use third-party advertising or marketing tracking
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
               
-              <div className="flex flex-col sm:flex-row gap-2 pt-4 border-t border-gray-200">
+              <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-gray-200">
                 <Button
                   onClick={() => setShowSettings(false)}
                   variant="outline"
-                  className="flex-1 sm:flex-none"
+                  className="flex-1 sm:flex-none border-gray-300 text-gray-700 hover:bg-gray-50 px-6 py-2.5 h-auto font-medium"
                 >
                   Cancel
                 </Button>
                 <Button
                   onClick={handleSavePreferences}
-                  className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white"
+                  className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 h-auto font-medium shadow-sm"
                 >
                   Save Preferences
                 </Button>
               </div>
               
-              <div className="flex items-start gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                <Info className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
-                <div className="text-sm text-blue-800">
-                  <p className="mb-1">
+              <div className="flex items-start gap-3 p-4 bg-blue-50 border border-blue-200 rounded-xl mt-4">
+                <div className="flex-shrink-0">
+                  <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
+                    <Info className="h-3 w-3 text-blue-600" />
+                  </div>
+                </div>
+                <div className="text-sm text-blue-800 leading-relaxed">
+                  <p className="mb-2">
                     <strong>Your Rights:</strong> You can change your cookie preferences at any time. 
                     Essential cookies cannot be disabled as they are necessary for platform functionality.
                   </p>
                   <p>
                     Learn more about our data practices in our{' '}
-                    <Link href="/privacy" className="underline hover:text-blue-900">
+                    <Link href="/privacy" className="underline hover:text-blue-900 font-medium">
                       Privacy Policy
                     </Link>
                     {' '}and{' '}
-                    <Link href="/cookies" className="underline hover:text-blue-900">
+                    <Link href="/cookies" className="underline hover:text-blue-900 font-medium">
                       Cookie Policy
                     </Link>
                     .
@@ -418,8 +434,8 @@ export function CookieNotice() {
               </div>
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

@@ -10,14 +10,24 @@ import { Card } from "@/components/ui/card";
 import { 
   Mail, 
   Send,
-  Twitter,
   Linkedin,
   Facebook,
   Instagram,
-  Youtube,
   ExternalLink
 } from "lucide-react";
 import { NewsletterSignup } from "@/components/newsletter-signup";
+
+// Custom X Icon Component
+const XIcon = ({ className }: { className?: string }) => (
+  <svg
+    className={className}
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+  </svg>
+);
 
 export function Footer() {
 
@@ -49,11 +59,10 @@ export function Footer() {
 
 
   const socialLinks = [
-    { name: "Twitter", icon: Twitter, href: "https://twitter.com/jurisight" },
-    { name: "LinkedIn", icon: Linkedin, href: "https://linkedin.com/company/jurisight" },
-    { name: "Facebook", icon: Facebook, href: "https://facebook.com/jurisight" },
-    { name: "Instagram", icon: Instagram, href: "https://instagram.com/jurisight" },
-    { name: "YouTube", icon: Youtube, href: "https://youtube.com/@jurisight" },
+    { name: "X", icon: XIcon, href: "https://x.com/jurisightlegal" },
+    { name: "LinkedIn", icon: Linkedin, href: "https://www.linkedin.com/company/jurisight-legal/" },
+    { name: "Facebook", icon: Facebook, href: "https://www.facebook.com/profile.php?id=61581218661866" },
+    { name: "Instagram", icon: Instagram, href: "https://www.instagram.com/juri.sight/" },
   ];
 
   return (
