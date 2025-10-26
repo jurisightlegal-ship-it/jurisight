@@ -132,8 +132,8 @@ export default function ShareCard({ title, url, description = "", hashtags = [],
                 aria-label={`Share \"${title}\" on Twitter`}
                 data-testid="share-twitter"
               >
-                <Suspense fallback={<span className="h-4 w-4" />}>
-                  <XBrandIcon className="h-4 w-4 text-white" />
+                <Suspense fallback={<span className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" />}>
+                  <XBrandIcon className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-white" />
                 </Suspense>
                 <span className="sr-only">Twitter</span>
               </Button>
@@ -180,8 +180,8 @@ export default function ShareCard({ title, url, description = "", hashtags = [],
                 aria-label={`Share \"${title}\" on WhatsApp`}
                 data-testid="share-whatsapp"
               >
-                <Suspense fallback={<span className="h-4 w-4" />}>
-                  <WhatsappIcon className="h-4 w-4 text-white" />
+                <Suspense fallback={<span className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" />}>
+                  <WhatsappIcon className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-white" />
                 </Suspense>
                 <span className="sr-only">WhatsApp</span>
               </Button>
@@ -191,7 +191,7 @@ export default function ShareCard({ title, url, description = "", hashtags = [],
             <motion.div variants={itemVariants}>
               <Button
                 variant="ghost"
-                className="rounded-full h-8 w-8 bg-gradient-to-b from-blue-500 to-blue-600 text-white shadow-lg hover:scale-105 focus-visible:ring-2 focus-visible:ring-blue-300 transition-transform duration-200"
+                className="rounded-full h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 bg-gradient-to-b from-blue-500 to-blue-600 text-white shadow-lg hover:scale-105 focus-visible:ring-2 focus-visible:ring-blue-300 transition-transform duration-200"
                 onClick={copyToClipboard}
                 aria-label="Copy article link"
                 data-testid="share-copy"
