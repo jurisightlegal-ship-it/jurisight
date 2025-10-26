@@ -1,5 +1,6 @@
 export const revalidate = 120;
 export const fetchCache = 'default-cache';
+export const dynamic = 'force-dynamic';
 
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase-db';
