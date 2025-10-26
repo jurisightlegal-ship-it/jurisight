@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowRight, Clock, Eye, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowRight, Clock, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getImageDisplayUrl } from "@/lib/client-storage-utils";
 
@@ -178,7 +178,7 @@ export function FeaturedBlog() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {visibleArticles.map((article) => (
+          {visibleArticles.map((article, index) => (
             <Link 
                key={article.id} 
                href={`/articles/${article.slug}`}
@@ -192,6 +192,8 @@ export function FeaturedBlog() {
                       src={article.featuredImage}
                       alt={article.title}
                       fill
+                      sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+                      priority={index === 0}
                       className="object-cover transition-transform duration-300 group-hover:scale-105"
                     />
                   ) : (
@@ -243,6 +245,7 @@ export function FeaturedBlog() {
                             alt={article.author.name}
                             width={20}
                             height={20}
+                            sizes="20px"
                             className="rounded-full"
                           />
                         ) : (

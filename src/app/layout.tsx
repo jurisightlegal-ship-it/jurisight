@@ -137,9 +137,9 @@ export default function RootLayout({
         {/* Google Analytics with Consent Mode */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-2399KEEWCS"
-          strategy="afterInteractive"
+          strategy="lazyOnload"
         />
-        <Script id="google-analytics" strategy="afterInteractive">
+        <Script id="google-analytics" strategy="lazyOnload">
           {`
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
@@ -169,7 +169,7 @@ export default function RootLayout({
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5234388962916973"
           crossOrigin="anonymous"
-          strategy="afterInteractive"
+          strategy="lazyOnload"
         />
         
         {/* Google News Subscription */}
@@ -177,9 +177,9 @@ export default function RootLayout({
           async 
           type="application/javascript" 
           src="https://news.google.com/swg/js/v1/swg-basic.js" 
-          strategy="afterInteractive"
+          strategy="lazyOnload"
         />
-        <Script id="google-news-subscription" strategy="afterInteractive">
+        <Script id="google-news-subscription" strategy="lazyOnload">
           {`
             (self.SWG_BASIC = self.SWG_BASIC || []).push(basicSubscriptions => {
               basicSubscriptions.init({

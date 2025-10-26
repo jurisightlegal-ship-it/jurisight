@@ -233,6 +233,7 @@ export default function ArticlesListClient() {
                           src={article.featuredImage}
                           alt={article.title}
                           fill
+                          sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
                           className="object-cover transition-transform duration-300 group-hover:scale-105"
                         />
                       ) : (
@@ -279,6 +280,7 @@ export default function ArticlesListClient() {
                                 alt={article.author.name}
                                 width={20}
                                 height={20}
+                                sizes="20px"
                                 className="rounded-full"
                               />
                             ) : (

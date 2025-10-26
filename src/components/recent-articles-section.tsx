@@ -182,6 +182,7 @@ export function RecentArticlesSection({
                     src={imageUrls.get(article.id)!}
                     alt={article.title}
                     fill
+                    sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
                     className="object-cover"
                   />
                 </div>
@@ -240,6 +241,7 @@ export function RecentArticlesSection({
                           alt={article.author.name}
                           width={24}
                           height={24}
+                          sizes="24px"
                           className="w-full h-full object-cover"
                         />
                       </div>

@@ -1,7 +1,12 @@
 "use client";
 
 import React, { createContext, useContext } from "react";
-import { MagazinePopup, useMagazinePopup } from "./magazine-popup";
+import dynamic from "next/dynamic";
+import { useMagazinePopup } from "./magazine-popup";
+
+const MagazinePopupLazy = dynamic(() => import("./magazine-popup").then(m => m.MagazinePopup), {
+  ssr: false,
+});
 
 interface MagazinePopupContextType {
   openPopup: () => void;
@@ -28,7 +33,7 @@ export function MagazinePopupProvider({ children }: MagazinePopupProviderProps) 
   return (
     <MagazinePopupContext.Provider value={{ openPopup, isOpen }}>
       {children}
-      <MagazinePopup isOpen={isOpen} onClose={closePopup} />
+      <MagazinePopupLazy isOpen={isOpen} onClose={closePopup} />
     </MagazinePopupContext.Provider>
   );
 }

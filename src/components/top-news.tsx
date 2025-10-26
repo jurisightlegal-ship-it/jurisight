@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Clock, Eye, ArrowRight } from "lucide-react";
+import { Clock, ArrowRight } from "lucide-react";
 import { getImageDisplayUrl } from "@/lib/client-storage-utils";
 
 type Article = {
@@ -149,13 +149,7 @@ export function TopNews() {
                       alt={article.title}
                       fill
                       sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
-                      unoptimized
                       priority={index < 2}
-                      onError={() => setFailedImageIds(prev => {
-                        const next = new Set(prev);
-                        next.add(article.id);
-                        return next;
-                      })}
                       className="object-cover transition-transform duration-300 group-hover:scale-105"
                     />
                   ) : (

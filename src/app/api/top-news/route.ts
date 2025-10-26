@@ -1,3 +1,6 @@
+export const revalidate = 120;
+export const fetchCache = 'default-cache';
+
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase-db';
 

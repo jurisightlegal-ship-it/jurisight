@@ -39,7 +39,6 @@ export function Footer() {
     { name: "High Court Judgements", href: "/high-court-judgements" },
     { name: "News", href: "/news" },
     { name: "Know Your Law", href: "/know-your-law" },
-    { name: "Dashboard", href: "/dashboard" },
   ];
 
   const practiceAreas = [
