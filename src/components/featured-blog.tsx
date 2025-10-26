@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -32,6 +33,7 @@ type Article = {
 };
 
 export function FeaturedBlog() {
+  const router = useRouter();
   const [articles, setArticles] = React.useState<Article[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [currentIndex, setCurrentIndex] = React.useState(0);
@@ -166,7 +168,7 @@ export function FeaturedBlog() {
               </Button>
             </div>
             
-            <Link href="/articles">
+            <Link href="/articles" prefetch={true}>
               <Button className="bg-white text-black hover:bg-gray-100 border border-black/20">
                 View All
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -177,7 +179,12 @@ export function FeaturedBlog() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {visibleArticles.map((article) => (
-            <Link key={article.id} href={`/articles/${article.slug}`}>
+            <Link 
+               key={article.id} 
+               href={`/articles/${article.slug}`}
+               prefetch={false}
+               onMouseEnter={() => router.prefetch(`/articles/${article.slug}`)}
+             >
               <Card className="group overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
                 <div className="relative aspect-video overflow-hidden">
                   {article.featuredImage ? (

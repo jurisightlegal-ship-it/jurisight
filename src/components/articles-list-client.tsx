@@ -220,7 +220,12 @@ export default function ArticlesListClient() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {articles.map((article) => (
-                <Link key={article.id} href={`/articles/${article.slug}`}>
+                <Link 
+                   key={article.id} 
+                   href={`/articles/${article.slug}`}
+                   prefetch={false}
+                   onMouseEnter={() => router.prefetch(`/articles/${article.slug}`)}
+                 >
                   <Card className="group overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
                     <div className="relative aspect-video overflow-hidden">
                       {article.featuredImage ? (

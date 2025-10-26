@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -46,6 +47,7 @@ export function RecentArticlesSection({
   currentArticleId, 
   currentSectionId 
 }: RecentArticlesSectionProps) {
+  const router = useRouter();
   const [articles, setArticles] = React.useState<RecentArticle[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
@@ -163,6 +165,7 @@ export function RecentArticlesSection({
         <Link 
           href="/articles" 
           className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 transition-colors"
+          prefetch={true}
         >
           View all articles
           <ArrowRight className="h-4 w-4" />
@@ -171,7 +174,7 @@ export function RecentArticlesSection({
       
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
         {articles.map((article) => (
-          <Card key={article.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-200">
+          <Card key={article.id} className="group overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
               {/* Featured Image */}
               {article.featuredImage && imageUrls.has(article.id) ? (
                 <div className="relative h-48">
@@ -254,7 +257,11 @@ export function RecentArticlesSection({
                     className="h-7 px-3 text-xs bg-blue-600 hover:bg-blue-700 text-white"
                     asChild
                   >
-                    <Link href={`/articles/${article.slug}`}>
+                    <Link 
+                       href={`/articles/${article.slug}`}
+                       prefetch={false}
+                       onMouseEnter={() => router.prefetch(`/articles/${article.slug}`)}
+                     >
                       Read Now
                     </Link>
                   </Button>

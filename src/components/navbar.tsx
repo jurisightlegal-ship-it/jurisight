@@ -36,21 +36,30 @@ export function Navbar() {
     <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-transparent backdrop-blur supports-[backdrop-filter]:bg-white/10">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-8">
-          <Link href="/" className="flex items-center gap-2" aria-label="Jurisight home">
-            <Image 
-              src={logo} 
-              alt="Jurisight logo" 
-              className="h-12 w-auto" 
-              loading="lazy"
-            />
-            <span className="sr-only">Jurisight</span>
-          </Link>
+          <Link 
+          href="/" 
+          className="flex items-center gap-2" 
+          aria-label="Jurisight home"
+          prefetch={true}
+        >
+          <Image 
+            src={logo} 
+            alt="Jurisight logo" 
+            className="h-12 w-auto" 
+            loading="lazy"
+          />
+          <span className="sr-only">Jurisight</span>
+        </Link>
           
           <nav className="hidden items-center gap-1 md:flex">
             {navItems.map((item) => {
               const isActive = item.href === "/" ? pathname === "/" : pathname?.startsWith(item.href);
               return (
-                <Link key={item.href} href={item.href}>
+                <Link 
+                  key={item.href} 
+                  href={item.href}
+                  prefetch={true}
+                >
                   <Button
                     variant="ghost"
                     className={cn(

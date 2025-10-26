@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -31,6 +32,7 @@ type Article = {
 };
 
 export function TopNews() {
+  const router = useRouter();
   const [articles, setArticles] = React.useState<Article[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [failedImageIds, setFailedImageIds] = React.useState<Set<number>>(new Set());
@@ -123,7 +125,7 @@ export function TopNews() {
             <h2 className="text-3xl font-bold text-black mb-2">Top News</h2>
             <p className="text-black/60">Most read stories across Jurisight</p>
           </div>
-          <Link href="/articles">
+          <Link href="/articles" prefetch={true}>
             <Button className="bg-white text-black hover:bg-gray-100 border border-black/20">
               View All
               <ArrowRight className="ml-2 h-4 w-4" />
@@ -133,7 +135,12 @@ export function TopNews() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {articles.map((article, index) => (
-            <Link key={article.id} href={`/articles/${article.slug}`}>
+            <Link 
+               key={article.id} 
+               href={`/articles/${article.slug}`}
+               prefetch={false}
+               onMouseEnter={() => router.prefetch(`/articles/${article.slug}`)}
+             >
               <Card className="group overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
                 <div className="relative aspect-video overflow-hidden">
                   {article.featuredImage && !failedImageIds.has(article.id) ? (
