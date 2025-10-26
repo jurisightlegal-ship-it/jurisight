@@ -5,25 +5,18 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
 import { getImageDisplayUrl } from '@/lib/client-storage-utils';
 import { Navbar } from '@/components/navbar';
 import { Footer } from '@/components/footer';
 import AnimatedBackgroundWrapper from '@/components/animated-background-wrapper';
 import HeroHeader from '@/components/hero-header';
 import { NewsletterCTA } from '@/components/newsletter-signup';
+import { MagazineBanner } from '@/components/magazine-banner';
 import { 
-  Search, 
   BookOpen,
-  Calendar,
   Clock,
-  User,
-  Eye,
-  ArrowRight,
-  Building2,
-  CalendarDays
+  ArrowRight
 } from 'lucide-react';
 
 interface Article {
@@ -48,8 +41,9 @@ interface Article {
   };
 }
 
-export default function HighCourtJudgementsPage() {
+export default function ArticlesListClient() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
@@ -72,8 +66,7 @@ export default function HighCourtJudgementsPage() {
       const offset = reset ? 0 : (currentPage + 1) * ARTICLES_PER_PAGE;
       const params = new URLSearchParams({
         limit: ARTICLES_PER_PAGE.toString(),
-        offset: offset.toString(),
-        section: 'high-court-judgements' // Filter for High Court judgements
+        offset: offset.toString()
       });
       if (searchTerm) params.append('search', searchTerm);
 
@@ -135,6 +128,15 @@ export default function HighCourtJudgementsPage() {
     }
   };
 
+  // Initialize searchTerm from URL query (supports `search` and `query`)
+  useEffect(() => {
+    const q = searchParams.get('search') || searchParams.get('query') || '';
+    if (q && q !== searchTerm) {
+      setSearchTerm(q);
+    }
+  }, [searchParams]);
+
+  // Fetch articles whenever searchTerm changes
   useEffect(() => {
     setCurrentPage(0);
     setHasMore(true);
@@ -143,21 +145,24 @@ export default function HighCourtJudgementsPage() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
+    // Sync URL with current search term for sharable state
+    if (searchTerm.trim().length > 0) {
+      router.replace(`/articles?search=${encodeURIComponent(searchTerm.trim())}`);
+    } else {
+      router.replace(`/articles`);
+    }
     setCurrentPage(0);
     setHasMore(true);
     fetchArticles(true);
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  };
-
   return (
     <div className="min-h-screen relative">
+      {/* Magazine Banner */}
+      <div className="relative z-20">
+        <MagazineBanner />
+      </div>
+
       {/* Compact Hero Wrapper */}
       <div className="relative min-h-[180px] w-full overflow-hidden">
         <div className="absolute inset-0 z-0">
@@ -171,13 +176,12 @@ export default function HighCourtJudgementsPage() {
         </div>
       </div>
 
-
-      {/* High Court Judgements Section */}
+      {/* All Articles Section */}
       <section className="relative py-16 px-4 sm:px-6 lg:px-8 bg-white/95 backdrop-blur-sm z-20">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">High Court Judgements</h2>
-            <p className="text-lg text-gray-600">Significant decisions and legal precedents from High Courts across India</p>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">All Articles</h2>
+            <p className="text-lg text-gray-600">Discover our latest legal insights and analysis</p>
           </div>
 
           {/* Articles Grid */}
@@ -198,10 +202,10 @@ export default function HighCourtJudgementsPage() {
           ) : articles.length === 0 ? (
             <Card className="text-center py-16">
               <CardContent>
-                <Building2 className="h-16 w-16 mx-auto text-gray-400 mb-4" />
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">No High Court judgements found</h3>
+                <BookOpen className="h-16 w-16 mx-auto text-gray-400 mb-4" />
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">No articles found</h3>
                 <p className="text-gray-600 mb-6">
-                  {searchTerm ? 'Try adjusting your search terms' : 'No High Court judgements available yet'}
+                  {searchTerm ? 'Try adjusting your search terms' : 'No published articles available yet'}
                 </p>
                 {searchTerm && (
                   <Button onClick={() => {
@@ -217,67 +221,69 @@ export default function HighCourtJudgementsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {articles.map((article) => (
                 <Link key={article.id} href={`/articles/${article.slug}`}>
-                  <Card className="group overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 cursor-pointer">
-                    {/* Featured Image */}
-                    {article.featuredImage ? (
-                      <div className="relative aspect-video overflow-hidden">
+                  <Card className="group overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+                    <div className="relative aspect-video overflow-hidden">
+                      {article.featuredImage ? (
                         <Image
                           src={article.featuredImage}
                           alt={article.title}
                           fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-300"
+                          className="object-cover transition-transform duration-300 group-hover:scale-105"
                         />
-                        <div className="absolute top-4 left-4">
-                          <Badge className="text-xs px-3 py-1 bg-white text-jurisight-navy">
-                            High Court
-                          </Badge>
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-jurisight-navy via-jurisight-royal to-jurisight-teal flex items-center justify-center">
+                          <div className="text-white text-lg font-semibold">
+                            {article.title.charAt(0).toUpperCase()}
+                          </div>
                         </div>
-                      </div>
-                    ) : (
-                      <div className="relative aspect-video bg-gradient-to-br from-green-600 via-blue-600 to-indigo-600 flex items-center justify-center">
-                        <Building2 className="h-12 w-12 text-white" />
+                      )}
+                      {article.section && (
                         <div className="absolute top-4 left-4">
-                          <Badge className="text-xs px-3 py-1 bg-white text-jurisight-navy">
-                            High Court
-                          </Badge>
+                          <span
+                            className="px-3 py-1 text-xs font-medium text-white rounded-full"
+                            style={{ backgroundColor: article.section.color }}
+                          >
+                            {article.section.name}
+                          </span>
                         </div>
-                      </div>
-                    )}
-
+                      )}
+                    </div>
                     <CardContent className="p-6">
                       <h3 className="text-xl font-bold text-black mb-3 line-clamp-2 group-hover:text-jurisight-navy transition-colors">
                         {article.title}
                       </h3>
-                      
                       {article.dek && (
-                        <p className="text-black/70 mb-4 line-clamp-3">{article.dek}</p>
+                        <p className="text-black/70 text-sm mb-4 line-clamp-3">
+                          {article.dek}
+                        </p>
                       )}
-
-                      {/* Reading Time and Author */}
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-1 text-sm text-black/60">
-                          <Clock className="h-4 w-4" />
-                          {article.readingTime} min read
+                      <div className="flex items-center justify-between text-xs text-black/50">
+                        <div className="flex items-center gap-4">
+                          {article.readingTime && (
+                            <div className="flex items-center gap-1">
+                              <Clock className="h-3 w-3" />
+                              <span>{article.readingTime} min read</span>
+                            </div>
+                          )}
                         </div>
-                        
-                        <div className="flex items-center gap-2">
-                          <div className="w-5 h-5 rounded-full overflow-hidden bg-jurisight-navy flex items-center justify-center">
+                        {article.author?.name && (
+                          <div className="flex items-center gap-2">
                             {avatarUrls[article.author.id] ? (
                               <Image
                                 src={avatarUrls[article.author.id]!}
                                 alt={article.author.name}
                                 width={20}
                                 height={20}
-                                className="w-full h-full object-cover"
+                                className="rounded-full"
                               />
                             ) : (
-                              <span className="text-xs text-white font-medium">
-                                {article.author.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                              </span>
+                              <div className="w-5 h-5 bg-jurisight-navy rounded-full flex items-center justify-center text-white text-xs">
+                                {article.author.name.charAt(0).toUpperCase()}
+                              </div>
                             )}
+                            <span className="font-medium">{article.author.name}</span>
                           </div>
-                          <span className="text-sm text-black/60">{article.author.name}</span>
-                        </div>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
@@ -310,7 +316,7 @@ export default function HighCourtJudgementsPage() {
                 <Button
                   onClick={loadMore}
                   disabled={loadingMore}
-                  className="px-8 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                  className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                 >
                   {loadingMore ? (
                     <>
@@ -319,14 +325,14 @@ export default function HighCourtJudgementsPage() {
                     </>
                   ) : (
                     <>
-                      Load More Judgements
+                      Load More Articles
                       <ArrowRight className="h-4 w-4 ml-2" />
                     </>
                   )}
                 </Button>
               ) : (
                 <p className="text-gray-500 font-medium">
-                  No more judgements to load
+                  No more articles to load
                 </p>
               )}
             </div>
@@ -336,8 +342,8 @@ export default function HighCourtJudgementsPage() {
           {!loading && articles.length > 0 && (
             <div className="text-center mt-6">
               <p className="text-sm text-gray-500">
-                Showing {articles.length} judgement{articles.length !== 1 ? 's' : ''}
-                {!hasMore && ` (all judgements loaded)`}
+                Showing {articles.length} article{articles.length !== 1 ? 's' : ''}
+                {!hasMore && ` (all articles loaded)`}
               </p>
             </div>
           )}
@@ -345,13 +351,13 @@ export default function HighCourtJudgementsPage() {
       </section>
 
       <NewsletterCTA
-        title="Stay Updated with High Court Decisions"
-        description="Get the latest High Court judgements, regional legal precedents, and state-level legal analysis delivered to your inbox."
-        gradient="from-green-600 to-blue-600"
-        textColor="text-green-100"
-        buttonColor="text-green-600"
+        title="Stay Updated with Legal Insights"
+        description="Get the latest legal analysis, court judgments, and expert commentary delivered to your inbox."
+        gradient="from-blue-600 to-purple-600"
+        textColor="text-blue-100"
+        buttonColor="text-blue-600"
         variant="premium"
-        badgeText="High Court Updates"
+        badgeText="Free Legal Newsletter"
       />
 
       <div className="relative z-20">

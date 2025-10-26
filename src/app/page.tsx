@@ -16,7 +16,7 @@ export default function Home() {
     <>
       <HomepageStructuredData />
       <MagazineBanner />
-      <div className="relative min-h-[400px] w-full overflow-hidden">
+      <div className="relative min-h-[180px] w-full overflow-hidden">
         {/* Animated Background */}
         <div className="absolute inset-0 z-0">
           <AnimatedBackgroundWrapper />
@@ -25,7 +25,7 @@ export default function Home() {
         {/* Content */}
         <div className="relative z-10">
           <Navbar />
-          <div className="relative flex min-h-[400px] items-center justify-center py-8 sm:py-12">
+          <div className="relative flex min-h-[180px] items-center justify-center py-0 sm:py-1">
             <HeroHeader />
           </div>
         </div>
