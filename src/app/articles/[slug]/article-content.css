@@ -8,6 +8,11 @@
   font-weight: 400 !important;
 }
 
+/* Justify paragraphs for better readability */
+.article-content p {
+  text-align: justify !important;
+}
+
 /* Allow font size styles to work */
 .article-content span[style*="font-size"],
 .article-content p[style*="font-size"],

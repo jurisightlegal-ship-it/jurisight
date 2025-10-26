@@ -134,63 +134,68 @@ export default function RootLayout({
         </Providers>
         <SpeedInsights />
         
-        {/* Google Analytics with Consent Mode */}
-        <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-2399KEEWCS"
-          strategy="lazyOnload"
-        />
-        <Script id="google-analytics" strategy="lazyOnload">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
+        {/* Only load analytics scripts in production */}
+        {process.env.NODE_ENV === 'production' && (
+          <>
+            {/* Google Analytics with Consent Mode */}
+            <Script
+              src="https://www.googletagmanager.com/gtag/js?id=G-2399KEEWCS"
+              strategy="lazyOnload"
+            />
+            <Script id="google-analytics" strategy="lazyOnload">
+              {`
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                
+                // Set default consent state (denied until user consents)
+                gtag('consent', 'default', {
+                  analytics_storage: 'denied',
+                  ad_storage: 'denied',
+                  ad_user_data: 'denied',
+                  ad_personalization: 'denied',
+                  functionality_storage: 'denied',
+                  personalization_storage: 'denied',
+                  security_storage: 'granted'
+                });
+                
+                gtag('js', new Date());
+                gtag('config', 'G-2399KEEWCS', {
+                  anonymize_ip: true,
+                  allow_google_signals: false,
+                  allow_ad_personalization_signals: false
+                });
+              `}
+            </Script>
             
-            // Set default consent state (denied until user consents)
-            gtag('consent', 'default', {
-              analytics_storage: 'denied',
-              ad_storage: 'denied',
-              ad_user_data: 'denied',
-              ad_personalization: 'denied',
-              functionality_storage: 'denied',
-              personalization_storage: 'denied',
-              security_storage: 'granted'
-            });
+            {/* Google AdSense */}
+            <Script
+              async
+              src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5234388962916973"
+              crossOrigin="anonymous"
+              strategy="lazyOnload"
+            />
             
-            gtag('js', new Date());
-            gtag('config', 'G-2399KEEWCS', {
-              anonymize_ip: true,
-              allow_google_signals: false,
-              allow_ad_personalization_signals: false
-            });
-          `}
-        </Script>
-        
-        {/* Google AdSense */}
-        <Script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5234388962916973"
-          crossOrigin="anonymous"
-          strategy="lazyOnload"
-        />
-        
-        {/* Google News Subscription */}
-        <Script 
-          async 
-          type="application/javascript" 
-          src="https://news.google.com/swg/js/v1/swg-basic.js" 
-          strategy="lazyOnload"
-        />
-        <Script id="google-news-subscription" strategy="lazyOnload">
-          {`
-            (self.SWG_BASIC = self.SWG_BASIC || []).push(basicSubscriptions => {
-              basicSubscriptions.init({
-                type: "NewsArticle",
-                isPartOfType: ["Product"],
-                isPartOfProductId: "CAowsePBDA:openaccess",
-                clientOptions: { theme: "light", lang: "en" },
-              });
-            });
-          `}
-        </Script>
+            {/* Google News Subscription */}
+            <Script 
+              async 
+              type="application/javascript" 
+              src="https://news.google.com/swg/js/v1/swg-basic.js" 
+              strategy="lazyOnload"
+            />
+            <Script id="google-news-subscription" strategy="lazyOnload">
+              {`
+                (self.SWG_BASIC = self.SWG_BASIC || []).push(basicSubscriptions => {
+                  basicSubscriptions.init({
+                    type: "NewsArticle",
+                    isPartOfType: ["Product"],
+                    isPartOfProductId: "CAowsePBDA:openaccess",
+                    clientOptions: { theme: "light", lang: "en" },
+                  });
+                });
+              `}
+            </Script>
+          </>
+        )}
       </body>
     </html>
   );

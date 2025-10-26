@@ -8,6 +8,12 @@ interface ClarityProviderProps {
 
 export function ClarityProvider({ children }: ClarityProviderProps) {
   useEffect(() => {
+    // Skip Clarity initialization in development mode
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('Microsoft Clarity skipped in development mode');
+      return;
+    }
+
     const projectId = process.env.NEXT_PUBLIC_CLARITY_PROJECT_ID;
 
     // Only initialize Clarity if we have a valid project ID
