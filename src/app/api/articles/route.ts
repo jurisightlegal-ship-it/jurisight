@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase-db';
 
-// Ensure latest articles are always fetched fresh (no caching)
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+// Enable response caching for the list endpoint
+export const revalidate = 120; // 2 minutes
+export const fetchCache = 'default-cache';
 
 interface SupabaseArticle {
   id: string;
@@ -44,6 +44,8 @@ export async function GET(request: NextRequest) {
     const exclude = searchParams.get('exclude'); // New parameter to exclude specific article IDs
     const sortByParam = (searchParams.get('sortBy') || 'created_at').toLowerCase();
     const sortOrderParam = (searchParams.get('sortOrder') || 'desc').toLowerCase();
+    const dekLengthParam = searchParams.get('dekLength');
+    const fieldsParam = searchParams.get('fields'); // comma-separated list of fields to include
 
     // Validate sort field to prevent invalid inputs
     const allowedSortFields = new Set(['created_at', 'updated_at', 'published_at', 'views', 'title']);
@@ -138,36 +140,63 @@ export async function GET(request: NextRequest) {
     }
 
     // Transform the data to match expected format
-    const articles = (result || []).map((article: SupabaseArticle) => ({
-      id: article.id,
-      title: article.title,
-      slug: article.slug,
-      dek: article.dek,
-      featuredImage: article.featured_image,
-      readingTime: article.reading_time,
-      views: article.views,
-      publishedAt: article.published_at,
-      createdAt: article.created_at,
-      updatedAt: article.updated_at,
-      author: {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        id: (article as any).users?.id || (article as any).author_id,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        name: (article as any).users?.name || 'Unknown Author',
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        avatar: (article as any).users?.image || null,
-      },
-      section: {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        id: (article as any).legal_sections?.id || (article as any).section_id,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        name: (article as any).legal_sections?.name || 'Unknown Section',
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        slug: (article as any).legal_sections?.slug || 'unknown',
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        color: (article as any).legal_sections?.color || '#6B7280',
+    const dekMaxLength = dekLengthParam ? Math.max(0, parseInt(dekLengthParam)) : undefined;
+    const requestedFields = fieldsParam
+      ? new Set(fieldsParam.split(',').map((f) => f.trim()).filter(Boolean))
+      : undefined;
+
+    const baseArticles = (result || []).map((article: SupabaseArticle) => {
+      const full = {
+        id: article.id,
+        title: article.title,
+        slug: article.slug,
+        dek: article.dek,
+        featuredImage: article.featured_image,
+        readingTime: article.reading_time,
+        views: article.views,
+        publishedAt: article.published_at,
+        createdAt: article.created_at,
+        updatedAt: article.updated_at,
+        author: {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          id: (article as any).users?.id || (article as any).author_id,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          name: (article as any).users?.name || 'Unknown Author',
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          avatar: (article as any).users?.image || null,
+        },
+        section: {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          id: (article as any).legal_sections?.id || (article as any).section_id,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          name: (article as any).legal_sections?.name || 'Unknown Section',
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          slug: (article as any).legal_sections?.slug || 'unknown',
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          color: (article as any).legal_sections?.color || '#6B7280',
+        }
+      } as const;
+
+      // Apply optional dek trimming
+      if (typeof full.dek === 'string' && dekMaxLength && full.dek.length > dekMaxLength) {
+        const trimmed = full.dek.slice(0, dekMaxLength).trimEnd();
+        // Append ellipsis if trimming occurred
+        (full as any).dek = `${trimmed}…`;
       }
-    }));
+
+      // Apply optional field selection
+      if (requestedFields && requestedFields.size > 0) {
+        const picked: Record<string, unknown> = {};
+        for (const key of requestedFields) {
+          if (key in full) {
+            // @ts-expect-error dynamic access
+            picked[key] = full[key];
+          }
+        }
+        return picked;
+      }
+      return full;
+    });
 
     // Get total count for pagination
     let countQuery = supabase
@@ -210,16 +239,23 @@ export async function GET(request: NextRequest) {
     const currentPage = limitAll ? 1 : page;
     const currentLimit = limitAll ? (count || 0) : limit;
 
-    return NextResponse.json({
-      articles,
-      pagination: {
-        page: currentPage,
-        limit: currentLimit,
-        total: count || 0,
-        totalPages,
-        hasMore
+    return NextResponse.json(
+      {
+        articles: baseArticles,
+        pagination: {
+          page: currentPage,
+          limit: currentLimit,
+          total: count || 0,
+          totalPages,
+          hasMore
+        }
+      },
+      {
+        headers: {
+          'Cache-Control': 's-maxage=120, stale-while-revalidate=86400'
+        }
       }
-    });
+    );
   } catch (error) {
     console.error('Error fetching articles:', error);
     return NextResponse.json(

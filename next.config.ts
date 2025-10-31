@@ -1,5 +1,8 @@
 import type { NextConfig } from "next";
 
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_HOST = SUPABASE_URL ? new URL(SUPABASE_URL).hostname : 'xxrajbmlbjlgihncivxi.supabase.co';
+
 const nextConfig: NextConfig = {
   turbopack: {
     root: __dirname,
@@ -18,18 +21,28 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      // Supabase public object URLs
       {
         protocol: 'https',
-        hostname: '*.supabase.co',
+        hostname: SUPABASE_HOST,
         port: '',
-        pathname: '/**',
+        pathname: '/storage/v1/object/public/**',
+      },
+      // Supabase signed object URLs
+      {
+        protocol: 'https',
+        hostname: SUPABASE_HOST,
+        port: '',
+        pathname: '/storage/v1/object/sign/**',
       },
     ],
     domains: ['via.placeholder.com'],
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
-    unoptimized: true, // Allow data URLs and unoptimized images
+    // Enable Next.js Image Optimization for remote images
+    formats: ['image/webp'],
+    minimumCacheTTL: 31536000,
   },
   eslint: {
     // Warning: This allows production builds to successfully complete even if

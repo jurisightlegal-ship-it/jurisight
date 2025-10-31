@@ -122,11 +122,11 @@ export async function POST(request: NextRequest) {
     // Choose bucket per type (workaround: some buckets reject non-image mime types)
     const bucket = folder === 'documents' ? 'jurisightlegal' : 'article-media';
 
-    // Upload to Supabase storage (omit explicit contentType to avoid mime restrictions)
+    // Upload to Supabase storage with long cache lifetime
     const { error: uploadError } = await supabase.storage
       .from(bucket)
       .upload(filePath, file, {
-        cacheControl: '3600',
+        cacheControl: '31536000',
         upsert: false
       });
 
@@ -236,4 +236,3 @@ export async function DELETE(request: NextRequest) {
     );
   }
 }
-

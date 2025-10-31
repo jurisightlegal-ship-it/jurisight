@@ -94,8 +94,9 @@ export class MediaUploadService {
       const { error } = await supabase.storage
         .from(this.BUCKET_NAME)
         .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: false
+          cacheControl: '31536000',
+          upsert: false,
+          contentType: file.type
         });
 
       if (error) {
@@ -239,4 +240,3 @@ export class MediaUploadService {
     });
   }
 }
-

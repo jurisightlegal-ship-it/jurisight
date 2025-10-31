@@ -724,7 +724,7 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
                 </div>
               </div>
               
-              ${formData.featuredImage ? `<img src="${formData.featuredImage}" alt="Featured image" style="width: 100%; max-height: 400px; object-fit: cover;" />` : ''}
+              ${formData.featuredImage ? `<img src="${formData.featuredImage}" alt="Featured image" style="width: 100%; max-height: 400px; object-fit: cover;" loading="lazy" decoding="async" />` : ''}
               
               <div class="content">
                 ${formData.body}

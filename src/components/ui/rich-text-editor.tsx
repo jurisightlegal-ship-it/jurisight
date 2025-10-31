@@ -136,7 +136,10 @@ export const RichTextEditor = ({
               const range = quill?.getSelection(true);
               if (range) {
                 // Insert HTML so we can keep data-file-path attribute
-                quill?.clipboard.dangerouslyPasteHTML(range.index, `<img src="${imageUrl}" data-file-path="${filePath}" class="rounded-lg max-w-full h-auto" />`);
+                quill?.clipboard.dangerouslyPasteHTML(
+                  range.index,
+                  `<img src="${imageUrl}" data-file-path="${filePath}" class="rounded-lg max-w-full h-auto" alt="" loading="lazy" decoding="async" />`
+                );
                 quill?.setSelection(range.index + 1, 0);
               }
             } catch (err) {
@@ -422,4 +425,3 @@ export const RichTextEditor = ({
     </div>
   );
 };
-

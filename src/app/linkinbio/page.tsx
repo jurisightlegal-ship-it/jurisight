@@ -36,7 +36,16 @@ const socialLinks = [
   {
       name: "LinkedIn",
       url: "https://www.linkedin.com/company/jurisight-legal/",
-      icon: () => <img src="/linkedin-app-icon.svg" alt="LinkedIn" className="w-7 h-7" />,
+      icon: () => (
+        <Image
+          src="/linkedin-app-icon.svg"
+          alt="LinkedIn"
+          width={28}
+          height={28}
+          className="w-7 h-7"
+          priority={false}
+        />
+      ),
       description: "Connect professionally",
       color: "from-blue-700 to-blue-900"
     },
@@ -50,7 +59,16 @@ const socialLinks = [
   {
     name: "X",
     url: "https://x.com/jurisightlegal",
-    icon: () => <img src="/x-social-media-logo-icon.svg" alt="X" className="w-7 h-7" />,
+    icon: () => (
+      <Image
+        src="/x-social-media-logo-icon.svg"
+        alt="X"
+        width={28}
+        height={28}
+        className="w-7 h-7"
+        priority={false}
+      />
+    ),
     description: "Follow us on X",
     color: "from-gray-600 to-black",
   },
