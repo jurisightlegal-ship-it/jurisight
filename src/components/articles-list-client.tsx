@@ -16,7 +16,8 @@ import { MagazineBanner } from '@/components/magazine-banner';
 import { 
   BookOpen,
   Clock,
-  ArrowRight
+  ArrowRight,
+  Calendar
 } from 'lucide-react';
 
 interface Article {
@@ -28,6 +29,7 @@ interface Article {
   readingTime: number;
   views: number;
   publishedAt: string;
+  createdAt?: string;
   author: {
     id: string;
     name: string;
@@ -39,6 +41,16 @@ interface Article {
     slug: string;
     color: string;
   };
+}
+
+function formatPublishedDate(dateString: string): string {
+  try {
+    const d = new Date(dateString);
+    if (Number.isNaN(d.getTime())) return '';
+    return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+  } catch {
+    return '';
+  }
 }
 
 export default function ArticlesListClient() {
@@ -70,10 +82,10 @@ export default function ArticlesListClient() {
       });
       if (searchTerm) params.append('search', searchTerm);
 
-      const response = await fetch(`/api/articles?${params}`);
+      const response = await fetch(`/api/articles?${params}`, { cache: 'no-store' });
       if (response.ok) {
         const data = await response.json();
-        const newArticles = data.articles || [];
+        const newArticles: Article[] = (data.articles || []).slice();
         
         // Check if there are more articles
         setHasMore(newArticles.length === ARTICLES_PER_PAGE);
@@ -82,7 +94,8 @@ export default function ArticlesListClient() {
           setArticles(newArticles);
           setCurrentPage(0);
         } else {
-          setArticles(prev => [...prev, ...newArticles]);
+          const merged = [...articles, ...newArticles];
+          setArticles(merged);
           setCurrentPage(prev => prev + 1);
         }
         
@@ -125,6 +138,48 @@ export default function ArticlesListClient() {
   const loadMore = () => {
     if (!loadingMore && hasMore) {
       fetchArticles(false);
+    }
+  };
+
+  const loadAll = async () => {
+    try {
+      setLoadingMore(true);
+      const params = new URLSearchParams({ limit: 'all' });
+      if (searchTerm) params.append('search', searchTerm);
+
+      const response = await fetch(`/api/articles?${params.toString()}`, { cache: 'no-store' });
+      if (response.ok) {
+        const data = await response.json();
+        const allArticles: Article[] = (data.articles || []).slice();
+        setArticles(allArticles);
+        setCurrentPage(0);
+        setHasMore(false);
+
+        // Process avatar URLs for all articles
+        const avatarPromises = allArticles.map(async (article: Article) => {
+          if (article.author.avatar) {
+            try {
+              const processedUrl = await getImageDisplayUrl(article.author.avatar);
+              return { id: article.author.id, url: processedUrl };
+            } catch (error) {
+              console.error('Error processing avatar URL:', error);
+              return { id: article.author.id, url: null };
+            }
+          }
+          return { id: article.author.id, url: null };
+        });
+
+        const avatarResults = await Promise.all(avatarPromises);
+        const avatarMap: Record<string, string | null> = {};
+        avatarResults.forEach(({ id, url }) => { avatarMap[id] = url; });
+        setAvatarUrls(avatarMap);
+      } else {
+        console.error('Failed to load all articles');
+      }
+    } catch (error) {
+      console.error('Error loading all articles:', error);
+    } finally {
+      setLoadingMore(false);
     }
   };
 
@@ -271,6 +326,12 @@ export default function ArticlesListClient() {
                               <span>{article.readingTime} min read</span>
                             </div>
                           )}
+                          {article.publishedAt && (
+                            <div className="flex items-center gap-1">
+                              <Calendar className="h-3 w-3" />
+                              <span>{formatPublishedDate(article.publishedAt)}</span>
+                            </div>
+                          )}
                         </div>
                         {article.author?.name && (
                           <div className="flex items-center gap-2">
@@ -318,28 +379,38 @@ export default function ArticlesListClient() {
 
           {/* Load More Button */}
           {!loading && articles.length > 0 && (
-            <div className="text-center mt-12">
+            <div className="mt-12 flex items-center justify-center gap-4 flex-wrap">
               {hasMore ? (
-                <Button
-                  onClick={loadMore}
-                  disabled={loadingMore}
-                  className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-                >
-                  {loadingMore ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Loading More...
-                    </>
-                  ) : (
-                    <>
-                      Load More Articles
-                      <ArrowRight className="h-4 w-4 ml-2" />
-                    </>
-                  )}
-                </Button>
+                <>
+                  <Button
+                    onClick={loadMore}
+                    disabled={loadingMore}
+                    className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                  >
+                    {loadingMore ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        Loading More...
+                      </>
+                    ) : (
+                      <>
+                        Load More Articles
+                        <ArrowRight className="h-4 w-4 ml-2" />
+                      </>
+                    )}
+                  </Button>
+                  <Button
+                    onClick={loadAll}
+                    disabled={loadingMore}
+                    variant="outline"
+                    className="px-8 py-3 border-black/20 hover:bg-gray-100 text-black rounded-lg font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Show All Articles
+                  </Button>
+                </>
               ) : (
                 <p className="text-gray-500 font-medium">
-                  No more articles to load
+                  All articles loaded
                 </p>
               )}
             </div>

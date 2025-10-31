@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase-db';
 
+// Ensure latest articles are always fetched fresh (no caching)
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 interface SupabaseArticle {
   id: string;
   title: string;
@@ -10,6 +14,8 @@ interface SupabaseArticle {
   reading_time: number;
   views: number;
   published_at: string;
+  created_at?: string;
+  updated_at?: string;
   users?: Array<{
     id: string;
     name: string;
@@ -29,11 +35,20 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const section = searchParams.get('section');
     const sections = searchParams.get('sections'); // New parameter for multiple sections
-    const limit = parseInt(searchParams.get('limit') || '10');
+    const rawLimit = searchParams.get('limit') || '10';
+    const limitAll = rawLimit === 'all';
+    const limit = limitAll ? 10 : parseInt(rawLimit);
     const offset = parseInt(searchParams.get('offset') || '0');
     const page = parseInt(searchParams.get('page') || '1');
     const search = searchParams.get('search') || '';
     const exclude = searchParams.get('exclude'); // New parameter to exclude specific article IDs
+    const sortByParam = (searchParams.get('sortBy') || 'created_at').toLowerCase();
+    const sortOrderParam = (searchParams.get('sortOrder') || 'desc').toLowerCase();
+
+    // Validate sort field to prevent invalid inputs
+    const allowedSortFields = new Set(['created_at', 'updated_at', 'published_at', 'views', 'title']);
+    const sortBy = allowedSortFields.has(sortByParam) ? sortByParam : 'created_at';
+    const ascending = sortOrderParam === 'asc';
 
     // Calculate offset from page
     const actualOffset = page > 1 ? (page - 1) * limit : offset;
@@ -49,6 +64,8 @@ export async function GET(request: NextRequest) {
         reading_time,
         views,
         published_at,
+        created_at,
+        updated_at,
         users(
           id,
           name,
@@ -62,8 +79,12 @@ export async function GET(request: NextRequest) {
         )
       `)
       .eq('status', 'PUBLISHED')
-      .order('published_at', { ascending: false })
-      .range(actualOffset, actualOffset + limit - 1);
+      .order(sortBy, { ascending });
+
+    // Apply range only when not requesting all
+    if (!limitAll) {
+      query = query.range(actualOffset, actualOffset + limit - 1);
+    }
 
     // Handle search
     if (search) {
@@ -126,6 +147,8 @@ export async function GET(request: NextRequest) {
       readingTime: article.reading_time,
       views: article.views,
       publishedAt: article.published_at,
+      createdAt: article.created_at,
+      updatedAt: article.updated_at,
       author: {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         id: (article as any).users?.id || (article as any).author_id,
@@ -180,14 +203,18 @@ export async function GET(request: NextRequest) {
 
     const { count } = await countQuery;
 
-    const totalPages = Math.ceil((count || 0) / limit);
-    const hasMore = page < totalPages;
+    let totalPages = Math.ceil((count || 0) / (limitAll ? (count || 1) : limit));
+    if (limitAll) totalPages = 1;
+    const hasMore = limitAll ? false : page < totalPages;
+
+    const currentPage = limitAll ? 1 : page;
+    const currentLimit = limitAll ? (count || 0) : limit;
 
     return NextResponse.json({
       articles,
       pagination: {
-        page,
-        limit,
+        page: currentPage,
+        limit: currentLimit,
         total: count || 0,
         totalPages,
         hasMore

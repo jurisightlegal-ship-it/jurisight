@@ -38,7 +38,7 @@ export function KnowTheLawBlogs() {
   React.useEffect(() => {
     const fetchArticles = async () => {
       try {
-        const response = await fetch('/api/articles?section=know-your-law&limit=6');
+        const response = await fetch('/api/articles?section=know-your-law&limit=6', { cache: 'no-store' });
         if (response.ok) {
           const data = await response.json();
           const articles = data.articles || [];

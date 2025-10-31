@@ -38,7 +38,7 @@ export function SupremeCourtJudgement() {
   React.useEffect(() => {
     const fetchArticles = async () => {
       try {
-        const response = await fetch('/api/articles?section=supreme-court-judgement&limit=6');
+        const response = await fetch('/api/articles?section=supreme-court-judgement&limit=6', { cache: 'no-store' });
         if (response.ok) {
           const data = await response.json();
           const articles = data.articles || [];
@@ -184,5 +184,4 @@ export function SupremeCourtJudgement() {
 }
 
 export default SupremeCourtJudgement;
-
 

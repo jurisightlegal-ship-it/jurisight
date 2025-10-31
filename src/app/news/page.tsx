@@ -79,7 +79,7 @@ export default function NewsPage() {
       });
       if (searchTerm) params.append('search', searchTerm);
 
-      const response = await fetch(`/api/articles?${params}`);
+      const response = await fetch(`/api/articles?${params}`, { cache: 'no-store' });
       if (response.ok) {
         const data = await response.json();
         const newArticles = data.articles || [];

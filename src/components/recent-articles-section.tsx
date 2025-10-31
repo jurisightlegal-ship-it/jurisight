@@ -58,7 +58,7 @@ export function RecentArticlesSection({
     const fetchRecentArticles = async () => {
       try {
         setLoading(true);
-        const response = await fetch('/api/articles?limit=9&exclude=' + currentArticleId);
+        const response = await fetch('/api/articles?limit=9&exclude=' + currentArticleId, { cache: 'no-store' });
         
         if (!response.ok) {
           throw new Error('Failed to fetch recent articles');
