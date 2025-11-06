@@ -514,9 +514,13 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
                   data-ad-client="ca-pub-5234388962916973"
                   data-ad-slot="3771813958"
                 />
-                <Script id="adsbygoogle-bottom" strategy="lazyOnload">
-                  {(adsbygoogle = (window as any).adsbygoogle || []).push({});}
-                </Script>
+                <Script
+                  id="adsbygoogle-bottom"
+                  strategy="lazyOnload"
+                  dangerouslySetInnerHTML={{
+                    __html: '(adsbygoogle = window.adsbygoogle || []).push({});',
+                  }}
+                />
               </div>
 
               {/* Case Citations */}
