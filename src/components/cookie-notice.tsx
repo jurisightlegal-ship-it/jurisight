@@ -136,7 +136,9 @@ export function CookieNotice() {
     if (typeof window !== 'undefined' && window.gtag) {
       window.gtag('consent', 'update', {
         analytics_storage: 'granted',
-        ad_storage: 'denied', // We don't use ads
+        // Grant ad storage so AdSense can serve ads
+        ad_storage: 'granted',
+        // Keep user data and personalization denied for compliance by default
         ad_user_data: 'denied',
         ad_personalization: 'denied'
       });
