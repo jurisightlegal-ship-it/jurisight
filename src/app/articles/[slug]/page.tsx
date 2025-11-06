@@ -10,6 +10,8 @@ import { SocialShareButton } from '@/components/social-share-button';
 import ShareCard from '@/components/share-card';
 import { MagazineBanner } from '@/components/magazine-banner';
 import { RecentArticlesSection } from '@/components/recent-articles-section';
+import { InArticleAd } from '@/components/ads/in-article-ad';
+import { Suspense } from 'react';
 import { Footer } from '@/components/footer';
 import { LanguageSelector } from '@/components/language-selector';
 import { supabase } from '@/lib/supabase-db';
@@ -339,6 +341,20 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
       .replace(/&nbsp;/g, ' ');
   };
 
+  // Split HTML approximately at 50% (prefer after a paragraph end)
+  function splitHtmlAtHalf(html: string): [string, string] {
+    const closes = [...html.matchAll(/<\/p>/gi)].map((m) => (m.index ?? 0) + m[0].length);
+    if (closes.length > 0) {
+      const halfIdx = Math.max(0, Math.floor(closes.length / 2) - 1);
+      const cut = closes[halfIdx];
+      return [html.slice(0, cut), html.slice(cut)];
+    }
+    const mid = Math.floor(html.length / 2);
+    let cut = html.indexOf('>', mid);
+    if (cut === -1) cut = mid;
+    return [html.slice(0, cut + 1), html.slice(cut + 1)];
+  }
+
   return (
     <ArticlePageClient>
       <MagazineBanner />
@@ -461,17 +477,32 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
                 </div>
               </div>
 
-              {/* Article Body */}
-              <div 
-                className="article-content max-w-none"
-                dangerouslySetInnerHTML={{ 
-                  __html: decodeHtmlEntities(article.body)
-                }}
-                style={{
-                  // Ensure videos and other rich content are properly styled
-                  '--tw-prose-video': 'theme(colors.gray.900)',
-                } as React.CSSProperties}
-              />
+              {/* Article Body (with first ad at ~50%) */}
+              {(() => {
+                const decoded = decodeHtmlEntities(article.body);
+                const [firstHalf, secondHalf] = splitHtmlAtHalf(decoded);
+                return (
+                  <div
+                    className="article-content max-w-none"
+                    style={{ '--tw-prose-video': 'theme(colors.gray.900)' } as React.CSSProperties}
+                  >
+                    <div dangerouslySetInnerHTML={{ __html: firstHalf }} />
+                    <div className="my-8">
+                      <Suspense fallback={<div className="text-center text-gray-400">Loading ad…</div>}>
+                        <InArticleAd />
+                      </Suspense>
+                    </div>
+                    <div dangerouslySetInnerHTML={{ __html: secondHalf }} />
+                  </div>
+                );
+              })()}
+
+              {/* In-Article Ad (Bottom) */}
+              <div className="my-8">
+                <Suspense fallback={<div className="text-center text-gray-400">Loading ad…</div>}>
+                  <InArticleAd />
+                </Suspense>
+              </div>
 
               {/* Case Citations */}
               {article.caseCitations && article.caseCitations.length > 0 && (
