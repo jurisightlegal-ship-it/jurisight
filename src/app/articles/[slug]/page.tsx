@@ -12,6 +12,7 @@ import { MagazineBanner } from '@/components/magazine-banner';
 import { RecentArticlesSection } from '@/components/recent-articles-section';
 import { InArticleAd } from '@/components/ads/in-article-ad';
 import { Suspense } from 'react';
+import Script from 'next/script';
 import { Footer } from '@/components/footer';
 import { LanguageSelector } from '@/components/language-selector';
 import { supabase } from '@/lib/supabase-db';
@@ -497,11 +498,25 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
                 );
               })()}
 
-              {/* In-Article Ad (Bottom) */}
-              <div className="my-8">
-                <Suspense fallback={<div className="text-center text-gray-400">Loading ad…</div>}>
-                  <InArticleAd />
-                </Suspense>
+              {/* In-Article Ad (Bottom) - use provided snippet */}
+              <div className="my-8 flex justify-center">
+                <Script
+                  async
+                  src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5234388962916973"
+                  crossOrigin="anonymous"
+                  strategy="lazyOnload"
+                />
+                <ins
+                  className="adsbygoogle"
+                  style={{ display: 'block', textAlign: 'center' }}
+                  data-ad-layout="in-article"
+                  data-ad-format="fluid"
+                  data-ad-client="ca-pub-5234388962916973"
+                  data-ad-slot="3771813958"
+                />
+                <Script id="adsbygoogle-bottom" strategy="lazyOnload">
+                  {(adsbygoogle = (window as any).adsbygoogle || []).push({});}
+                </Script>
               </div>
 
               {/* Case Citations */}
