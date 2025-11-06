@@ -11,9 +11,6 @@ export function InArticleAd({ className }: InArticleAdProps) {
   const adRef = useRef<HTMLDivElement | HTMLModElement | null>(null);
 
   useEffect(() => {
-    const scriptSrc = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5234388962916973';
-    const scriptEl = document.querySelector<HTMLScriptElement>(`script[src="${scriptSrc}"]`);
-
     const initAd = () => {
       const el = adRef.current as unknown as HTMLElement | null;
       if (!el) return;
@@ -36,18 +33,24 @@ export function InArticleAd({ className }: InArticleAdProps) {
       }
     };
 
-    if (!scriptEl) {
-      const s = document.createElement('script');
-      s.async = true;
-      s.src = scriptSrc;
-      s.crossOrigin = 'anonymous';
-      s.onload = initAd;
-      document.head.appendChild(s);
-    } else {
-      // If script already present, attempt init immediately (and again on next tick)
-      initAd();
-      setTimeout(initAd, 0);
-    }
+    // Rely on global loader; retry until library is present, then init
+    const tryInit = (attempts = 0) => {
+      const el = adRef.current as unknown as HTMLElement | null;
+      if (!el) return;
+      const status = el.getAttribute('data-ad-status') || el.getAttribute('data-adsbygoogle-status');
+      if (status === 'done') return;
+
+      const libReady = typeof (window as any).adsbygoogle !== 'undefined';
+      if (libReady) {
+        initAd();
+        return;
+      }
+      if (attempts < 50) {
+        setTimeout(() => tryInit(attempts + 1), 200);
+      }
+    };
+
+    tryInit();
   }, []);
 
   return (

@@ -500,12 +500,6 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
 
               {/* In-Article Ad (Bottom) - use provided snippet */}
               <div className="my-8 flex justify-center">
-                <Script
-                  async
-                  src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5234388962916973"
-                  crossOrigin="anonymous"
-                  strategy="lazyOnload"
-                />
                 <ins
                   className="adsbygoogle"
                   style={{ display: 'block', textAlign: 'center' }}
@@ -516,7 +510,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
                 />
                 <Script
                   id="adsbygoogle-bottom"
-                  strategy="lazyOnload"
+                  strategy="afterInteractive"
                   dangerouslySetInnerHTML={{
                     __html: '(adsbygoogle = window.adsbygoogle || []).push({});',
                   }}

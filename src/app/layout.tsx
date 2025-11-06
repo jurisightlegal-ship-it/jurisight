@@ -172,7 +172,7 @@ export default function RootLayout({
               async
               src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5234388962916973"
               crossOrigin="anonymous"
-              strategy="lazyOnload"
+              strategy="afterInteractive"
             />
             
             {/* Google News Subscription */}
@@ -200,4 +200,3 @@ export default function RootLayout({
     </html>
   );
 }
-
