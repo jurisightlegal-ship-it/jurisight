@@ -715,8 +715,8 @@ div[class*="CardContent"] blockquote * {
   100% { background-position: -200% 0; }
 }
 
-/* Hide placeholder when the ad finishes rendering */
-.ad-container:has(ins.adsbygoogle[data-adsbygoogle-status="done"]) .ad-placeholder {
+/* Hide placeholder only when an actual ad iframe is present */
+.ad-container:has(ins.adsbygoogle iframe) .ad-placeholder {
   display: none;
 }
 
