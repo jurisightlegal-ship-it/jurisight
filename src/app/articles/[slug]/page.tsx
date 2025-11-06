@@ -406,14 +406,11 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
             )}
 
             <CardContent className="p-8 xl:p-12 2xl:p-16">
-              {/* Horizontal Article Ad — top, with responsive placeholder */}
-              <div className="my-6 ad-container">
-                <div className="ad-placeholder w-full max-w-[728px] h-[90px] rounded-md">
-                  <span className="sr-only">Advertisement</span>
-                </div>
+              {/* Horizontal Article Ad: updated per provided snippet */}
+              <div className="my-6 flex justify-center">
                 <ins
                   className="adsbygoogle"
-                  style={{ display: 'block' }}
+                  style={{ display: 'inline-block', width: 728, height: 90 }}
                   data-ad-client="ca-pub-5234388962916973"
                   data-ad-slot="3999330079"
                 />
@@ -507,11 +504,8 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
                     style={{ '--tw-prose-video': 'theme(colors.gray.900)' } as React.CSSProperties}
                   >
                     <div dangerouslySetInnerHTML={{ __html: firstHalf }} />
-                    <div className="my-8 ad-container">
-                      <div className="ad-placeholder w-full max-w-[728px] h-[250px] rounded-md">
-                        <span className="sr-only">Advertisement</span>
-                      </div>
-                      <Suspense fallback={<div className="sr-only">Loading ad…</div>}>
+                    <div className="my-8">
+                      <Suspense fallback={<div className="text-center text-gray-400">Loading ad…</div>}>
                         <InArticleAd />
                       </Suspense>
                     </div>
@@ -520,21 +514,18 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
                 );
               })()}
 
-              {/* Horizontal Article page — bottom, responsive with placeholder */}
-              <div className="my-8 ad-container">
-                <div className="ad-placeholder w-full max-w-[728px] h-[90px] rounded-md">
-                  <span className="sr-only">Advertisement</span>
-                </div>
+              {/* In-Article Ad (Bottom) - use provided snippet */}
+              <div className="my-8 flex justify-center">
                 <ins
                   className="adsbygoogle"
-                  style={{ display: 'block' }}
+                  style={{ display: 'block', textAlign: 'center' }}
+                  data-ad-layout="in-article"
+                  data-ad-format="fluid"
                   data-ad-client="ca-pub-5234388962916973"
-                  data-ad-slot="3999330079"
-                  data-ad-format="auto"
-                  data-full-width-responsive="true"
+                  data-ad-slot="3771813958"
                 />
                 <Script
-                  id="adsbygoogle-horizontal-bottom-push"
+                  id="adsbygoogle-bottom"
                   strategy="afterInteractive"
                   dangerouslySetInnerHTML={{
                     __html: '(adsbygoogle = window.adsbygoogle || []).push({});',

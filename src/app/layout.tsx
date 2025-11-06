@@ -174,10 +174,6 @@ export default function RootLayout({
               crossOrigin="anonymous"
               strategy="afterInteractive"
             />
-            {/* AdSense Non-Personalized Ads (NPA) fallback */}
-            <Script id="adsense-npa" strategy="afterInteractive">
-              {`(adsbygoogle = window.adsbygoogle || []).requestNonPersonalizedAds = 1;`}
-            </Script>
             
             {/* Google News Subscription */}
             <Script 
