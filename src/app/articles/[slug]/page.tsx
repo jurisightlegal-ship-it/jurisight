@@ -406,18 +406,22 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
             )}
 
             <CardContent className="p-8 xl:p-12 2xl:p-16">
-              {/* Horizontal Article Ad: after image, before tag and published date */}
+              {/* Horizontal Article Ad: updated per provided snippet */}
               <div className="my-6 flex justify-center">
+                <Script
+                  id="adsbygoogle-horizontal-loader"
+                  src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5234388962916973"
+                  crossOrigin="anonymous"
+                  strategy="afterInteractive"
+                />
                 <ins
                   className="adsbygoogle"
-                  style={{ display: 'block' }}
+                  style={{ display: 'inline-block', width: 728, height: 90 }}
                   data-ad-client="ca-pub-5234388962916973"
                   data-ad-slot="3999330079"
-                  data-ad-format="auto"
-                  data-full-width-responsive="true"
                 />
                 <Script
-                  id="adsbygoogle-horizontal-top"
+                  id="adsbygoogle-horizontal-top-push"
                   strategy="afterInteractive"
                   dangerouslySetInnerHTML={{
                     __html: '(adsbygoogle = window.adsbygoogle || []).push({});',
