@@ -32,7 +32,7 @@ export default function Home() {
         </div>
       </div>
       {/* AdSense unit below the hero section */}
-      <AdsenseBannerHome className="mx-auto w-full max-w-[320px] sm:max-w-[468px]" />
+      <AdsenseBannerHome className="mx-auto w-full max-w-[320px] sm:max-w-[468px] lg:max-w-[728px]" />
       <FeaturedBlog />
       <TopNews />
       <SupremeCourtJudgement />
