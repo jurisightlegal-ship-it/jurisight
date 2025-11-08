@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, Clock, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getImageDisplayUrl } from "@/lib/client-storage-utils";
+import { FluidInlineAd } from "@/components/ads/fluid-inline-ad";
 
 type Article = {
   id: number;
@@ -178,89 +179,100 @@ export function FeaturedBlog() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {visibleArticles.map((article, index) => (
-            <Link 
-               key={article.id} 
-               href={`/articles/${article.slug}`}
-               prefetch={false}
-               onMouseEnter={() => router.prefetch(`/articles/${article.slug}`)}
-             >
-              <Card className="group overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
-                <div className="relative aspect-video overflow-hidden">
-                  {article.featuredImage ? (
-                    <Image
-                      src={article.featuredImage}
-                      alt={article.title}
-                      fill
-                      sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
-                      priority={index === 0}
-                      className="object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-jurisight-navy via-jurisight-royal to-jurisight-teal flex items-center justify-center">
-                      <div className="text-white text-lg font-semibold">
-                        {article.title.charAt(0).toUpperCase()}
-                      </div>
-                    </div>
-                  )}
-                  
-                  {article.section && (
-                    <div className="absolute top-4 left-4">
-                      <span
-                        className="px-3 py-1 text-xs font-medium text-white rounded-full"
-                        style={{ backgroundColor: article.section.color }}
-                      >
-                        {article.section.name}
-                      </span>
-                    </div>
-                  )}
+          {visibleArticles.map((article, index) => {
+            if (index === 2) {
+              // Replace the 3rd article with a responsive fluid AdSense unit
+              return (
+                <div key="featured-inline-ad" className="w-full">
+                  <FluidInlineAd />
                 </div>
+              );
+            }
 
-                <CardContent className="p-6">
-                  <h3 className="text-xl font-bold text-black mb-3 line-clamp-2 group-hover:text-jurisight-navy transition-colors">
-                    {article.title}
-                  </h3>
-                  
-                  {article.dek && (
-                    <p className="text-black/70 text-sm mb-4 line-clamp-3">
-                      {article.dek}
-                    </p>
-                  )}
-
-                  <div className="flex items-center justify-between text-xs text-black/50">
-                    <div className="flex items-center gap-4">
-                      {article.readingTime && (
-                        <div className="flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          <span>{article.readingTime} min read</span>
+            return (
+              <Link 
+                key={article.id} 
+                href={`/articles/${article.slug}`}
+                prefetch={false}
+                onMouseEnter={() => router.prefetch(`/articles/${article.slug}`)}
+              >
+                <Card className="group overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+                  <div className="relative aspect-video overflow-hidden">
+                    {article.featuredImage ? (
+                      <Image
+                        src={article.featuredImage}
+                        alt={article.title}
+                        fill
+                        sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+                        priority={index === 0}
+                        className="object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-jurisight-navy via-jurisight-royal to-jurisight-teal flex items-center justify-center">
+                        <div className="text-white text-lg font-semibold">
+                          {article.title.charAt(0).toUpperCase()}
                         </div>
-                      )}
-                    </div>
-                    
-                    {article.author?.name && (
-                      <div className="flex items-center gap-2">
-                        {processedAvatars[article.id] ? (
-                          <Image
-                            src={processedAvatars[article.id]!}
-                            alt={article.author.name}
-                            width={20}
-                            height={20}
-                            sizes="20px"
-                            className="rounded-full"
-                          />
-                        ) : (
-                          <div className="w-5 h-5 bg-jurisight-navy rounded-full flex items-center justify-center text-white text-xs">
-                            {article.author.name.charAt(0).toUpperCase()}
-                          </div>
-                        )}
-                        <span className="font-medium">{article.author.name}</span>
+                      </div>
+                    )}
+
+                    {article.section && (
+                      <div className="absolute top-4 left-4">
+                        <span
+                          className="px-3 py-1 text-xs font-medium text-white rounded-full"
+                          style={{ backgroundColor: article.section.color }}
+                        >
+                          {article.section.name}
+                        </span>
                       </div>
                     )}
                   </div>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
+
+                  <CardContent className="p-6">
+                    <h3 className="text-xl font-bold text-black mb-3 line-clamp-2 group-hover:text-jurisight-navy transition-colors">
+                      {article.title}
+                    </h3>
+
+                    {article.dek && (
+                      <p className="text-black/70 text-sm mb-4 line-clamp-3">
+                        {article.dek}
+                      </p>
+                    )}
+
+                    <div className="flex items-center justify-between text-xs text-black/50">
+                      <div className="flex items-center gap-4">
+                        {article.readingTime && (
+                          <div className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            <span>{article.readingTime} min read</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {article.author?.name && (
+                        <div className="flex items-center gap-2">
+                          {processedAvatars[article.id] ? (
+                            <Image
+                              src={processedAvatars[article.id]!}
+                              alt={article.author.name}
+                              width={20}
+                              height={20}
+                              sizes="20px"
+                              className="rounded-full"
+                            />
+                          ) : (
+                            <div className="w-5 h-5 bg-jurisight-navy rounded-full flex items-center justify-center text-white text-xs">
+                              {article.author.name.charAt(0).toUpperCase()}
+                            </div>
+                          )}
+                          <span className="font-medium">{article.author.name}</span>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+            );
+          })}
         </div>
 
         {articles.length > 3 && (
