@@ -10,6 +10,7 @@ import { WhatsAppCommunityBadge } from '@/components/whatsapp-community-badge';
 import { Footer } from '@/components/footer';
 import { HomepageStructuredData } from '@/components/structured-data';
 import { MagazineBanner } from '@/components/magazine-banner';
+import { AdsenseBannerHome } from '@/components/ads/adsense-banner-home';
 
 export default function Home() {
   return (
@@ -30,6 +31,8 @@ export default function Home() {
           </div>
         </div>
       </div>
+      {/* AdSense unit below the hero section */}
+      <AdsenseBannerHome className="mx-auto w-full max-w-[320px] sm:max-w-[468px]" />
       <FeaturedBlog />
       <TopNews />
       <SupremeCourtJudgement />
