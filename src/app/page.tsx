@@ -11,6 +11,7 @@ import { Footer } from '@/components/footer';
 import { HomepageStructuredData } from '@/components/structured-data';
 import { MagazineBanner } from '@/components/magazine-banner';
 import { AdsenseBannerHome } from '@/components/ads/adsense-banner-home';
+import LatestArticles from '@/components/latest-articles';
 
 export default function Home() {
   return (
@@ -33,6 +34,7 @@ export default function Home() {
       </div>
       {/* AdSense unit below the hero section */}
       <AdsenseBannerHome className="mx-auto w-full max-w-[320px] sm:max-w-[468px] lg:max-w-[728px]" />
+      <LatestArticles />
       <FeaturedBlog />
       <TopNews />
       <SupremeCourtJudgement />
